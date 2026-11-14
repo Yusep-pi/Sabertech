@@ -1,0 +1,5 @@
+.godot/
+/android/
+*.tmp
+*.blend1
+blender/previews/

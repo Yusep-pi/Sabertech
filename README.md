@@ -1,0 +1,113 @@
+# Sabertech — Misión Espacial
+
+Juego para el hackathon: diseñar, lanzar y operar una misión espacial. El contexto completo (concepto, fases, reparto, arte) está en [CONTEXTO.md](CONTEXTO.md).
+
+Godot 4.6 o más nuevo. Abrir `project.godot` y ejecutar (F5): arranca en la cabina de la nave, en primera persona.
+
+**Controles:** WASD o flechas para caminar, mouse para mirar, E o clic para usar la consola que se mira, Esc para cerrar una pantalla o soltar el mouse. En la cinemática, Espacio la salta.
+
+## Cómo está armado el 3D
+
+- **Cabina (primera persona)** — `scenes/cabina/`. Es el lugar principal. Antes del lanzamiento la nave está sobre la plataforma (por la ventana se ve la torre) y la *computadora de misión* (al frente) abre el briefing y el diseño. Después del lanzamiento la nave está en órbita (por la ventana se ve el destino) y cualquier consola abre las operaciones; al terminar, el informe. Las pantallas de cada consola muestran datos en vivo.
+- **Lanzamiento (tercera persona)** — `scenes/lanzamiento/`. Cinemática con cinco planos: general con cuenta regresiva, primer plano de los motores, contrapicado del despegue, seguimiento con teleobjetivo y ascenso. Si el lanzamiento falla, cambia: por masa el cohete tiembla y no sube; por fiabilidad explota en el seguimiento.
+- **Pantallas de interfaz** (briefing, diseño, operaciones, informe) se abren encima de la cabina, como si se mirara la consola de cerca. `GameState.ir_a()` decide si abrir una pantalla en la cabina o cambiar de escena.
+
+### Modelos de Blender
+
+Los modelos son low-poly con colores planos, provisorios hasta pasar al estilo N64 con texturas. Se generan con un script, así que se pueden rehacer en segundos:
+
+```bash
+/media/menibon/Datos/Blender/blender-5.2.4-candidate+v52.4f5026e99892-linux.x86_64-release/blender --background --factory-startup --python blender/generar_modelos.py
+```
+
+Escribe `assets/modelos/{cabina,nave,cohetes,plataforma}.glb`, guarda `blender/sabertech.blend` para mirarlo o retocarlo a mano y deja renders de revisión en `blender/previews/`. Convenciones:
+
+- En Blender el frente mira a +Y; en Godot queda mirando a -Z.
+- Cada pieza de la nave es un empty con el mismo nombre que su id en `datos.json` (`panel_grande`, `radar`...): el juego las prende y apaga por nombre (`scripts/nave_3d.gd`). Si arte rehace la nave, tiene que mantener esos nombres.
+- Las consolas de la cabina se llaman `consola_principal`, `consola_energia`, `consola_comunicaciones` y `consola_ciencia`; las pantallas, `pantalla_<nombre>`.
+- Un objeto cuyo nombre termina en `-col` recibe colisión al importarse en Godot.
+- Cada cohete tiene un empty `<id>_carga` donde se apoya la nave.
+
+## Estructura
+
+| Ruta | Qué es |
+|---|---|
+| `data/datos.json` | Misiones, piezas, eventos y frases del informe. Se balancea acá, sin tocar código. |
+| `scripts/autoload/game_state.gd` | Autoload `GameState`: estado de la partida, todas las cuentas y la navegación. |
+| `scripts/ui/interfaz.gd` | Colores y piezas de UI compartidas (`Interfaz.etiqueta`, `Interfaz.panel`...). El tema de arte se aplica acá. |
+| `scripts/nave_3d.gd` | La nave modular 3D, con las piezas elegidas a la vista. |
+| `scenes/cabina/` | Cabina en primera persona (`cabina.gd`) y el jugador (`jugador.gd`). Escena principal. |
+| `scenes/briefing/` | Fase 1: elegir misión. |
+| `scenes/diseno/` | Fase 2: armar la nave con los 5 medidores y la nave 3D girando. |
+| `scenes/lanzamiento/` | Fase 3: cinemática del lanzamiento. |
+| `scenes/operaciones/` | Fase 4: 8 turnos repartiendo energía, con eventos. |
+| `scenes/informe/` | Fase 5: puntaje y frases que explican el resultado. |
+| `blender/generar_modelos.py` | Genera los modelos 3D. |
+| `tests/test_game_state.gd` | Pruebas de la lógica y simulación de balance. |
+| `tests/recorrido.tscn` | Juega una partida sola y guarda capturas de cada pantalla y de cada plano de la cinemática. |
+
+Cada escena se puede abrir sola desde el editor (F6) para probarla: arma datos de prueba si hace falta.
+
+```bash
+godot --headless --path . -s res://tests/test_game_state.gd
+```
+
+```bash
+godot --path . res://tests/recorrido.tscn
+```
+
+Las capturas del recorrido quedan en `~/.local/share/godot/app_userdata/Sabertech - Misión Espacial/capturas`.
+
+## Cómo se juega cada fase
+
+1. **Briefing:** cada misión trae presupuesto, delta-v necesario, luz solar, señal de radio, capacidad del cohete y ciencia objetivo.
+2. **Diseño:** se eligen piezas y los medidores se actualizan en vivo. Se puede lanzar con medidores en rojo.
+3. **Lanzamiento:** falla si la masa supera la capacidad, si sale mal la tirada de fiabilidad del cohete o si al llegar falta delta-v.
+4. **Operaciones:** cada turno hay `generación + batería` de energía. Los sistemas básicos siempre consumen; calefacción, transmisión e instrumentos se prenden y apagan. Los instrumentos llenan la memoria y la ciencia solo cuenta al transmitir. Lo que no entra en la memoria se pierde. Sin calefacción la nave se daña. Algunos turnos tienen condiciones (noche lunar, tormenta de polvo) y 3 turnos al azar traen un evento con decisión.
+5. **Informe:** ciencia hasta 600 puntos (900 si se supera el objetivo), salud hasta 200, presupuesto: ahorrar suma hasta 200 y pasarse resta 4 veces más.
+
+## Usar GameState desde una pantalla
+
+```gdscript
+GameState.elegir_mision("marte")
+GameState.alternar_pieza("radar")      # elige o quita; en categorías únicas reemplaza
+GameState.medidores["energia"]         # {nombre, valor, limite, unidad, mayor_es_mejor, ok}
+GameState.lanzar()                     # {exito, motivo}
+GameState.iniciar_operaciones()
+GameState.cambiar_plan("radar", true)  # false si no alcanza la energía
+GameState.resolver_evento(0)
+GameState.terminar_turno()             # resumen del turno
+GameState.calcular_informe()           # {puntaje, nota, frases, ...}
+GameState.ir_a("informe")              # cambia de pantalla
+```
+
+Señales: `mision_cambiada`, `seleccion_cambiada`, `medidores_cambiados`, `plan_cambiado`, `turno_iniciado`, `turno_terminado`. Las pantallas no calculan nada: leen de `GameState` y reaccionan a las señales.
+
+## Campos de datos.json
+
+Todas las piezas: `id`, `categoria`, `nombre`, `descripcion`, `costo` (M$), `masa` (kg), `fiabilidad` (0-1). Opcionales: `potencia` (W que genera) y `consumo` (W que gasta).
+
+| Categoría | Campos propios |
+|---|---|
+| `cohete` | `capacidad`: kg a órbita baja. Se multiplica por `factor_capacidad` de la misión. Su masa no cuenta para la nave. |
+| `energia` | `potencia`, `tipo`: `solar` (rinde potencia / distancia² y le afecta `factor_solar`) o `rtg` |
+| `comunicacion` | `tasa`: datos por turno. Se divide por `factor_datos` de la misión. |
+| `propulsion` | `isp` (s), `combustible` (kg) |
+| `instrumento` | `datos` por turno, `ciencia` por dato transmitido |
+| `extra` | `reduccion_fallo` (redundancia: además evita las fallas de componente), `proteccion` (blindaje: reduce daño y roturas) |
+
+`nave_base`: estructura que lleva toda nave (suma costo, masa y consumo siempre), con `bateria` y `almacenamiento` (memoria de datos).
+
+Misiones: `presupuesto`, `delta_v` (m/s que debe aportar la nave), `distancia_ua`, `factor_capacidad`, `factor_datos`, `calefaccion` (W), `dano_frio` (salud por turno sin calefacción), `objetivo_ciencia` y `condiciones` por número de turno (`factor_solar`, `multiplicador_instrumentos`).
+
+Eventos: `titulo`, `texto`, `opciones` con `texto`, `efectos`, `resultado` y opcionalmente `requisitos` (`delta_v`). Efectos posibles: `salud`, `sin_ciencia_turnos`, `multiplicador_datos`, `multiplicador_datos_resto`, `delta_v`, `bateria`, `romper` (`instrumento` u `objetivo`), `reparar` (`objetivo`), `probabilidad`, `blindable`. Un evento con `"objetivo": "componente"` elige un componente instalado al azar y lo rompe, salvo que la nave tenga la pieza de `evitable_con`.
+
+Frases: textos del informe con marcadores como `{pct}`. Una clave terminada en `_uno` se usa cuando la cantidad es 1.
+
+## Cómo se calculan los medidores
+
+- **Presupuesto:** suma de costos (cohete + base + piezas) ≤ `presupuesto`.
+- **Masa:** masa seca + combustible ≤ `capacidad` del cohete × `factor_capacidad`.
+- **Energía:** consumo de todo + `calefaccion` ≤ generación.
+- **Datos:** suma de `datos` de los instrumentos ≤ `tasa` / `factor_datos`.
+- **Delta-v:** `isp × 9.81 × ln(masa_total / masa_seca)` ≥ `delta_v`.
