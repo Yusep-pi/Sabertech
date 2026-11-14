@@ -9,7 +9,8 @@ extends Node
 ##   modelos (casco.png, pared.png...), le pone el material retro
 ##   (scripts/material_retro.gdshader): píxel nítido, proyección triplanar, relieve
 ##   con <nombre>_normal.png y variación de tono para que no se note el mosaico.
-##   Lo mismo con planeta_<destino>.png y fondo_espacio.png. La lista de archivos
+##   Lo mismo con planeta_<nombre>.png (el resource_name del material de la esfera,
+##   o el destino de la misión) y fondo_espacio.png. La lista de archivos
 ##   y sus prompts está en arte/PROMPTS_GEMINI.md.
 ## - A cada cámara le agrega contornos en aristas y siluetas (scripts/contornos.gdshader),
 ##   y a las luces, sombras con penumbra.
@@ -160,7 +161,11 @@ func _texturizar(malla: MeshInstance3D) -> void:
 	# Los planetas: esferas grandes con un material propio.
 	if malla.mesh is SphereMesh and (malla.mesh as SphereMesh).radius >= RADIO_PLANETA:
 		var material := malla.material_override as StandardMaterial3D
-		var mapa := textura("planeta_" + GameState.mision.get("destino", "tierra"))
+		# Por nombre si la esfera lo dice (en el viaje se ven la Tierra y la Luna a la vez).
+		var nombre: String = "planeta_" + GameState.mision.get("destino", "tierra")
+		if material and material.resource_name.begins_with("planeta_"):
+			nombre = material.resource_name
+		var mapa := textura(nombre)
 		if material and mapa and material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
 			material.albedo_texture = mapa
 			material.albedo_color = Color.WHITE

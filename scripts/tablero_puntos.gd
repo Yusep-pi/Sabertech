@@ -20,6 +20,7 @@ var _reloj := 0.0
 
 func _ready() -> void:
 	var marco := StandardMaterial3D.new()
+	marco.resource_name = "oscuro"  # Estilo le pone la textura retro
 	marco.albedo_color = Color("#2C3A66")
 	marco.metallic = 0.6
 	marco.roughness = 0.3
@@ -173,8 +174,8 @@ func _texto(texto: String, color: Color, tamano: int) -> Label3D:
 func _caja(posicion: Vector3, tamano: Vector3, material: Material) -> void:
 	var malla := BoxMesh.new()
 	malla.size = tamano
+	malla.material = material  # en la malla, no override: así Estilo ve el nombre
 	var instancia := MeshInstance3D.new()
 	instancia.mesh = malla
-	instancia.material_override = material
 	instancia.position = posicion
 	add_child(instancia)

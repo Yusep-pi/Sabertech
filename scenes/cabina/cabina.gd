@@ -259,7 +259,7 @@ func _armar_orbita() -> void:
 	_planeta = Node3D.new()
 	_planeta.position = Vector3(-60, -105, -320)
 	add_child(_planeta)
-	_planeta.add_child(_esfera(150, COLOR_PLANETA.get(destino, Color.GRAY), 32))
+	_planeta.add_child(_esfera(150, COLOR_PLANETA.get(destino, Color.GRAY), 32, destino))
 	if destino == "tierra":
 		var atmosfera := _esfera(156, Color(Interfaz.CIAN, 0.18), 32)
 		var material := atmosfera.material_override as StandardMaterial3D
@@ -272,7 +272,7 @@ func _armar_orbita() -> void:
 func _armar_viaje() -> void:
 	_tierra = Node3D.new()
 	add_child(_tierra)
-	_tierra.add_child(_esfera(150, COLOR_PLANETA["tierra"], 32))
+	_tierra.add_child(_esfera(150, COLOR_PLANETA["tierra"], 32, "tierra"))
 	var atmosfera := _esfera(156, Color(Interfaz.CIAN, 0.18), 32)
 	var material := atmosfera.material_override as StandardMaterial3D
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -280,7 +280,7 @@ func _armar_viaje() -> void:
 	_tierra.add_child(atmosfera)
 	_luna = Node3D.new()
 	add_child(_luna)
-	_luna.add_child(_esfera(150, COLOR_PLANETA["luna"], 32))
+	_luna.add_child(_esfera(150, COLOR_PLANETA["luna"], 32, "luna"))
 	_actualizar_ventana_viaje()
 
 
@@ -344,19 +344,8 @@ func _crear_estrellas() -> void:
 	add_child(estrellas)
 
 
-func _esfera(radio: float, color: Color, segmentos: int) -> MeshInstance3D:
-	var malla := SphereMesh.new()
-	malla.radius = radio
-	malla.height = radio * 2
-	malla.radial_segments = segmentos
-	malla.rings = segmentos / 2
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 1.0
-	var instancia := MeshInstance3D.new()
-	instancia.mesh = malla
-	instancia.material_override = material
-	return instancia
+func _esfera(radio: float, color: Color, segmentos: int, planeta := "") -> MeshInstance3D:
+	return Espacio.esfera(radio, color, segmentos, planeta)
 
 
 ## Altura del punto donde va la nave en el cohete elegido (la toma del modelo de Blender).

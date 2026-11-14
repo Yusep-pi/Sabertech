@@ -44,7 +44,7 @@ static func estrellas(cantidad: int = 700, radio: float = 700.0) -> MultiMeshIns
 ## El planeta ("tierra" o "luna"); la Tierra lleva atmósfera.
 static func planeta(destino: String, radio: float) -> Node3D:
 	var nodo := Node3D.new()
-	nodo.add_child(esfera(radio, COLOR_PLANETA.get(destino, Color.GRAY), 32))
+	nodo.add_child(esfera(radio, COLOR_PLANETA.get(destino, Color.GRAY), 32, destino))
 	if destino == "tierra":
 		var atmosfera := esfera(radio * 1.04, Color(Interfaz.CIAN, 0.18), 32)
 		var material := atmosfera.material_override as StandardMaterial3D
@@ -69,7 +69,8 @@ static func textura_bocanada() -> GradientTexture2D:
 	return textura
 
 
-static func esfera(radio: float, color: Color, segmentos: int) -> MeshInstance3D:
+## planeta: "tierra", "luna"... para que Estilo le ponga planeta_<nombre>.png.
+static func esfera(radio: float, color: Color, segmentos: int, planeta := "") -> MeshInstance3D:
 	var malla := SphereMesh.new()
 	malla.radius = radio
 	malla.height = radio * 2
@@ -78,6 +79,8 @@ static func esfera(radio: float, color: Color, segmentos: int) -> MeshInstance3D
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 1.0
+	if planeta != "":
+		material.resource_name = "planeta_" + planeta
 	var instancia := MeshInstance3D.new()
 	instancia.mesh = malla
 	instancia.material_override = material

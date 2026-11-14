@@ -316,17 +316,10 @@ func _armar_exterior() -> void:
 	add_child(sol)
 	add_child(Espacio.estrellas(900, 1500))
 	# La Tierra abajo a la izquierda, a la vista desde el ventanal.
-	var planeta := Espacio.planeta(GameState.mision.get("destino", "tierra"), 600)
+	# (La nave no se dibuja afuera: el jugador está adentro de ella.)
+	var planeta := Espacio.planeta("tierra", 600)
 	planeta.position = Vector3(-700, -520, 150)
 	add_child(planeta)
-	# Un ala de la nave, afuera del ventanal.
-	var nave := Nave3D.new()
-	nave.scale = Vector3.ONE * 4.0
-	nave.position = Vector3(-14, -6, -10)
-	nave.rotation_degrees = Vector3(0, 20, 0)
-	add_child(nave)
-	var ids: Array = GameState.seleccion if not GameState.seleccion.is_empty() else GameState.datos.get("eva", {}).get("nave_por_defecto", [])
-	nave.mostrar(ids)
 
 
 ## Antes del lanzamiento, por el ventanal se ve el cielo de la plataforma.

@@ -268,6 +268,7 @@ func _crear_cama() -> void:
 
 	# 1. Base metálica estructurada
 	var mat_base := StandardMaterial3D.new()
+	mat_base.resource_name = "oscuro"
 	mat_base.albedo_color = Color("#17203E")
 	mat_base.metallic = 0.4
 	mat_base.roughness = 0.5
@@ -321,6 +322,7 @@ func _crear_cama() -> void:
 
 	# 6. Mesita de soporte lateral
 	var mat_mesa := StandardMaterial3D.new()
+	mat_mesa.resource_name = "oscuro"
 	mat_mesa.albedo_color = Color("#222D54")
 	_crear_bloque_con_colision(Vector3(0.1, 0.25, -1.35), Vector3(0.7, 0.5, 0.45), mat_mesa, nodo_cama)
 
@@ -345,6 +347,7 @@ func _crear_refrigerador() -> void:
 
 	# 1. Cuerpo principal del refrigerador
 	var mat_refri := StandardMaterial3D.new()
+	mat_refri.resource_name = "casco_gris"
 	mat_refri.albedo_color = Color("#222E54")
 	mat_refri.metallic = 0.4
 	mat_refri.roughness = 0.35
@@ -352,6 +355,7 @@ func _crear_refrigerador() -> void:
 
 	# 2. Puerta superior (congelador criogénico de muestras)
 	var mat_puertas := StandardMaterial3D.new()
+	mat_puertas.resource_name = "casco_gris"
 	mat_puertas.albedo_color = Color("#314173")
 	mat_puertas.metallic = 0.5
 	mat_puertas.roughness = 0.3
@@ -389,6 +393,7 @@ func _crear_refrigerador() -> void:
 
 	# 6. Rejilla inferior de ventilación
 	var mat_rejilla := StandardMaterial3D.new()
+	mat_rejilla.resource_name = "oscuro"
 	mat_rejilla.albedo_color = Color("#080D1D")
 	var rejilla := _crear_malla(Vector3(0.44, 0.06, 0), Vector3(0.03, 0.08, 0.8), mat_rejilla)
 	nodo_refri.add_child(rejilla)
@@ -481,6 +486,7 @@ func _crear_tablero() -> void:
 func _crear_mobiliario_extra() -> void:
 	# Casilleros de tripulación junto al refrigerador
 	var mat_casillero := StandardMaterial3D.new()
+	mat_casillero.resource_name = "casco_gris"
 	mat_casillero.albedo_color = Color("#182348")
 	mat_casillero.roughness = 0.6
 	_crear_bloque_con_colision(Vector3(-2.95, 1.1, 1.1), Vector3(0.85, 2.2, 1.2), mat_casillero)

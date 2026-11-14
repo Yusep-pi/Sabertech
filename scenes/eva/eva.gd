@@ -213,9 +213,11 @@ func _consola_3d(posicion: Vector3, normal: Vector3) -> Node3D:
 			material.emission_enabled = true
 			material.emission = parte[2]
 			material.emission_energy_multiplier = 0.8
+		else:
+			material.resource_name = "oscuro"  # el cuerpo: Estilo le pone la textura retro
+		malla.material = material
 		var instancia := MeshInstance3D.new()
 		instancia.mesh = malla
-		instancia.material_override = material
 		instancia.position = parte[1]
 		consola.add_child(instancia)
 	return consola
@@ -250,8 +252,9 @@ func _efecto_tarea(id: String, posicion: Vector3) -> Node3D:
 			malla.size = Vector3(0.8, 0.5, 0.6)
 			escombro.mesh = malla
 			var material := StandardMaterial3D.new()
+			material.resource_name = "casco_gris"
 			material.albedo_color = Color("#6B6F7A")
-			escombro.material_override = material
+			malla.material = material
 			escombro.position = posicion
 			add_child(escombro)
 			return escombro
