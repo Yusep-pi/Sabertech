@@ -27,6 +27,8 @@ const PANTALLAS := {
 }
 ## Encima de la computadora de misión: ahí flota el marcador de "usá esta consola".
 const POSICION_MARCADOR := Vector3(0, 1.95, -3.6)
+## La puerta trasera, que lleva al habitáculo (en coordenadas de la cabina).
+const PUERTA_TRASERA := Vector3(0, 1.15, 3.98)
 const COLOR_PLANETA := {"tierra": Color("#2E6FD0"), "luna": Color("#A3A6B0"), "marte": Color("#C1552B")}
 const REFRESCO_PANTALLAS := 0.3
 ## Debajo de este valor las barras de la tripulación se pintan de alerta.
@@ -45,6 +47,7 @@ const MENSAJES_FIN := {
 
 var _interior: Node3D
 var _jugador: Jugador
+var _compuerta: Compuerta
 var _textos_consola: Dictionary = {}  # consola -> Label3D
 var _marcador: Label3D
 var _planeta: Node3D
@@ -79,8 +82,6 @@ func _ready() -> void:
 	_crear_textos_consola()
 
 	_jugador = Jugador.new()
-	# Al lado del asiento, a un paso de la computadora de misión.
-	_jugador.position = Vector3(0.8, 0.05, -1.4)
 	_jugador.consola_usada.connect(_usar_consola)
 	_interior.add_child(_jugador)
 
@@ -88,7 +89,15 @@ func _ready() -> void:
 		_armar_orbita()
 	else:
 		_armar_plataforma()
+	var desde_habitaculo := GameState.origen_transicion == "habitaculo"
+	if desde_habitaculo:
+		# Entra por la puerta trasera, mirando hacia el frente de la cabina.
+		_jugador.position = Vector3(0.0, 0.05, 2.9)
+	else:
+		# Al lado del asiento, a un paso de la computadora de misión.
+		_jugador.position = Vector3(0.8, 0.05, -1.4)
 	_jugador.mirar_hacia(_interior.to_global(PANTALLAS["consola_principal"][0]))
+	_crear_compuerta()
 	_crear_marcador()
 	_crear_hud()
 	GameState.tripulacion_cambiada.connect(func(_h: float, _c: float) -> void: _actualizar_tripulacion())
@@ -99,8 +108,11 @@ func _ready() -> void:
 
 	var pendiente := GameState.pantalla_pendiente
 	GameState.pantalla_pendiente = ""
+	GameState.origen_transicion = ""
 	if pendiente != "":
 		abrir_pantalla(pendiente)
+	elif desde_habitaculo:
+		pass
 	elif GameState.en_orbita():
 		if GameState.tiene_viaje():
 			_mostrar_mensaje("Rumbo a la Luna. Mirá por la ventana: la Tierra queda atrás. Usá cualquier consola para operar.")
@@ -180,6 +192,26 @@ func _usar_consola(consola: String) -> void:
 		_mostrar_mensaje("Sin datos: la nave todavía está en la plataforma. Usá la computadora de misión.")
 	else:
 		abrir_pantalla("briefing" if GameState.mision.is_empty() else "diseno")
+
+
+## La puerta trasera lleva al habitáculo, y de ahí a la esclusa y al exterior.
+func _crear_compuerta() -> void:
+	_compuerta = Compuerta.new()
+	_compuerta.jugador = _jugador
+	_compuerta.agregar(func() -> bool:
+		return _jugador.position.z > 2.4 and absf(_jugador.position.x) < 1.2,
+		"Ir al habitáculo", "habitaculo", "cabina")
+	add_child(_compuerta)
+	var cartel := Label3D.new()
+	cartel.text = "HABITÁCULO"
+	cartel.position = PUERTA_TRASERA + Vector3(0, 1.45, -0.12)
+	cartel.rotation_degrees.y = 180
+	cartel.pixel_size = 0.0025
+	cartel.font_size = 32
+	cartel.outline_size = 8
+	cartel.outline_modulate = Interfaz.FONDO
+	cartel.modulate = Interfaz.AQUA
+	_interior.add_child(cartel)
 
 
 # --- Modelo e iluminación ---------------------------------------------------
@@ -496,7 +528,7 @@ func _crear_hud() -> void:
 	_mensaje.offset_top = 60
 	hud.add_child(_mensaje)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · F: comer · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
+	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · F: comer · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)

@@ -1,5 +1,5 @@
 extends Node
-## Recorre una partida completa y guarda capturas en user://capturas:
+## Recorre una partida completa y guarda capturas en capturas/ (dentro del proyecto):
 ## cabina en la plataforma, pantallas de las consolas, cada plano de la
 ## cinemática de lanzamiento, cabina en órbita, operaciones, informe y una
 ## explosión de prueba. Sirve para revisar el flujo sin jugarlo a mano:
@@ -10,7 +10,7 @@ const PIEZAS := ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico
 ## Segundos de la cinemática en los que se captura cada plano.
 const PLANOS := {"general": 2.5, "motores": 5.6, "despegue": 8.6, "seguimiento": 11.8, "ascenso": 15.0, "resultado": 18.5}
 
-var _carpeta := "user://capturas"
+var _carpeta := "res://capturas"  # dentro del proyecto (fuera de Git), no en el disco del sistema
 
 
 func _ready() -> void:

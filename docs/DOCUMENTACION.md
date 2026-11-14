@@ -62,12 +62,17 @@ El juego arranca en **primera persona, dentro de la cabina de la nave**, que est
 
 5. **Informe.** Nota, puntaje y frases que explican el resultado, con botones para rediseñar la nave o elegir otra misión.
 
-### Niveles aparte (todavía sin integrar)
+### Recorrer la nave a pie
 
-- **Esclusa** (`scenes/esclusa/`): la sala con el traje colgado en el armario, un ventanal hacia el exterior y la escotilla. Ponerse el traje, despresurizar y salir.
+Desde la cabina se camina por toda la nave. Las puertas se cruzan **manteniendo E** junto a ellas:
+
+**Cabina** ⇄ puerta trasera ⇄ **Habitáculo** ⇄ puerta sur ⇄ **Esclusa** ⇄ escotilla ⇄ **Exterior**
+
+- **Habitáculo** (`scenes/sala_dos/`, de Luis): cama, refrigerador, casilleros y una ventana sobre la cama.
+- **Esclusa** (`scenes/esclusa/`): el traje colgado en el armario, un ventanal hacia el exterior y la escotilla. Ponerse el traje, despresurizar y salir. Solo se vuelve a la nave con la esclusa presurizada y sin el traje, y la escotilla se abre solo en órbita.
 - **Caminata espacial** (`scenes/eva/`): supervivencia en gravedad cero con mochila propulsora, oxígeno y combustible limitados, reparaciones con puzzles y lluvias de micrometeoritos.
 
-Se conectan entre sí (se sale de la esclusa a la caminata y se vuelve), pero todavía no desde la cabina del juego principal. Se prueban abriendo `scenes/esclusa/esclusa.tscn` y pulsando F6.
+La misión sigue corriendo mientras se recorre la nave: el hambre y la cordura bajan y el viaje a la Luna avanza.
 
 ## 3. Cronología
 
@@ -199,8 +204,9 @@ Puntaje: ciencia hasta 600 (900 si se supera el objetivo) + salud hasta 200 + pr
 | `lanzamiento` | 3D, cinemática | Cinco planos: general con cuenta regresiva, motores, contrapicado del despegue, seguimiento con teleobjetivo y ascenso. Variantes de falla. |
 | `operaciones` | Interfaz | Plan de energía, estado de la nave, bitácora y eventos. |
 | `informe` | Interfaz | Nota, puntaje y frases. |
-| `esclusa` | 3D, primera persona | Nivel aparte: traje, despresurización y salida. |
-| `eva` | 3D, gravedad cero | Nivel aparte: caminata espacial con supervivencia y puzzles. |
+| `sala_dos` | 3D, primera persona | Habitáculo (de Luis): cama, refrigerador y casilleros; une la cabina con la esclusa. |
+| `esclusa` | 3D, primera persona | Traje, despresurización y salida al exterior. |
+| `eva` | 3D, gravedad cero | Caminata espacial con supervivencia y puzzles. |
 
 Cada escena se puede abrir sola desde el editor (F6): si le faltan datos, arma una partida de prueba.
 
@@ -280,9 +286,10 @@ Cada imagen en `assets/texturas/` con el nombre de un material **se aplica sola*
 | `tests/test_game_state.gd` | Fórmulas, medidores, lanzamiento, operaciones, informe y una simulación de balance | `godot --headless --path . -s res://tests/test_game_state.gd` |
 | `tests/recorrido.tscn` | Una partida completa con capturas de cada pantalla y cada plano de la cinemática; comprueba la mirada y el caminar en la cabina | `godot --path . res://tests/recorrido.tscn` |
 | `tests/recorrido_esclusa.tscn` | Traje, despresurización, salida a la caminata y vuelta | `godot --path . res://tests/recorrido_esclusa.tscn` |
+| `tests/recorrido_niveles.tscn` | Recorrer la nave a pie, ida y vuelta: puertas, reglas de la esclusa y ubicación al entrar a cada ambiente | `godot --path . res://tests/recorrido_niveles.tscn` |
 | `tests/recorrido_eva.tscn` | Propulsor, freno, mouse, los cuatro puzzles (y 200 paneles al azar por tipo), lluvia, victoria y falta de oxígeno | `godot --path . res://tests/recorrido_eva.tscn` |
 
-Las capturas quedan en `~/.local/share/godot/app_userdata/Sabertech - Misión Espacial/capturas`. Con `-- --sin-filtro` al final se capturan sin el filtro retro.
+Las capturas quedan en la carpeta `capturas/` del proyecto, que Git ignora. Con `-- --sin-filtro` al final se capturan sin el filtro retro.
 
 ### Herramientas
 
@@ -322,13 +329,13 @@ Las capturas quedan en `~/.local/share/godot/app_userdata/Sabertech - Misión Es
 ### Funciona hoy (en `main`)
 
 - Partida completa de punta a punta en 3D, con las cinco fases.
-- Esclusa y caminata espacial como niveles aparte, conectados entre sí.
+- La nave se recorre a pie: cabina, habitáculo, esclusa y exterior, ida y vuelta.
 - Estilo visual con texturas, relieve, contornos, sombras y filtro retro.
 - Pruebas automáticas de todo lo anterior.
 
 ### Pendientes
 
-1. **Integrar la esclusa al juego:** que la puerta trasera de la cabina lleve a la esclusa, y que algún evento de las operaciones obligue a salir a reparar (por ejemplo, una falla de panel solar que se arregla en la caminata).
+1. **Darle un motivo a la caminata:** que algún evento de las operaciones obligue a salir a reparar (por ejemplo, una falla de panel solar que se arregla afuera), y que el resultado de la caminata vuelva a la misión.
 2. **Decidir qué hacer con la campaña** (rama local `feature/campana`): tres misiones encadenadas, fondos que pasan de una a otra, investigación de cinco piezas nuevas, reintentos y título final. Lleva la partida a 25-35 minutos. Habría que adaptarla a lo que el equipo cambió en las pantallas antes de subirla.
 3. **Más profundidad en los turnos:** objetivos científicos concretos ("mapear el polo durante la noche lunar"), ventanas de comunicación y un minijuego de inserción orbital.
 4. **Balance:** la Luna con radar sigue siendo muy fuerte; conviene que el rol de contenido lo revise jugando.

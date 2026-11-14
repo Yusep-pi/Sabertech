@@ -1,11 +1,13 @@
 extends Node3D
 ## Esclusa: la sala donde el astronauta se pone el traje antes de salir.
-## Nivel de prueba, conectado solo con la caminata espacial.
+## Se llega desde el habitáculo (puerta interior) y lleva a la caminata espacial.
 ##
 ## Ida: armario (ponerse el traje) → panel de la escotilla (despresurizar y abrir)
 ## → salir por la escotilla → caminata espacial.
-## Vuelta: entrar → panel (cerrar y presurizar) → armario (quitarse el traje).
-## Por el ventanal se ve el exterior: la Tierra, las estrellas y la nave.
+## Vuelta: entrar → panel (cerrar y presurizar) → armario (quitarse el traje)
+## → puerta interior, de vuelta al habitáculo.
+## Por el ventanal se ve el exterior: en órbita, el espacio y la nave; en la
+## plataforma, el cielo (y la escotilla no se abre: salir es solo en órbita).
 ##
 ## Se prueba sola: abrir scenes/esclusa/esclusa.tscn y pulsar F6.
 
@@ -16,8 +18,9 @@ const ESCENA_CAMINATA := "res://scenes/eva/eva.tscn"
 const NOMBRES := {
 	"consola_armario": "Armario del traje",
 	"consola_escotilla": "Panel de la escotilla",
-	"consola_puerta": "Puerta a la cabina",
 }
+## La puerta interior, hacia el habitáculo.
+const PUERTA_INTERIOR := Vector3(0, 1.15, 2.98)
 ## Coordenadas en Godot (las de Blender giradas: x, z, -y).
 const CENTRO_ESCOTILLA := Vector3(0, 1.2, -3.0)
 const PANTALLA_ESCOTILLA := Vector3(1.45, 1.52, -2.82)
@@ -65,6 +68,7 @@ func _ready() -> void:
 	_jugador = Jugador.new()
 	_jugador.consola_usada.connect(_usar)
 	add_child(_jugador)
+	_crear_compuerta()
 
 	if GameState.vuelve_de_caminata:
 		# Volvemos de afuera: con el traje puesto, la escotilla abierta y la sala sin aire.
@@ -79,10 +83,15 @@ func _ready() -> void:
 		_jugador.position = Vector3(0, 0.05, -1.8)
 		_jugador.mirar_hacia(PANTALLA_ESCOTILLA)
 		_mostrar_mensaje("De vuelta adentro. Cerrá la escotilla desde el panel para presurizar.")
+	elif GameState.origen_transicion == "habitaculo":
+		_jugador.position = Vector3(0, 0.05, 2.0)
+		_jugador.mirar_hacia(CENTRO_ESCOTILLA)
+		_mostrar_mensaje("Esclusa. Para salir, primero ponete el traje: está colgado en el armario.")
 	else:
 		_jugador.position = Vector3(-0.4, 0.05, 1.9)
 		_jugador.mirar_hacia(CENTRO_ESCOTILLA)
 		_mostrar_mensaje("Esclusa. Para salir, primero ponete el traje: está colgado en el armario.")
+	GameState.origen_transicion = ""
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_actualizar_hud()
 
@@ -117,14 +126,34 @@ func _usar(consola: String) -> void:
 			if estado == "sin_traje":
 				_mostrar_mensaje("¡Sin traje no! Abrir la escotilla vacía la esclusa. Ponete el traje primero.")
 			elif estado == "con_traje":
-				_despresurizar()
+				if en_plataforma():
+					_mostrar_mensaje("La nave todavía está en la plataforma: las caminatas espaciales son en órbita.")
+				else:
+					_despresurizar()
 			elif estado == "abierta":
 				_presurizar()
-		"consola_puerta":
-			if presion < PRESION:
-				_mostrar_mensaje("La puerta no abre: del otro lado hay aire y acá no.")
-			else:
-				_mostrar_mensaje("Del otro lado está la cabina (en esta prueba la puerta todavía no lleva a ningún lado).")
+
+
+## Hay una misión en curso y la nave sigue en la plataforma (en la prueba suelta, sin misión, se puede salir).
+func en_plataforma() -> bool:
+	return not GameState.mision.is_empty() and not GameState.en_orbita()
+
+
+## La puerta interior lleva al habitáculo, con la esclusa presurizada y sin el traje puesto.
+func _crear_compuerta() -> void:
+	var compuerta := Compuerta.new()
+	compuerta.jugador = _jugador
+	compuerta.agregar(func() -> bool: return _jugador.position.z > 2.2 and absf(_jugador.position.x) < 1.0,
+		"Ir al habitáculo", "habitaculo", "esclusa", _motivo_puerta_cerrada)
+	add_child(compuerta)
+
+
+func _motivo_puerta_cerrada() -> String:
+	if presion < PRESION:
+		return "La puerta no abre: del otro lado hay aire y acá no."
+	if estado != "sin_traje":
+		return "Sacate el traje en el armario antes de volver a la nave."
+	return ""
 
 
 func _ponerse_traje() -> void:
@@ -233,6 +262,9 @@ func _preparar_modelo(modelo: Node) -> void:
 
 
 func _armar_exterior() -> void:
+	if en_plataforma():
+		_armar_cielo()
+		return
 	add_child(Espacio.entorno())
 	var sol := DirectionalLight3D.new()
 	sol.rotation_degrees = Vector3(-25, -70, 0)
@@ -252,6 +284,28 @@ func _armar_exterior() -> void:
 	add_child(nave)
 	var ids: Array = GameState.seleccion if not GameState.seleccion.is_empty() else GameState.datos.get("eva", {}).get("nave_por_defecto", [])
 	nave.mostrar(ids)
+
+
+## Antes del lanzamiento, por el ventanal se ve el cielo de la plataforma.
+func _armar_cielo() -> void:
+	var cielo := ProceduralSkyMaterial.new()
+	cielo.sky_top_color = Color("#3D7FD9")
+	cielo.sky_horizon_color = Color("#BFE3F5")
+	cielo.ground_horizon_color = Color("#9DB0A0")
+	cielo.ground_bottom_color = Color("#4E5A48")
+	var entorno := Environment.new()
+	entorno.background_mode = Environment.BG_SKY
+	entorno.sky = Sky.new()
+	entorno.sky.sky_material = cielo
+	entorno.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	var nodo := WorldEnvironment.new()
+	nodo.environment = entorno
+	add_child(nodo)
+	var sol := DirectionalLight3D.new()
+	sol.rotation_degrees = Vector3(-35, -40, 0)
+	sol.light_energy = 1.2
+	sol.shadow_enabled = true
+	add_child(sol)
 
 
 func _crear_luces() -> void:
@@ -358,7 +412,7 @@ func _crear_hud() -> void:
 	_mensaje.offset_top = 52
 	hud.add_child(_mensaje)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
+	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)

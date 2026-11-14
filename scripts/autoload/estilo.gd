@@ -36,6 +36,7 @@ const MATERIALES := {
 const NIEBLA := {
 	"Cabina": [0.006, 30.0],
 	"Esclusa": [0.008, 24.0],
+	"SalaDos": [0.006, 24.0],
 }
 ## Una esfera más grande que esto es un planeta.
 const RADIO_PLANETA := 100.0
