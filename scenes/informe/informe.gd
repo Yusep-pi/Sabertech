@@ -58,12 +58,17 @@ func _panel_numeros(informe: Dictionary) -> Control:
 		["Ciencia", "%d / %d" % [roundi(informe["ciencia"]), roundi(informe["objetivo"])]],
 		["Presupuesto usado", "%d / %d M$" % [roundi(costo), roundi(GameState.mision.get("presupuesto", 0.0))]],
 		["Salud final", "%d%%" % roundi(informe["salud"])],
+		["Hambre / cordura final", "%d%% / %d%%" % [roundi(informe.get("hambre", 0.0)), roundi(informe.get("cordura", 0.0))]],
 	]
 	if not ops.is_empty():
 		filas.append(["Datos captados", "%d" % roundi(ops["datos_generados"])])
 		filas.append(["Datos enviados", "%d" % roundi(ops["datos_transmitidos"])])
 		filas.append(["Datos perdidos", "%d" % roundi(ops["datos_perdidos"])])
 		filas.append(["Delta-v de reserva", "%d m/s" % roundi(ops["dv_restante"])])
+		var viaje: Dictionary = ops.get("viaje", {})
+		if not viaje.is_empty():
+			var horas: float = viaje["horas_totales"] if ops["motivo_fin"] == "llegada" else viaje["horas"]
+			filas.append(["Viaje a la Luna", "%s km en %d h" % [GameState._miles(viaje["recorrido_km"]), roundi(horas)]])
 	for fila in filas:
 		var linea := Interfaz.hbox()
 		var nombre := Interfaz.etiqueta(fila[0], Interfaz.CIAN, 17)

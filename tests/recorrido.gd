@@ -6,7 +6,7 @@ extends Node
 ##   godot --path . res://tests/recorrido.tscn
 
 const MISION := "luna"
-const PIEZAS := ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "camara", "espectrometro", "blindaje"]
+const PIEZAS := ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro", "blindaje"]
 ## Segundos de la cinemática en los que se captura cada plano.
 const PLANOS := {"general": 2.5, "motores": 5.6, "despegue": 8.6, "seguimiento": 11.8, "ascenso": 15.0, "resultado": 18.5}
 

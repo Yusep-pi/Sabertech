@@ -1,5 +1,5 @@
 {
-	"_unidades": "costo en M$, masa en kg, potencia y consumo en W (energia por turno), capacidad en kg a orbita baja, isp en s, delta_v en m/s, datos y tasa en unidades por turno",
+	"_unidades": "costo en M$, masa en kg, potencia y consumo en W (energia por turno), capacidad en kg a orbita baja, isp en s, delta_v en m/s, datos y tasa en unidades por turno. viaje (solo luna): velocidad en m/s, segundos_por_hora = segundos reales por hora de mision; empuje (propulsion) multiplica la velocidad de crucero",
 
 	"partida": {
 		"turnos": 8,
@@ -59,11 +59,11 @@
 		},
 		{
 			"id": "luna",
-			"nombre": "Orbitador lunar",
+			"nombre": "Viaje tripulado a la Luna",
 			"dificultad": "Media",
 			"destino": "luna",
-			"descripcion": "Una sonda que entra en órbita lunar para mapear cráteres y buscar hielo en los polos. Hay que frenar al llegar y sobrevivir a la noche lunar.",
-			"objetivo": "Mapear la superficie lunar y buscar agua congelada.",
+			"descripcion": "Un viaje tripulado de 384.400 km hasta la Luna. La velocidad depende de la nave: cuanto más delta-v sobre, antes se llega. Hay que mantener a la tripulación entera y hacer ciencia por el camino.",
+			"objetivo": "Llegar a la Luna con la tripulación a salvo y entregar ciencia durante el viaje.",
 			"presupuesto": 400,
 			"delta_v": 1500,
 			"distancia_ua": 1.0,
@@ -71,10 +71,18 @@
 			"factor_datos": 3.0,
 			"calefaccion": 60,
 			"dano_frio": 15,
-			"objetivo_ciencia": 320,
+			"objetivo_ciencia": 450,
+			"viaje": {
+				"distancia_km": 384400,
+				"velocidad_base": 1480,
+				"velocidad_maxima": 1800,
+				"factor_dv": 0.25,
+				"segundos_por_hora": 12.5,
+				"puntos_llegada": 200
+			},
 			"condiciones": {
-				"4": { "nombre": "Noche lunar", "descripcion": "La nave pasa por la sombra de la Luna: los paneles no generan nada.", "factor_solar": 0.0 },
-				"5": { "nombre": "Noche lunar", "descripcion": "Sigue la oscuridad: los paneles no generan nada.", "factor_solar": 0.0 }
+				"2": { "nombre": "Cinturones de Van Allen", "descripcion": "La nave cruza la zona de radiación que rodea la Tierra: los instrumentos captan mucho ruido.", "multiplicador_instrumentos": { "camara": 0.4, "espectrometro": 0.4, "radar": 0.6 } },
+				"5": { "nombre": "Rotación térmica", "descripcion": "Como en las Apollo, la nave gira despacio para repartir el calor del Sol: los paneles rinden la mitad.", "factor_solar": 0.5 }
 			}
 		},
 		{
@@ -99,6 +107,17 @@
 		}
 	],
 
+	"_tripulacion": "hambre y cordura van de 0 a 100 y bajan por minuto real en orbita; si una llega a 0 la mision termina. Cada racion suma hambre_por_racion. raciones es el respaldo si la nave no lleva viveres; cordura_por_frio se resta por turno sin calefaccion.",
+	"tripulacion": {
+		"hambre_inicial": 100,
+		"cordura_inicial": 100,
+		"hambre_por_minuto": 12,
+		"cordura_por_minuto": 3,
+		"raciones": 4,
+		"hambre_por_racion": 35,
+		"cordura_por_frio": 8
+	},
+
 	"nave_base": {
 		"id": "nave_base",
 		"nombre": "Estructura y computadora",
@@ -116,6 +135,7 @@
 		{ "id": "energia", "nombre": "Energía", "multiple": false, "obligatoria": true },
 		{ "id": "comunicacion", "nombre": "Comunicación", "multiple": false, "obligatoria": true },
 		{ "id": "propulsion", "nombre": "Propulsión", "multiple": false, "obligatoria": true },
+		{ "id": "viveres", "nombre": "Víveres", "multiple": false, "obligatoria": true },
 		{ "id": "instrumento", "nombre": "Instrumentos", "multiple": true, "obligatoria": false },
 		{ "id": "extra", "nombre": "Extras", "multiple": true, "obligatoria": false }
 	],
@@ -182,19 +202,38 @@
 			"id": "motor_quimico", "categoria": "propulsion", "nombre": "Motor químico",
 			"descripcion": "Simple y probado. Necesita mucho combustible para cambiar de velocidad.",
 			"costo": 20, "masa": 60, "fiabilidad": 0.98,
-			"isp": 320, "combustible": 600
+			"isp": 320, "combustible": 600, "empuje": 1.0
 		},
 		{
 			"id": "motor_eficiente", "categoria": "propulsion", "nombre": "Motor eficiente",
 			"descripcion": "Saca más velocidad de cada kilo de combustible. Más caro y delicado.",
 			"costo": 45, "masa": 80, "consumo": 20, "fiabilidad": 0.96,
-			"isp": 450, "combustible": 700
+			"isp": 450, "combustible": 700, "empuje": 1.0
 		},
 		{
 			"id": "motor_ionico", "categoria": "propulsion", "nombre": "Motor iónico",
 			"descripcion": "Muy poco combustible para muchísimo delta-v, pero mientras empuja consume mucha electricidad.",
 			"costo": 80, "masa": 90, "consumo": 600, "fiabilidad": 0.95,
-			"isp": 3000, "combustible": 150
+			"isp": 3000, "combustible": 150, "empuje": 0.85
+		},
+
+		{
+			"id": "despensa_chica", "categoria": "viveres", "nombre": "Despensa chica",
+			"descripcion": "Dos raciones. Liviana y barata, pero la tripulación va a pasar hambre en un viaje largo.",
+			"costo": 5, "masa": 30, "fiabilidad": 1.0,
+			"raciones": 2
+		},
+		{
+			"id": "despensa_mediana", "categoria": "viveres", "nombre": "Despensa mediana",
+			"descripcion": "Cuatro raciones: alcanzan para un viaje normal si se reparten bien.",
+			"costo": 10, "masa": 60, "fiabilidad": 1.0,
+			"raciones": 4
+		},
+		{
+			"id": "despensa_grande", "categoria": "viveres", "nombre": "Despensa grande",
+			"descripcion": "Seis raciones. Sobra comida, pero pesa: menos delta-v y un viaje más lento.",
+			"costo": 18, "masa": 100, "fiabilidad": 1.0,
+			"raciones": 6
 		},
 
 		{
@@ -230,7 +269,7 @@
 		}
 	],
 
-	"_efectos": "salud, sin_ciencia_turnos, multiplicador_datos (este turno), multiplicador_datos_resto (el resto de la mision), delta_v, bateria, romper (instrumento | objetivo), reparar (objetivo), probabilidad (para romper y reparar), blindable (el blindaje reduce dano y probabilidad de romper)",
+	"_efectos": "salud, hambre, cordura (tripulacion), sin_ciencia_turnos, multiplicador_datos (este turno), multiplicador_datos_resto (el resto de la mision), delta_v, bateria, romper (instrumento | objetivo), reparar (objetivo), probabilidad (para romper y reparar), blindable (el blindaje reduce dano y probabilidad de romper)",
 
 	"eventos": [
 		{
@@ -240,12 +279,12 @@
 			"opciones": [
 				{
 					"texto": "Apagar los instrumentos y esperar",
-					"efectos": { "sin_ciencia_turnos": 1 },
+					"efectos": { "sin_ciencia_turnos": 1, "cordura": -5 },
 					"resultado": "La nave esperó a resguardo. Se perdió un turno de ciencia, pero no hubo daños."
 				},
 				{
 					"texto": "Seguir trabajando",
-					"efectos": { "salud": -35, "romper": "instrumento", "probabilidad": 0.5, "blindable": true },
+					"efectos": { "salud": -35, "cordura": -15, "romper": "instrumento", "probabilidad": 0.5, "blindable": true },
 					"resultado": "La tormenta golpeó de lleno a la nave."
 				}
 			]
@@ -313,12 +352,12 @@
 			"opciones": [
 				{
 					"texto": "Usar la batería para reparar",
-					"efectos": { "salud": -10, "bateria": -200, "blindable": true },
+					"efectos": { "salud": -10, "bateria": -200, "hambre": -10, "blindable": true },
 					"resultado": "Las reparaciones contuvieron el daño, pero vaciaron buena parte de la batería."
 				},
 				{
 					"texto": "Ignorarlo y seguir",
-					"efectos": { "salud": -25, "blindable": true },
+					"efectos": { "salud": -25, "cordura": -10, "blindable": true },
 					"resultado": "El daño quedó sin reparar."
 				}
 			]
@@ -336,11 +375,19 @@
 		"datos_perdidos": "Se perdieron {datos} unidades de datos porque la memoria se llenó antes de transmitirlas.",
 		"apagones": "En {n} turnos no alcanzó la energía ni para los sistemas básicos.",
 		"apagones_uno": "En un turno no alcanzó la energía ni para los sistemas básicos.",
-		"frio": "La nave pasó {n} turnos sin calefacción y eso dañó su electrónica.",
-		"frio_uno": "La nave pasó un turno sin calefacción y eso dañó su electrónica.",
+		"frio": "La nave pasó {n} turnos sin calefacción: se dañó la electrónica y la tripulación perdió cordura.",
+		"frio_uno": "La nave pasó un turno sin calefacción: se dañó la electrónica y la tripulación perdió cordura.",
 		"respaldo": "Los sistemas redundantes salvaron la misión cuando falló {componente}.",
 		"presupuesto_excedido": "Te pasaste del presupuesto por {monto} M$ y eso resta puntos.",
 		"presupuesto_sobrante": "Te sobraron {monto} M$ del presupuesto ({pct}%).",
-		"salud_baja": "La nave terminó con solo {salud}% de salud."
+		"salud_baja": "La nave terminó con solo {salud}% de salud.",
+		"fin_hambre": "La tripulación se quedó sin fuerzas por el hambre y la misión se abandonó.",
+		"fin_cordura": "La tripulación perdió la cordura y ya no pudo seguir operando la nave.",
+		"cordura_baja": "La tripulación terminó al límite: solo le quedaba {cordura}% de cordura.",
+		"fallo_frenado": "La nave llegó a la Luna con {dv} m/s de delta-v y necesitaba {requerido} para frenar: pasó de largo y se perdió en el espacio.",
+		"llegada_luna": "La nave recorrió {km} km en {horas} horas a {velocidad} m/s de media y llegó a la Luna.",
+		"viaje_incompleto": "La tripulación quedó a {faltan} km de la Luna ({pct}% del viaje).",
+		"raciones_sobrantes": "Sobraron {n} raciones en la despensa.",
+		"raciones_sobrantes_uno": "Sobró una ración en la despensa."
 	}
 }

@@ -29,6 +29,19 @@ const PANTALLAS := {
 const POSICION_MARCADOR := Vector3(0, 1.95, -3.6)
 const COLOR_PLANETA := {"tierra": Color("#2E6FD0"), "luna": Color("#A3A6B0"), "marte": Color("#C1552B")}
 const REFRESCO_PANTALLAS := 0.3
+## Debajo de este valor las barras de la tripulación se pintan de alerta.
+const UMBRAL_TRIPULACION := 25.0
+## Viaje a la Luna: dónde se ven la Tierra y la Luna al salir y al llegar.
+const TIERRA_INICIO := Vector3(-60, -105, -320)
+const TIERRA_FIN := Vector3(260, -60, 900)
+const LUNA_INICIO := Vector3(40, 30, -1400)
+const LUNA_FIN := Vector3(-60, -105, -320)
+const MENSAJES_FIN := {
+	"llegada": "¡Llegaste a la Luna! El informe está en cualquier consola.",
+	"frenado": "Llegaste a la Luna sin delta-v para frenar: la nave pasó de largo. El informe está en cualquier consola.",
+	"hambre": "La tripulación no aguantó el hambre. La misión terminó: el informe está en cualquier consola.",
+	"cordura": "La tripulación perdió la cordura. La misión terminó: el informe está en cualquier consola.",
+}
 
 var _interior: Node3D
 var _jugador: Jugador
@@ -42,6 +55,18 @@ var _indicacion: Label
 var _objetivo: Label
 var _mensaje: Label
 var _tiempo_refresco := 0.0
+var _panel_tripulacion: Control
+var _barras_tripulacion: Dictionary = {}  # hambre, cordura -> {texto, barra}
+var _texto_raciones: Label
+var _caja_tripulacion: BoxContainer
+var _grupo_viaje: Control
+var _titulo_viaje: Label
+var _compacto := false
+var _texto_viaje: Label
+var _barra_viaje: ProgressBar
+var _tierra: Node3D
+var _luna: Node3D
+var _titulo_tripulacion: Label
 
 
 func _ready() -> void:
@@ -66,6 +91,10 @@ func _ready() -> void:
 	_jugador.mirar_hacia(_interior.to_global(PANTALLAS["consola_principal"][0]))
 	_crear_marcador()
 	_crear_hud()
+	GameState.tripulacion_cambiada.connect(func(_h: float, _c: float) -> void: _actualizar_tripulacion())
+	GameState.operaciones_terminadas.connect(_on_operaciones_terminadas)
+	GameState.viaje_avanzado.connect(func(_p: float) -> void: _actualizar_ventana_viaje())
+	_actualizar_tripulacion()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 	var pendiente := GameState.pantalla_pendiente
@@ -73,7 +102,10 @@ func _ready() -> void:
 	if pendiente != "":
 		abrir_pantalla(pendiente)
 	elif GameState.en_orbita():
-		_mostrar_mensaje("La nave llegó a destino. Mirá por la ventana y usá cualquier consola para operar.")
+		if GameState.tiene_viaje():
+			_mostrar_mensaje("Rumbo a la Luna. Mirá por la ventana: la Tierra queda atrás. Usá cualquier consola para operar.")
+		else:
+			_mostrar_mensaje("La nave llegó a destino. Mirá por la ventana y usá cualquier consola para operar.")
 	else:
 		_mostrar_mensaje("Bienvenido a bordo. La computadora de misión está al frente.")
 
@@ -90,6 +122,10 @@ func _process(delta: float) -> void:
 
 
 func _input(evento: InputEvent) -> void:
+	if evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_F and GameState.reloj_corriendo():
+		_comer()
+		get_viewport().set_input_as_handled()
+		return
 	if evento is InputEventKey and evento.pressed and evento.physical_keycode == KEY_ESCAPE:
 		if _pantalla_abierta:
 			cerrar_pantalla()
@@ -117,6 +153,7 @@ func abrir_pantalla(pantalla: String) -> void:
 	_pantalla_abierta.add_child(volver)
 	_jugador.activo = false
 	_mira.visible = false
+	_ubicar_tripulacion(true)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
@@ -126,9 +163,13 @@ func cerrar_pantalla() -> void:
 		_pantalla_abierta = null
 		if GameState.en_orbita() and not GameState.ops["terminada"]:
 			var quedan: int = GameState.ops["turnos"] - GameState.ops["turno"] + 1
-			_mostrar_mensaje("Quedan %d turnos. Volvé a cualquier consola para seguir operando." % quedan)
+			if GameState.tiene_viaje():
+				_mostrar_mensaje("Faltan %d tramos para la Luna. Volvé a cualquier consola para ajustar la energía." % quedan)
+			else:
+				_mostrar_mensaje("Quedan %d turnos. Volvé a cualquier consola para seguir operando." % quedan)
 	_jugador.activo = true
 	_mira.visible = true
+	_ubicar_tripulacion(false)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
@@ -196,6 +237,9 @@ func _armar_orbita() -> void:
 	_sol(Vector3(-20, 60, 0), 1.4)
 	_crear_estrellas()
 
+	if GameState.tiene_viaje():
+		_armar_viaje()
+		return
 	var destino: String = GameState.mision.get("destino", "tierra")
 	_planeta = Node3D.new()
 	_planeta.position = Vector3(-60, -105, -320)
@@ -207,6 +251,34 @@ func _armar_orbita() -> void:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		_planeta.add_child(atmosfera)
+
+
+## En el viaje se ven las dos: la Tierra se aleja y la Luna se acerca con el progreso.
+func _armar_viaje() -> void:
+	_tierra = Node3D.new()
+	add_child(_tierra)
+	_tierra.add_child(_esfera(150, COLOR_PLANETA["tierra"], 32))
+	var atmosfera := _esfera(156, Color(Interfaz.CIAN, 0.18), 32)
+	var material := atmosfera.material_override as StandardMaterial3D
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_tierra.add_child(atmosfera)
+	_luna = Node3D.new()
+	add_child(_luna)
+	_luna.add_child(_esfera(150, COLOR_PLANETA["luna"], 32))
+	_actualizar_ventana_viaje()
+
+
+func _actualizar_ventana_viaje() -> void:
+	if not _tierra:
+		return
+	var t := GameState.progreso_viaje()
+	_tierra.position = TIERRA_INICIO.lerp(TIERRA_FIN, t)
+	_tierra.scale = Vector3.ONE * lerpf(1.0, 0.25, t)
+	# La Luna crece cada vez más rápido al acercarse.
+	var cerca := t * t
+	_luna.position = LUNA_INICIO.lerp(LUNA_FIN, cerca)
+	_luna.scale = Vector3.ONE * lerpf(0.12, 1.0, cerca)
 
 
 func _entorno(fondo: Environment.BGMode, cielo: Material, color: Color) -> void:
@@ -323,7 +395,7 @@ func _actualizar_marcador() -> void:
 			texto = "¡Alerta!"
 			color = Interfaz.ALERTA
 		else:
-			texto = "Turno %d de %d" % [GameState.ops["turno"], GameState.ops["turnos"]]
+			texto = ("Tramo %d de %d" if GameState.tiene_viaje() else "Turno %d de %d") % [GameState.ops["turno"], GameState.ops["turnos"]]
 	elif not GameState.mision.is_empty():
 		texto = "Diseñar y lanzar"
 	_marcador.text = "[E] %s\n▼" % texto
@@ -369,7 +441,8 @@ func _textos_en_orbita() -> Dictionary:
 	var ops := GameState.ops
 	var energia := GameState.energia_turno()
 	var base := GameState.get_nave_base()
-	var principal := "TURNO %d / %d\nCiencia %d / %d\nSalud %d%%" % [
+	var formato := ("TRAMO" if GameState.tiene_viaje() else "TURNO") + " %d / %d\nCiencia %d / %d\nSalud %d%%"
+	var principal := formato % [
 		mini(ops["turno"], ops["turnos"]), ops["turnos"], roundi(ops["ciencia"]), roundi(GameState.mision["objetivo_ciencia"]), roundi(ops["salud"])]
 	if not ops["evento_actual"].is_empty():
 		principal += "\n¡ALERTA: %s!" % ops["evento_actual"]["titulo"]
@@ -423,7 +496,7 @@ func _crear_hud() -> void:
 	_mensaje.offset_top = 60
 	hud.add_child(_mensaje)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
+	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · F: comer · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)
@@ -431,6 +504,42 @@ func _crear_hud() -> void:
 	_capa_pantalla = CanvasLayer.new()
 	_capa_pantalla.layer = 5
 	add_child(_capa_pantalla)
+
+	# La tripulación va por encima de las pantallas: el reloj corre aunque haya una abierta.
+	var capa_tripulacion := CanvasLayer.new()
+	capa_tripulacion.layer = 6
+	add_child(capa_tripulacion)
+	_panel_tripulacion = Interfaz.panel(Color(Interfaz.PANEL, 0.85), 10)
+	_panel_tripulacion.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	capa_tripulacion.add_child(_panel_tripulacion)
+	_caja_tripulacion = BoxContainer.new()
+	_caja_tripulacion.add_theme_constant_override("separation", 6)
+	_panel_tripulacion.add_child(_caja_tripulacion)
+	_titulo_tripulacion = Interfaz.etiqueta("Tripulación", Interfaz.AQUA, 16)
+	_caja_tripulacion.add_child(_titulo_tripulacion)
+	for clave in ["hambre", "cordura"]:
+		var grupo := Interfaz.vbox(2)
+		grupo.custom_minimum_size.x = 120
+		var texto := Interfaz.etiqueta("", Interfaz.BLANCO, 14)
+		var barra := Interfaz.barra(Interfaz.LIMA)
+		barra.custom_minimum_size.y = 10
+		grupo.add_child(texto)
+		grupo.add_child(barra)
+		_caja_tripulacion.add_child(grupo)
+		_barras_tripulacion[clave] = {"texto": texto, "barra": barra}
+	_texto_raciones = Interfaz.etiqueta("", Interfaz.CIAN, 14)
+	_caja_tripulacion.add_child(_texto_raciones)
+	_grupo_viaje = Interfaz.vbox(2)
+	_grupo_viaje.custom_minimum_size.x = 200
+	_titulo_viaje = Interfaz.etiqueta("Viaje a la Luna", Interfaz.AQUA, 14)
+	_grupo_viaje.add_child(_titulo_viaje)
+	_barra_viaje = Interfaz.barra(Interfaz.CIAN)
+	_barra_viaje.custom_minimum_size.y = 10
+	_grupo_viaje.add_child(_barra_viaje)
+	_texto_viaje = Interfaz.etiqueta("", Interfaz.BLANCO, 13)
+	_grupo_viaje.add_child(_texto_viaje)
+	_caja_tripulacion.add_child(_grupo_viaje)
+	_ubicar_tripulacion(false)
 
 
 func _actualizar_hud() -> void:
@@ -442,8 +551,74 @@ func _actualizar_hud() -> void:
 		_objetivo.text = "Objetivo: diseñá la nave y lanzala desde la computadora de misión."
 	elif GameState.ops["terminada"]:
 		_objetivo.text = "Misión terminada: el informe está en cualquier consola."
+	elif GameState.tiene_viaje():
+		_objetivo.text = "Objetivo: llegá a la Luna con la tripulación entera (tramo %d de %d)." % [GameState.ops["turno"], GameState.ops["turnos"]]
 	else:
 		_objetivo.text = "Objetivo: operá la nave (turno %d de %d). Cualquier consola sirve." % [GameState.ops["turno"], GameState.ops["turnos"]]
+
+
+# --- Tripulación ------------------------------------------------------------
+
+## En la cabina el panel va arriba a la derecha; con una pantalla abierta pasa a
+## una tira compacta arriba al centro, para no tapar los datos de la pantalla.
+func _ubicar_tripulacion(compacto: bool) -> void:
+	_compacto = compacto
+	_caja_tripulacion.vertical = not compacto
+	_titulo_tripulacion.visible = not compacto
+	_titulo_viaje.visible = not compacto
+	_grupo_viaje.custom_minimum_size.x = 150.0 if compacto else 200.0
+	if GameState.en_orbita():
+		_actualizar_tripulacion()
+	_panel_tripulacion.custom_minimum_size.x = 0.0 if compacto else 240.0
+	_panel_tripulacion.reset_size()
+	if compacto:
+		_panel_tripulacion.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE)
+		_panel_tripulacion.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		_panel_tripulacion.position.y = 6
+	else:
+		_panel_tripulacion.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE)
+		_panel_tripulacion.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		_panel_tripulacion.position += Vector2(-16, 12)
+
+
+func _actualizar_tripulacion() -> void:
+	# Al terminar la misión las barras se ocultan: los valores finales están en el informe.
+	_panel_tripulacion.visible = GameState.en_orbita() and not GameState.ops["terminada"]
+	if not _panel_tripulacion.visible:
+		return
+	var ops := GameState.ops
+	for clave in _barras_tripulacion:
+		var valor: float = ops[clave]
+		_barras_tripulacion[clave]["texto"].text = "%s: %d%%" % [clave.capitalize(), roundi(valor)]
+		_barras_tripulacion[clave]["barra"].value = valor / 100.0
+		Interfaz.color_barra(_barras_tripulacion[clave]["barra"], Interfaz.ALERTA if valor < UMBRAL_TRIPULACION else Interfaz.LIMA)
+	_texto_raciones.text = "Raciones: %d  ·  [F] comer" % ops["raciones"]
+	_grupo_viaje.visible = GameState.tiene_viaje()
+	if _grupo_viaje.visible:
+		var viaje: Dictionary = ops["viaje"]
+		_barra_viaje.value = GameState.progreso_viaje()
+		var minutos := GameState.minutos_para_llegar()
+		var llegada := "%d:%02d" % [floori(minutos), floori(fmod(minutos * 60.0, 60.0))]
+		if _compacto:
+			_texto_viaje.text = "Luna %d%% · llegada en %s" % [floori(GameState.progreso_viaje() * 100), llegada]
+		else:
+			_texto_viaje.text = "%s / %s km · %s m/s\nLlegada en %s" % [
+				GameState._miles(viaje["recorrido_km"]), GameState._miles(viaje["distancia_km"]), GameState._miles(viaje["velocidad"]), llegada]
+
+
+func _comer() -> void:
+	if GameState.comer_racion():
+		_mostrar_mensaje("Comiste una ración (quedan %d)." % GameState.ops["raciones"])
+	elif GameState.ops["raciones"] <= 0:
+		_mostrar_mensaje("No quedan raciones en la despensa.")
+	else:
+		_mostrar_mensaje("La tripulación no tiene hambre todavía.")
+
+
+func _on_operaciones_terminadas(motivo: String) -> void:
+	_actualizar_tripulacion()
+	if MENSAJES_FIN.has(motivo):
+		_mostrar_mensaje(MENSAJES_FIN[motivo])
 
 
 func _mostrar_mensaje(texto: String) -> void:

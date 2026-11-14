@@ -30,6 +30,8 @@ func _ready() -> void:
 	GameState.plan_cambiado.connect(_actualizar)
 	GameState.turno_iniciado.connect(_on_turno_iniciado)
 	GameState.turno_terminado.connect(_on_turno_terminado)
+	GameState.operaciones_terminadas.connect(_on_operaciones_terminadas)
+	GameState.viaje_avanzado.connect(func(_p: float) -> void: _actualizar_boton_turno())
 	_on_turno_iniciado(GameState.ops["turno"])
 
 
@@ -155,7 +157,7 @@ func _actualizar() -> void:
 	var energia := GameState.energia_turno()
 	var condicion := GameState.condicion_turno()
 
-	_turno.text = "Turno %d / %d" % [mini(ops["turno"], ops["turnos"]), ops["turnos"]]
+	_turno.text = ("Tramo %d / %d" if GameState.tiene_viaje() else "Turno %d / %d") % [mini(ops["turno"], ops["turnos"]), ops["turnos"]]
 	_condicion.text = "" if condicion.is_empty() else "%s: %s" % [condicion["nombre"], condicion["descripcion"]]
 	var objetivo: float = mision["objetivo_ciencia"]
 	_ciencia.text = "Ciencia entregada: %d / %d" % [roundi(ops["ciencia"]), roundi(objetivo)]
@@ -166,7 +168,11 @@ func _actualizar() -> void:
 	_pintar_estado("bateria", "Batería: %d / %d" % [roundi(ops["bateria"]), roundi(base["bateria"])], ops["bateria"] / base["bateria"], false)
 	var memoria := GameState.datos_almacenados()
 	_pintar_estado("memoria", "Memoria: %d / %d datos" % [roundi(memoria), roundi(base["almacenamiento"])], memoria / base["almacenamiento"], memoria >= base["almacenamiento"] * 0.9)
-	_texto_dv.text = "Delta-v de reserva: %d m/s" % roundi(ops["dv_restante"])
+	if GameState.tiene_viaje():
+		_texto_dv.text = ("Delta-v para frenar en la Luna: sobran %d m/s" if ops["dv_restante"] >= 0.0 else "¡Faltan %d m/s de delta-v para frenar en la Luna!") % roundi(absf(ops["dv_restante"]))
+		_texto_dv.add_theme_color_override("font_color", Interfaz.CIAN if ops["dv_restante"] >= 0.0 else Interfaz.ALERTA)
+	else:
+		_texto_dv.text = "Delta-v de reserva: %d m/s" % roundi(ops["dv_restante"])
 	var rotas := []
 	for id in ops["rotas"]:
 		rotas.append(GameState.get_pieza(id)["nombre"])
@@ -186,13 +192,31 @@ func _actualizar() -> void:
 	_prevision.text = _texto_prevision()
 	_pronostico.text = _texto_pronostico()
 	_avisos.text = "\n".join(ops["avisos"])
-	_boton_turno.text = "Ver informe  ⏎" if ops["terminada"] else "Terminar turno  ⏎"
+	_actualizar_boton_turno()
 	if ops["terminada"]:
 		_paso.text = "La misión terminó. Mirá cómo te fue →"
 	elif not ops["evento_actual"].is_empty():
 		_paso.text = "Primero decidí qué hacer con el evento."
+	elif GameState.tiene_viaje():
+		_paso.text = "Elegí qué encender: el tramo se cierra solo al avanzar el viaje →"
 	else:
 		_paso.text = "Paso siguiente: elegí qué encender y terminá el turno →"
+
+
+## En el viaje a la Luna los turnos se cierran solos: el botón muestra cuánto falta.
+func _actualizar_boton_turno() -> void:
+	var ops := GameState.ops
+	if ops["terminada"]:
+		_boton_turno.text = "Ver informe  ⏎"
+		_boton_turno.disabled = false
+	elif GameState.tiene_viaje():
+		_boton_turno.disabled = true
+		if ops["evento_actual"].is_empty():
+			_boton_turno.text = "Próximo tramo en %d s" % ceili(GameState.segundos_para_tramo())
+		else:
+			_boton_turno.text = "Viaje en espera"
+	else:
+		_boton_turno.text = "Terminar turno  ⏎"
 
 
 func _pintar_estado(clave: String, texto: String, proporcion: float, alerta: bool) -> void:
@@ -310,6 +334,14 @@ func _on_turno_terminado(resumen: Dictionary) -> void:
 	_bitacora.text = linea + "\n\n" + _bitacora.text
 	if GameState.ops["terminada"]:
 		_actualizar()
+
+
+## La misión puede terminar fuera de un turno (hambre o cordura de la tripulación).
+func _on_operaciones_terminadas(_motivo: String) -> void:
+	if is_instance_valid(_capa_evento):
+		_capa_evento.queue_free()
+	_boton_turno.disabled = false
+	_actualizar()
 
 
 func _mostrar_evento(evento: Dictionary) -> void:
