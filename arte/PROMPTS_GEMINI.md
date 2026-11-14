@@ -76,8 +76,7 @@ Formato: **2:1 equirectangular**, para envolver una esfera. Los bordes izquierdo
 | Archivo | Dónde se ve |
 |---|---|
 | `planeta_tierra.png` | La Tierra, desde la cabina en órbita, la esclusa y la caminata |
-| `planeta_luna.png` | La Luna, en la misión lunar |
-| `planeta_marte.png` | Marte, en la misión a Marte |
+| `planeta_luna.png` | La Luna, en el viaje (crece por la ventana a medida que se acerca) |
 
 ```
 Generate an equirectangular (2:1) surface map of [SUBJECT], for wrapping
@@ -87,7 +86,6 @@ left and right edges must match. Follow the style guide.
 
 - **planeta_tierra.png:** `planet Earth: deep blue oceans, simplified green and sandy continents with soft edges, white polar caps and a few soft white cloud bands`
 - **planeta_luna.png:** `the Moon: light grey surface with darker grey maria and a few simple round craters`
-- **planeta_marte.png:** `planet Mars: rusty orange-red surface with darker brown regions, a few canyons and small white polar caps`
 
 ## Fondo del espacio
 

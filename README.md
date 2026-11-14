@@ -85,7 +85,7 @@ Escribe `assets/modelos/{cabina,nave,cohetes,plataforma}.glb`, guarda `blender/s
 | `scripts/ui/interfaz.gd` | Colores y piezas de UI compartidas (`Interfaz.etiqueta`, `Interfaz.panel`...). El tema de arte se aplica acá. |
 | `scripts/nave_3d.gd` | La nave modular 3D, con las piezas elegidas a la vista. |
 | `scenes/cabina/` | Cabina en primera persona (`cabina.gd`) y el jugador (`jugador.gd`). Escena principal. |
-| `scenes/briefing/` | Fase 1: elegir misión. |
+| `scenes/briefing/` | Fase 1: presentar la misión a la Luna. |
 | `scenes/diseno/` | Fase 2: armar la nave con los 5 medidores y la nave 3D girando. |
 | `scenes/lanzamiento/` | Fase 3: cinemática del lanzamiento. |
 | `scenes/operaciones/` | Fase 4: 8 turnos repartiendo energía, con eventos. |
@@ -108,16 +108,16 @@ Las capturas de los recorridos quedan en la carpeta `capturas/` del proyecto, qu
 
 ## Cómo se juega cada fase
 
-1. **Briefing:** cada misión trae presupuesto, delta-v necesario, luz solar, señal de radio, capacidad del cohete y ciencia objetivo.
+1. **Briefing:** la misión (viaje tripulado a la Luna) trae distancia, presupuesto, delta-v para frenar, luz solar, señal de radio, capacidad del cohete y ciencia objetivo. Es la única misión: Tierra y Marte se quitaron.
 2. **Diseño:** se eligen piezas y los medidores se actualizan en vivo. Se puede lanzar con medidores en rojo.
 3. **Lanzamiento:** falla si la masa supera la capacidad, si sale mal la tirada de fiabilidad del cohete o si al llegar falta delta-v.
-4. **Operaciones:** cada turno hay `generación + batería` de energía. Los sistemas básicos siempre consumen; calefacción, transmisión e instrumentos se prenden y apagan. Los instrumentos llenan la memoria y la ciencia solo cuenta al transmitir. Lo que no entra en la memoria se pierde. Sin calefacción la nave se daña. Algunos turnos tienen condiciones (noche lunar, tormenta de polvo) y 3 turnos al azar traen un evento con decisión.
+4. **Operaciones:** cada turno hay `generación + batería` de energía. Los sistemas básicos siempre consumen; calefacción, transmisión e instrumentos se prenden y apagan. Los instrumentos llenan la memoria y la ciencia solo cuenta al transmitir. Lo que no entra en la memoria se pierde. Sin calefacción la nave se daña. Algunos tramos tienen condiciones (cinturones de Van Allen, rotación térmica) y 3 turnos al azar traen un evento con decisión.
 5. **Informe:** ciencia hasta 600 puntos (900 si se supera el objetivo), salud hasta 200, presupuesto: ahorrar suma hasta 200 y pasarse resta 4 veces más.
 
 ## Usar GameState desde una pantalla
 
 ```gdscript
-GameState.elegir_mision("marte")
+GameState.elegir_mision("luna")       # la única misión
 GameState.alternar_pieza("radar")      # elige o quita; en categorías únicas reemplaza
 GameState.medidores["energia"]         # {nombre, valor, limite, unidad, mayor_es_mejor, ok}
 GameState.lanzar()                     # {exito, motivo}

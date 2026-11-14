@@ -38,7 +38,7 @@ func _ready() -> void:
 	var redisenar := Interfaz.boton("Rediseñar la nave", 20)
 	redisenar.pressed.connect(GameState.ir_a.bind("diseno"))
 	botones.add_child(redisenar)
-	var otra := Interfaz.boton("Elegir otra misión", 20)
+	var otra := Interfaz.boton("Empezar de cero", 20)
 	otra.pressed.connect(func() -> void:
 		GameState.reiniciar()
 		GameState.ir_a("briefing"))

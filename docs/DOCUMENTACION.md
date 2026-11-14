@@ -46,21 +46,15 @@ El juego arranca en **primera persona, dentro de la cabina de la nave**, que est
 
 ### Las cinco fases
 
-1. **Briefing.** En la computadora de misión se elige una de tres misiones, que funcionan como niveles de dificultad:
-
-   | Misión | Dificultad | Presupuesto | Delta-v | Luz solar | Señal |
-   |---|---|---|---|---|---|
-   | Satélite de observación terrestre | Fácil | 250 M$ | 500 m/s | 100% | 100% |
-   | Orbitador lunar | Media | 400 M$ | 1500 m/s | 100% | 33% |
-   | Orbitador a Marte | Difícil | 550 M$ | 2600 m/s | 43% | 12% |
+1. **Briefing.** En la computadora de misión se presenta la única misión: un **viaje tripulado a la Luna** (384.400 km, 400 M$ de presupuesto, 1500 m/s de delta-v para frenar al llegar, señal de radio al 33%). Las misiones a la órbita terrestre y a Marte se quitaron para concentrar el juego en la Luna.
 
 2. **Diseño.** Se eligen piezas en seis categorías (cohete, energía, comunicación, propulsión, instrumentos y extras) mientras cinco medidores se actualizan en vivo: **presupuesto, masa, energía, datos y delta-v**. Una nave 3D gira en el centro y muestra las piezas elegidas. Se puede lanzar con medidores en rojo: las consecuencias llegan después.
 
 3. **Lanzamiento.** Una cinemática en tercera persona con cinco planos. El resultado ya está decidido por las reglas: si la nave pesa más de lo que el cohete puede llevar, no despega; si falla la tirada de fiabilidad, el cohete explota; si llega sin suficiente delta-v, no queda en órbita.
 
-4. **Operaciones.** De vuelta en la cabina, ya en órbita y con el destino visible por la ventana. Son 8 turnos: en cada uno se decide qué encender (calefacción, transmisión, cada instrumento) con la energía disponible. Los instrumentos llenan una memoria limitada y **la ciencia solo cuenta cuando se transmite**. Hay turnos con condiciones especiales (noche lunar, sombra de la Tierra, tormenta de polvo en Marte) y tres eventos al azar con una decisión que tomar.
+4. **Operaciones.** De vuelta en la cabina, ya en órbita y con el destino visible por la ventana. Son 8 turnos: en cada uno se decide qué encender (calefacción, transmisión, cada instrumento) con la energía disponible. Los instrumentos llenan una memoria limitada y **la ciencia solo cuenta cuando se transmite**. Hay tramos con condiciones especiales (cinturones de Van Allen, rotación térmica) y tres eventos al azar con una decisión que tomar.
 
-5. **Informe.** Nota, puntaje y frases que explican el resultado, con botones para rediseñar la nave o elegir otra misión.
+5. **Informe.** Nota, puntaje y frases que explican el resultado, con botones para rediseñar la nave o volver al briefing.
 
 ### Recorrer la nave a pie
 
@@ -179,7 +173,7 @@ Toda nave lleva además una **estructura base** (`nave_base`) con computadora, b
 | Datos | datos de los instrumentos | no superan lo que la antena transmite / factor de la misión |
 | Delta-v | `Isp × 9,81 × ln(masa total / masa seca)` (Tsiolkovsky) | alcanza lo que pide la misión |
 
-- **Energía solar:** potencia / distancia al Sol². En Marte (1,52 UA) un panel rinde el 43%. El RTG no depende de la distancia.
+- **Energía solar:** potencia / distancia al Sol² (la Luna está a 1 UA, así que rinde completo salvo a la sombra o en la rotación térmica). El RTG no depende de la distancia ni de la sombra.
 - **Fiabilidad:** producto de las fiabilidades de las piezas; la redundancia reduce a la mitad la probabilidad de falla de la nave.
 
 ### Operaciones
@@ -187,7 +181,7 @@ Toda nave lleva además una **estructura base** (`nave_base`) con computadora, b
 - **Energía del turno:** generación + batería. Los sistemas básicos siempre consumen; lo demás se enciende y se apaga. Si el plan no entra, se apagan cosas automáticamente.
 - **Datos:** los instrumentos llenan una memoria de 150 unidades; lo que no entra se pierde. Transmitir los envía a la Tierra y recién ahí se convierten en ciencia.
 - **Daño:** sin calefacción, la electrónica sufre; si no alcanza ni para los sistemas básicos, hay un apagón. Con la salud en cero, se pierde el contacto.
-- **Condiciones por misión:** sombra de la Tierra (paneles a la mitad), noche lunar (paneles en cero) y tormenta de polvo en Marte (paneles al 60%; solo el radar ve bien).
+- **Condiciones del viaje:** cinturones de Van Allen en el tramo 2 (los instrumentos captan mucho ruido) y rotación térmica en el tramo 5 (paneles a la mitad).
 - **Eventos** (3 por partida, al azar): tormenta solar, falla de componente, cometa, desvío de órbita y micrometeorito. Cada uno pide una decisión, y varios usan lo que se eligió en el diseño: el delta-v de sobra, la redundancia o el blindaje.
 
 ### Informe
@@ -199,7 +193,7 @@ Puntaje: ciencia hasta 600 (900 si se supera el objetivo) + salud hasta 200 + pr
 | Escena | Tipo | Qué es |
 |---|---|---|
 | `cabina` | 3D, primera persona | Escena principal. Plataforma antes del lanzamiento, órbita después. Consolas con datos en vivo y un marcador que indica qué usar. |
-| `briefing` | Interfaz | Tarjetas de las tres misiones. |
+| `briefing` | Interfaz | Tarjeta de la misión a la Luna, para aceptarla. |
 | `diseno` | Interfaz + 3D | Piezas, medidores y nave 3D girando. |
 | `lanzamiento` | 3D, cinemática | Cinco planos: general con cuenta regresiva, motores, contrapicado del despegue, seguimiento con teleobjetivo y ascenso. Variantes de falla. |
 | `operaciones` | Interfaz | Plan de energía, estado de la nave, bitácora y eventos. |

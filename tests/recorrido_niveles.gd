@@ -27,7 +27,7 @@ func _recorrer() -> void:
 
 	# Una nave ya en órbita, para que la escotilla se pueda abrir.
 	GameState.reiniciar()
-	GameState.elegir_mision("tierra")
+	GameState.elegir_mision("luna")
 	for id in ["cohete_chico", "panel_chico", "antena_media", "motor_quimico", "despensa_mediana", "camara"]:
 		GameState.elegir_pieza(id)
 	GameState.lanzamiento = {"exito": true, "motivo": ""}

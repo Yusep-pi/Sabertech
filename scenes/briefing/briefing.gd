@@ -1,5 +1,5 @@
 extends Control
-## Fase 1: briefing. Elegir una de las misiones; cada una funciona como dificultad.
+## Fase 1: briefing. Presenta la misión (el viaje tripulado a la Luna) y se acepta.
 
 
 func _ready() -> void:
@@ -9,15 +9,19 @@ func _ready() -> void:
 	var titulo := Interfaz.etiqueta("SABERTECH · Director de misión", Interfaz.AQUA, 34)
 	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	columna.add_child(titulo)
-	var subtitulo := Interfaz.etiqueta("Elegí una misión. Después vas a diseñar la nave, lanzarla y operarla.", Interfaz.CIAN, 18)
+	var subtitulo := Interfaz.etiqueta("Tu misión. Después vas a diseñar la nave, lanzarla y llevar a la tripulación hasta la Luna.", Interfaz.CIAN, 18)
 	subtitulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	columna.add_child(subtitulo)
 
 	var tarjetas := Interfaz.hbox(16)
 	tarjetas.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tarjetas.alignment = BoxContainer.ALIGNMENT_CENTER
 	columna.add_child(tarjetas)
 	for mision in GameState.get_misiones():
-		tarjetas.add_child(_tarjeta(mision))
+		var tarjeta := _tarjeta(mision)
+		tarjeta.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		tarjeta.custom_minimum_size.x = 620
+		tarjetas.add_child(tarjeta)
 
 
 func _tarjeta(mision: Dictionary) -> Control:
@@ -26,7 +30,6 @@ func _tarjeta(mision: Dictionary) -> Control:
 	var caja := Interfaz.vbox(10)
 	panel.add_child(caja)
 
-	caja.add_child(Interfaz.etiqueta(mision["dificultad"].to_upper(), _color_dificultad(mision["dificultad"]), 16))
 	caja.add_child(Interfaz.parrafo(mision["nombre"], Interfaz.BLANCO, 24))
 	caja.add_child(Interfaz.parrafo(mision["descripcion"], Interfaz.CIAN))
 	caja.add_child(HSeparator.new())
@@ -34,8 +37,9 @@ func _tarjeta(mision: Dictionary) -> Control:
 	var luz: float = 100.0 / pow(mision["distancia_ua"], 2)
 	var senal: float = 100.0 / mision["factor_datos"]
 	var datos := [
+		["Distancia", "%s km" % GameState._miles(mision.get("viaje", {}).get("distancia_km", 0.0))],
 		["Presupuesto", "%d M$" % roundi(mision["presupuesto"])],
-		["Delta-v necesario", "%d m/s" % roundi(mision["delta_v"])],
+		["Delta-v para frenar", "%d m/s" % roundi(mision["delta_v"])],
 		["Luz solar", "%d%%" % roundi(luz)],
 		["Señal de radio", "%d%%" % roundi(senal)],
 		["Capacidad del cohete", "%d%% de la normal" % roundi(mision["factor_capacidad"] * 100)],
@@ -54,7 +58,7 @@ func _tarjeta(mision: Dictionary) -> Control:
 	caja.add_child(espacio)
 	caja.add_child(Interfaz.parrafo("Objetivo: " + mision["objetivo"], Interfaz.LIMA))
 
-	var elegir := Interfaz.boton("Elegir esta misión", 20)
+	var elegir := Interfaz.boton_principal("Aceptar la misión", 20)
 	elegir.pressed.connect(_on_elegir.bind(mision["id"]))
 	caja.add_child(elegir)
 	return panel
@@ -64,11 +68,3 @@ func _on_elegir(id: String) -> void:
 	GameState.elegir_mision(id)
 	GameState.ir_a("diseno")
 
-
-static func _color_dificultad(dificultad: String) -> Color:
-	match dificultad:
-		"Fácil":
-			return Interfaz.LIMA
-		"Media":
-			return Interfaz.AQUA
-	return Interfaz.ALERTA

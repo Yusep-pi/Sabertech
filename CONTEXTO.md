@@ -18,10 +18,7 @@ Simulador de director de misión en 5 fases, 10-15 minutos por partida. El jugad
 
 ## Fases
 
-1. **Briefing.** Elegir 1 de 3 misiones (funcionan como dificultad). Cada una define presupuesto, objetivo científico, delta-v requerido y distancia.
-   - Satélite de observación en órbita terrestre (fácil: cerca, mucho sol).
-   - Orbitador lunar (medio).
-   - Orbitador a Marte (difícil: poco sol, comunicación débil, mucho combustible).
+1. **Briefing.** Una sola misión: el viaje tripulado a la Luna. Define presupuesto, objetivo científico, delta-v requerido y distancia. (Al principio había tres misiones, Tierra, Luna y Marte; se dejó solo la Luna.)
 2. **Diseño (corazón del juego).** Elegir piezas por categoría mientras 5 medidores se actualizan en vivo. Nave 3D low-poly girando en el centro; las piezas aparecen al elegirlas. Se puede lanzar con medidores en rojo; las consecuencias llegan después.
 3. **Lanzamiento.** Animación corta y tirada según la fiabilidad del cohete. Si la masa excede la capacidad o falta delta-v, la misión falla acá, con explicación.
 4. **Operaciones.** 8 turnos. En cada uno se reparte la energía entre instrumentos, transmisión y calefacción. La ciencia solo cuenta si se transmite. En 2-3 turnos cae un evento con decisión (tormenta solar, falla de componente, oportunidad científica).
@@ -51,7 +48,7 @@ Los valores numéricos de cada pieza aún no están cargados (los define el rol 
 ## Fórmulas
 
 - **Delta-v:** `dv = Isp * 9.81 * ln(masa_inicial / masa_final)`
-- **Energía solar:** potencia del panel / (distancia al sol en UA)^2. En Marte rinde ~43%. El RTG no depende de la distancia.
+- **Energía solar:** potencia del panel / (distancia al sol en UA)^2. El RTG no depende de la distancia ni de la sombra.
 - **Datos:** tasa de la antena / factor fijo por misión.
 - **Fiabilidad:** producto de las fiabilidades de las piezas; la redundancia la sube.
 

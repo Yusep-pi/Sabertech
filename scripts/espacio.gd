@@ -3,7 +3,7 @@ extends RefCounted
 ## Piezas del espacio exterior que comparten la cabina en órbita y la caminata
 ## espacial: entorno, estrellas y planetas.
 
-const COLOR_PLANETA := {"tierra": Color("#2E6FD0"), "luna": Color("#A3A6B0"), "marte": Color("#C1552B")}
+const COLOR_PLANETA := {"tierra": Color("#2E6FD0"), "luna": Color("#A3A6B0")}
 
 
 static func entorno() -> WorldEnvironment:
@@ -41,7 +41,7 @@ static func estrellas(cantidad: int = 700, radio: float = 700.0) -> MultiMeshIns
 	return nodo
 
 
-## El destino de la misión ("tierra", "luna", "marte"); la Tierra lleva atmósfera.
+## El planeta ("tierra" o "luna"); la Tierra lleva atmósfera.
 static func planeta(destino: String, radio: float) -> Node3D:
 	var nodo := Node3D.new()
 	nodo.add_child(esfera(radio, COLOR_PLANETA.get(destino, Color.GRAY), 32))

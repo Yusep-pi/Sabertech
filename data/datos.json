@@ -1,12 +1,12 @@
 {
-	"_unidades": "costo en M$, masa en kg, potencia y consumo en W (energia por turno), capacidad en kg a orbita baja, isp en s, delta_v en m/s, datos y tasa en unidades por turno. viaje (solo luna): velocidad en m/s, segundos_por_hora = segundos reales por hora de mision; empuje (propulsion) multiplica la velocidad de crucero",
+	"_unidades": "costo en M$, masa en kg, potencia y consumo en W (energia por turno), capacidad en kg a orbita baja, isp en s, delta_v en m/s, datos y tasa en unidades por turno. viaje: velocidad en m/s, segundos_por_hora = segundos reales por hora de mision; empuje (propulsion) multiplica la velocidad de crucero",
 
 	"partida": {
 		"turnos": 8,
 		"eventos_por_partida": 3
 	},
 
-	"_eva": "caminata espacial (nivel aparte, todavia sin integrar): tiempos en segundos, distancias en metros, empuje en m/s2; el traje se dana al chocar por encima de velocidad_segura; las tareas usan la primera pieza instalada de su lista",
+	"_eva": "caminata espacial (se sale por la esclusa en orbita): tiempos en segundos, distancias en metros, empuje en m/s2; el traje se dana al chocar por encima de velocidad_segura; las tareas usan la primera pieza instalada de su lista",
 	"eva": {
 		"oxigeno_segundos": 240,
 		"combustible": 100,
@@ -38,29 +38,8 @@
 
 	"misiones": [
 		{
-			"id": "tierra",
-			"nombre": "Satélite de observación terrestre",
-			"dificultad": "Fácil",
-			"destino": "tierra",
-			"descripcion": "Un satélite en órbita baja para vigilar bosques, hielo y cultivos. Cerca de casa: mucho sol y comunicación fácil.",
-			"objetivo": "Entregar imágenes y mediciones de la superficie terrestre.",
-			"presupuesto": 250,
-			"delta_v": 500,
-			"distancia_ua": 1.0,
-			"factor_capacidad": 1.0,
-			"factor_datos": 1.0,
-			"calefaccion": 20,
-			"dano_frio": 5,
-			"objetivo_ciencia": 450,
-			"condiciones": {
-				"3": { "nombre": "Sombra de la Tierra", "descripcion": "Media órbita a oscuras: los paneles rinden la mitad.", "factor_solar": 0.5 },
-				"6": { "nombre": "Sombra de la Tierra", "descripcion": "Media órbita a oscuras: los paneles rinden la mitad.", "factor_solar": 0.5 }
-			}
-		},
-		{
 			"id": "luna",
 			"nombre": "Viaje tripulado a la Luna",
-			"dificultad": "Media",
 			"destino": "luna",
 			"descripcion": "Un viaje tripulado de 384.400 km hasta la Luna. La velocidad depende de la nave: cuanto más delta-v sobre, antes se llega. Hay que mantener a la tripulación entera y hacer ciencia por el camino.",
 			"objetivo": "Llegar a la Luna con la tripulación a salvo y entregar ciencia durante el viaje.",
@@ -83,26 +62,6 @@
 			"condiciones": {
 				"2": { "nombre": "Cinturones de Van Allen", "descripcion": "La nave cruza la zona de radiación que rodea la Tierra: los instrumentos captan mucho ruido.", "multiplicador_instrumentos": { "camara": 0.4, "espectrometro": 0.4, "radar": 0.6 } },
 				"5": { "nombre": "Rotación térmica", "descripcion": "Como en las Apollo, la nave gira despacio para repartir el calor del Sol: los paneles rinden la mitad.", "factor_solar": 0.5 }
-			}
-		},
-		{
-			"id": "marte",
-			"nombre": "Orbitador a Marte",
-			"dificultad": "Difícil",
-			"destino": "marte",
-			"descripcion": "Un viaje de meses hasta Marte. Llega menos de la mitad de luz solar, la señal es débil y hace falta mucho combustible para frenar.",
-			"objetivo": "Estudiar la atmósfera y el subsuelo marciano desde órbita.",
-			"presupuesto": 550,
-			"delta_v": 2600,
-			"distancia_ua": 1.52,
-			"factor_capacidad": 0.15,
-			"factor_datos": 8.0,
-			"calefaccion": 80,
-			"dano_frio": 15,
-			"objetivo_ciencia": 480,
-			"condiciones": {
-				"5": { "nombre": "Tormenta de polvo", "descripcion": "El polvo tapa la superficie y ensucia los paneles. Solo el radar ve a través.", "factor_solar": 0.6, "multiplicador_instrumentos": { "camara": 0.2, "espectrometro": 0.4 } },
-				"6": { "nombre": "Tormenta de polvo", "descripcion": "La tormenta sigue. Solo el radar ve a través.", "factor_solar": 0.6, "multiplicador_instrumentos": { "camara": 0.2, "espectrometro": 0.4 } }
 			}
 		}
 	],
@@ -189,7 +148,7 @@
 		},
 		{
 			"id": "panel_grande", "categoria": "energia", "nombre": "Panel solar grande",
-			"descripcion": "Mucha energía cerca del Sol. En Marte rinde menos de la mitad y nada a la sombra.",
+			"descripcion": "Mucha energía mientras le dé el Sol, pero nada a la sombra. Pesa más que el chico.",
 			"costo": 35, "masa": 110, "fiabilidad": 0.97,
 			"potencia": 1200, "tipo": "solar"
 		},
@@ -271,7 +230,7 @@
 		},
 		{
 			"id": "radar", "categoria": "instrumento", "nombre": "Radar",
-			"descripcion": "Ve bajo la superficie y a través del polvo y las nubes. Pesado, gasta mucha energía y genera muchos datos.",
+			"descripcion": "Ve bajo la superficie lunar. Pesado, gasta mucha energía y genera muchos datos.",
 			"costo": 70, "masa": 80, "consumo": 200, "fiabilidad": 0.97,
 			"datos": 60, "ciencia": 1.5
 		},
@@ -350,19 +309,19 @@
 		},
 		{
 			"id": "correccion_orbita",
-			"titulo": "La órbita se desvía",
-			"texto": "Pequeñas fuerzas fueron cambiando la órbita. Hay que encender el motor para corregirla.",
+			"titulo": "La trayectoria se desvía",
+			"texto": "Pequeñas fuerzas fueron sacando a la nave del rumbo a la Luna. Hay que encender el motor para corregir, y ese delta-v después falta para frenar.",
 			"opciones": [
 				{
 					"texto": "Corregir (gasta 150 m/s de delta-v)",
 					"requisitos": { "delta_v": 150 },
 					"efectos": { "delta_v": -150 },
-					"resultado": "Órbita corregida."
+					"resultado": "Rumbo corregido."
 				},
 				{
-					"texto": "Dejarla así",
+					"texto": "Seguir así",
 					"efectos": { "multiplicador_datos_resto": 0.7 },
-					"resultado": "Desde una órbita peor, los instrumentos captarán menos datos el resto de la misión."
+					"resultado": "Desde una trayectoria peor, los instrumentos captarán menos datos el resto del viaje."
 				}
 			]
 		},

@@ -28,7 +28,7 @@ func _initialize() -> void:
 
 
 func _probar_datos(gs: Node) -> void:
-	_comprobar(gs.get_misiones().size() == 3, "hay 3 misiones")
+	_comprobar(gs.get_misiones().size() == 1 and gs.get_misiones()[0]["id"] == "luna", "la única misión es la Luna")
 	for pieza in gs.get_piezas():
 		_comprobar(not gs.get_categoria(pieza["categoria"]).is_empty(), "categoría válida para " + pieza["id"])
 	for clave in ["fallo_masa", "fallo_cohete", "fallo_delta_v", "ciencia", "transmision_baja"]:
@@ -37,7 +37,7 @@ func _probar_datos(gs: Node) -> void:
 
 func _probar_formulas(gs: Node) -> void:
 	_cerca(gs.calcular_delta_v(300, 2000, 1000), 300 * 9.81 * log(2.0), "delta-v de Tsiolkovsky")
-	_cerca(gs.calcular_generacion({"potencia": 1000, "tipo": "solar"}, 1.52), 432.8, "panel solar en Marte")
+	_cerca(gs.calcular_generacion({"potencia": 1000, "tipo": "solar"}, 1.52), 432.8, "el panel solar rinde menos lejos del Sol")
 	_cerca(gs.calcular_generacion({"potencia": 350, "tipo": "rtg"}, 1.52), 350, "RTG no depende de la distancia")
 
 
@@ -56,26 +56,21 @@ func _probar_seleccion(gs: Node) -> void:
 
 
 func _probar_medidores(gs: Node) -> void:
-	_armar(gs, "tierra", ["cohete_chico", "panel_chico", "antena_media", "motor_quimico", "despensa_mediana", "camara", "espectrometro"])
-	_comprobar(gs.puede_lanzar(), "tierra: se puede lanzar")
-	_todo_verde(gs, "tierra")
-	_cerca(gs.medidores["costo"]["valor"], 235, "tierra: costo total")
-	_cerca(gs.medidores["masa"]["valor"], 1095, "tierra: masa con combustible")
-	gs.elegir_pieza("radar")
-	_comprobar(not gs.medidores["costo"]["ok"], "tierra + radar: se pasa del presupuesto")
-
 	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro"])
 	_comprobar(not gs.medidores["masa"]["ok"], "luna + cohete chico: excede la capacidad")
 	gs.elegir_pieza("cohete_mediano")
+	_comprobar(gs.puede_lanzar(), "luna + cohete mediano: se puede lanzar")
 	_todo_verde(gs, "luna + cohete mediano")
+	_cerca(gs.medidores["costo"]["valor"], 340, "luna: costo total")
+	_cerca(gs.medidores["masa"]["valor"], 1205, "luna: masa con combustible")
+	gs.elegir_pieza("radar")
+	_comprobar(not gs.medidores["costo"]["ok"], "luna + radar: se pasa del presupuesto")
 
 	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_ionico", "despensa_mediana", "camara", "espectrometro"])
 	_todo_verde(gs, "luna iónica en cohete chico")
 
-	_armar(gs, "marte", ["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "despensa_mediana", "espectrometro", "radar"])
-	_comprobar(not gs.medidores["energia"]["ok"], "marte + radar: falta energía")
-	gs.elegir_pieza("motor_quimico")
-	_comprobar(not gs.medidores["delta_v"]["ok"], "marte + químico: falta delta-v")
+	_armar(gs, "luna", ["cohete_pesado", "panel_chico", "antena_alta", "motor_quimico", "despensa_mediana", "espectrometro", "radar"])
+	_comprobar(not gs.medidores["energia"]["ok"], "luna + panel chico + radar: falta energía")
 
 	var antes: float = gs.detalle["fiabilidad_nave"]
 	gs.elegir_pieza("redundancia")
@@ -88,10 +83,7 @@ func _probar_lanzamiento(gs: Node) -> void:
 	_comprobar(gs.texto_fallo_lanzamiento().contains("kg"), "el fallo por masa se explica con números")
 	_comprobar(gs.calcular_informe()["puntaje"] == 0, "sin lanzamiento no hay puntaje")
 
-	_armar(gs, "marte", ["cohete_pesado", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "espectrometro"])
-	var motivo: String = gs.lanzar()["motivo"]
-	_comprobar(motivo == "delta_v" or motivo == "cohete", "marte con químico no llega a órbita")
-
+	var motivo := ""
 	# En la Luna el delta-v se juzga al llegar, no al despegar.
 	_armar(gs, "luna", ["cohete_pesado", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara"], false)
 	gs.mision = gs.mision.duplicate(true)
@@ -192,11 +184,13 @@ func _probar_viaje(gs: Node) -> void:
 	_cerca(gs.calcular_velocidad_viaje(viaje, 100000.0, 1.0), viaje["velocidad_maxima"], "la velocidad tiene tope")
 	_comprobar(gs.calcular_velocidad_viaje(viaje, 400.0, 0.85) < gs.calcular_velocidad_viaje(viaje, 400.0, 1.0), "el iónico llega más lento")
 
-	# Tierra y Marte no tienen viaje.
-	_armar(gs, "tierra", ["cohete_chico", "panel_chico", "antena_baja", "motor_quimico", "despensa_mediana", "camara"], false)
+	# Una misión sin bloque "viaje" se juega por turnos, sin barra de viaje.
+	_armar(gs, "luna", ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara"], false)
+	gs.mision = gs.mision.duplicate(true)
+	gs.mision.erase("viaje")
 	gs.lanzamiento = {"exito": true, "motivo": ""}
 	gs.iniciar_operaciones()
-	_comprobar(not gs.tiene_viaje(), "la misión Tierra no tiene viaje")
+	_comprobar(not gs.tiene_viaje(), "sin bloque viaje no hay viaje")
 
 	var piezas_luna := ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro"]
 	_armar(gs, "luna", piezas_luna, false)
@@ -305,19 +299,10 @@ func _avanzar(gs: Node, segundos: float) -> void:
 ## (todo encendido, primera opción posible en cada evento) para ver el balance.
 func _simular_balance(gs: Node) -> void:
 	var naves := {
-		"tierra": [
-			["cohete_chico", "panel_chico", "antena_media", "motor_quimico", "despensa_mediana", "camara", "espectrometro"],
-			["cohete_chico", "panel_grande", "antena_media", "motor_quimico", "despensa_mediana", "camara", "espectrometro", "blindaje"],
-		],
 		"luna": [
 			["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro"],
 			["cohete_chico", "panel_grande", "antena_alta", "motor_ionico", "despensa_mediana", "camara", "espectrometro"],
 			["cohete_mediano", "rtg", "antena_alta", "motor_quimico", "despensa_mediana", "espectrometro", "radar"],
-		],
-		"marte": [
-			["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "despensa_mediana", "espectrometro", "radar"],
-			["cohete_pesado", "rtg", "antena_alta", "motor_eficiente", "despensa_mediana", "espectrometro", "redundancia"],
-			["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "despensa_mediana", "camara", "espectrometro", "blindaje"],
 		],
 	}
 	print("\nSimulación de balance (200 partidas por nave, estrategia simple):")

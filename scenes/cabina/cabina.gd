@@ -29,7 +29,7 @@ const PANTALLAS := {
 const POSICION_MARCADOR := Vector3(0, 1.95, -3.6)
 ## La puerta trasera, que lleva al habitáculo (en coordenadas de la cabina).
 const PUERTA_TRASERA := Vector3(0, 1.15, 3.98)
-const COLOR_PLANETA := {"tierra": Color("#2E6FD0"), "luna": Color("#A3A6B0"), "marte": Color("#C1552B")}
+const COLOR_PLANETA := {"tierra": Color("#2E6FD0"), "luna": Color("#A3A6B0")}
 const REFRESCO_PANTALLAS := 0.3
 ## Viaje a la Luna: dónde se ven la Tierra y la Luna al salir y al llegar.
 const TIERRA_INICIO := Vector3(-60, -105, -320)
@@ -401,7 +401,7 @@ func _crear_marcador() -> void:
 
 ## Qué dice el marcador y de qué color, según lo que toca hacer.
 func _actualizar_marcador() -> void:
-	var texto := "Elegir misión"
+	var texto := "Ver la misión"
 	var color := Interfaz.LIMA
 	if GameState.en_orbita():
 		if GameState.ops["terminada"]:
@@ -430,7 +430,7 @@ func _textos_en_plataforma() -> Dictionary:
 	var mision := GameState.mision
 	if mision.is_empty():
 		return {
-			"consola_principal": "SABERTECH\nSin misión asignada\n[E] Elegir misión",
+			"consola_principal": "SABERTECH\nMisión: viaje a la Luna\n[E] Ver el briefing",
 			"consola_energia": "ENERGÍA\nEn espera",
 			"consola_comunicaciones": "COMUNICACIONES\nEn espera",
 			"consola_ciencia": "CIENCIA\nEn espera",
@@ -530,7 +530,7 @@ func _actualizar_hud() -> void:
 	var consola := _jugador.consola_mirada() if _jugador.activo else ""
 	_indicacion.text = "[E] " + NOMBRES_CONSOLA[consola] if consola != "" else ""
 	if GameState.mision.is_empty():
-		_objetivo.text = "Objetivo: elegí una misión en la computadora de misión."
+		_objetivo.text = "Objetivo: revisá la misión en la computadora de misión."
 	elif not GameState.en_orbita():
 		_objetivo.text = "Objetivo: diseñá la nave y lanzala desde la computadora de misión."
 	elif GameState.ops["terminada"]:
