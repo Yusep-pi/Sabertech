@@ -11,6 +11,12 @@ signal medidores_cambiados(medidores: Dictionary)
 signal plan_cambiado
 signal turno_iniciado(turno: int)
 signal turno_terminado(resumen: Dictionary)
+## Cambió el hambre, la cordura o las raciones de la tripulación.
+signal tripulacion_cambiada(hambre: float, cordura: float)
+## Las operaciones terminaron. motivo: "turnos", "llegada", "salud", "hambre" o "cordura".
+signal operaciones_terminadas(motivo: String)
+## Avanzó el viaje al destino (solo misiones con "viaje"). progreso de 0 a 1.
+signal viaje_avanzado(progreso: float)
 
 const RUTA_DATOS := "res://data/datos.json"
 const G0 := 9.81
@@ -58,9 +64,16 @@ var _categorias_por_id: Dictionary = {}
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	rng.randomize()
 	cargar_datos()
 	recalcular()
+
+
+## El reloj de la tripulación corre solo en órbita y mientras sigan las operaciones.
+func _process(delta: float) -> void:
+	if reloj_corriendo():
+		avanzar_tiempo(delta)
 
 
 func cargar_datos(ruta: String = RUTA_DATOS) -> void:
@@ -325,7 +338,8 @@ func lanzar() -> Dictionary:
 		motivo = "masa"
 	elif rng.randf() > detalle["fiabilidad_lanzamiento"]:
 		motivo = "cohete"
-	elif medidores["delta_v"]["valor"] < medidores["delta_v"]["limite"]:
+	elif medidores["delta_v"]["valor"] < medidores["delta_v"]["limite"] and not mision.has("viaje"):
+		# En un viaje el delta-v se necesita para frenar al llegar: se juzga al final.
 		motivo = "delta_v"
 	lanzamiento = {"exito": motivo == "", "motivo": motivo}
 	ops = {}
@@ -349,6 +363,7 @@ func texto_fallo_lanzamiento() -> String:
 
 func iniciar_operaciones() -> void:
 	var partida: Dictionary = datos.get("partida", {})
+	var tripulacion := get_tripulacion()
 	ops = {
 		"turno": 1,
 		"turnos": int(partida.get("turnos", 8)),
@@ -372,7 +387,13 @@ func iniciar_operaciones() -> void:
 		"eventos_vividos": [],  # {turno, titulo, resultado}
 		"respaldos": [],  # nombres de componentes que salvó la redundancia
 		"avisos": [],  # mensajes del inicio del turno (energía recortada, etc.)
+		"hambre": float(tripulacion.get("hambre_inicial", 100.0)),
+		"cordura": float(tripulacion.get("cordura_inicial", 100.0)),
+		"raciones": int(pieza_elegida("viveres").get("raciones", tripulacion.get("raciones", 0))),
+		"motivo_fin": "",  # "", "turnos", "llegada", "salud", "hambre" o "cordura"
+		"viaje": {},  # ver _preparar_viaje; {} si la misión no tiene viaje
 	}
+	ops["viaje"] = _preparar_viaje()
 	plan = {"instrumentos": {}, "transmitir": true, "calefaccion": true}
 	for pieza in piezas_elegidas("instrumento"):
 		plan["instrumentos"][pieza["id"]] = true
@@ -529,7 +550,8 @@ func terminar_turno() -> Dictionary:
 		if not plan["calefaccion"]:
 			ops["turnos_frio"] += 1
 			ops["salud"] -= mision.get("dano_frio", 0.0)
-			resumen["mensajes"].append("Sin calefacción: la electrónica sufrió el frío.")
+			resumen["mensajes"].append("Sin calefacción: la electrónica y la tripulación sufrieron el frío.")
+			cambiar_tripulacion(0.0, -get_tripulacion().get("cordura_por_frio", 0.0))
 		_generar_datos(resumen)
 		if plan["transmitir"]:
 			_transmitir(resumen)
@@ -537,16 +559,157 @@ func terminar_turno() -> Dictionary:
 	ops["salud"] = clampf(ops["salud"], 0.0, 100.0)
 	ops["sin_ciencia_turnos"] = maxi(0, ops["sin_ciencia_turnos"] - 1)
 	ops["turno"] += 1
-	if ops["salud"] <= 0.0:
+	# Si la tripulación cayó durante el turno, el final ya quedó registrado.
+	var ya_terminada: bool = ops["terminada"]
+	if ya_terminada:
+		pass
+	elif ops["salud"] <= 0.0:
 		ops["terminada"] = true
+		ops["motivo_fin"] = "salud"
 		ops["turno_perdida"] = resumen["turno"]
 		resumen["mensajes"].append("Se perdió el contacto con la nave.")
 	elif ops["turno"] > ops["turnos"]:
 		ops["terminada"] = true
+		ops["motivo_fin"] = "turnos"
+		if tiene_viaje():
+			# El último tramo cierra al llegar (los tests cierran turnos a mano).
+			ops["viaje"]["recorrido_km"] = ops["viaje"]["distancia_km"]
+			if ops["dv_restante"] < 0.0:
+				# Llegó sin delta-v para frenar: pasa de largo.
+				ops["motivo_fin"] = "frenado"
+				ops["turno_perdida"] = resumen["turno"]
+				resumen["mensajes"].append("No alcanzó el delta-v para frenar: la nave pasó de largo.")
+			else:
+				ops["motivo_fin"] = "llegada"
 	turno_terminado.emit(resumen)
-	if not ops["terminada"]:
+	if ops["terminada"] and not ya_terminada:
+		operaciones_terminadas.emit(ops["motivo_fin"])
+	else:
 		_iniciar_turno()
 	return resumen
+
+
+# --- Tripulación ------------------------------------------------------------
+
+func get_tripulacion() -> Dictionary:
+	return datos.get("tripulacion", {})
+
+
+func reloj_corriendo() -> bool:
+	return en_orbita() and not ops.get("terminada", true)
+
+
+## Avanza el reloj de la tripulación: hambre y cordura bajan por minuto.
+func avanzar_tiempo(segundos: float) -> void:
+	if ops.is_empty() or ops["terminada"]:
+		return
+	var minutos := segundos / 60.0
+	var tripulacion := get_tripulacion()
+	cambiar_tripulacion(-tripulacion.get("hambre_por_minuto", 0.0) * minutos, -tripulacion.get("cordura_por_minuto", 0.0) * minutos)
+	if tiene_viaje() and not ops["terminada"]:
+		_avanzar_viaje(segundos)
+
+
+# --- Viaje ------------------------------------------------------------------
+
+## La misión tiene un viaje al destino (por ahora solo la Luna). Requiere operaciones iniciadas.
+func tiene_viaje() -> bool:
+	return not ops.get("viaje", {}).is_empty()
+
+
+## Velocidad media de crucero en m/s: base más una parte del delta-v que sobró,
+## con tope, por el empuje del motor (el iónico empuja poco y llega más lento).
+static func calcular_velocidad_viaje(viaje: Dictionary, dv_sobrante: float, empuje: float) -> float:
+	var base: float = viaje.get("velocidad_base", 1000.0)
+	var velocidad := clampf(base + maxf(dv_sobrante, 0.0) * viaje.get("factor_dv", 0.0), base, viaje.get("velocidad_maxima", base))
+	return velocidad * empuje
+
+
+func _preparar_viaje() -> Dictionary:
+	var datos_viaje: Dictionary = mision.get("viaje", {})
+	if datos_viaje.is_empty():
+		return {}
+	var empuje: float = pieza_elegida("propulsion").get("empuje", 1.0)
+	var velocidad := calcular_velocidad_viaje(datos_viaje, ops.get("dv_restante", 0.0), empuje)
+	var distancia: float = datos_viaje["distancia_km"]
+	return {
+		"distancia_km": distancia,
+		"velocidad": velocidad,
+		"horas_totales": distancia / (velocidad * 3.6),
+		"segundos_por_hora": float(datos_viaje.get("segundos_por_hora", 10.0)),
+		"horas": 0.0,
+		"recorrido_km": 0.0,
+	}
+
+
+## Fracción del viaje recorrida, de 0 a 1 (0 si no hay viaje).
+func progreso_viaje() -> float:
+	if not tiene_viaje():
+		return 0.0
+	return ops["viaje"]["recorrido_km"] / ops["viaje"]["distancia_km"]
+
+
+## Minutos reales que faltan para llegar.
+func minutos_para_llegar() -> float:
+	if not tiene_viaje():
+		return 0.0
+	var viaje: Dictionary = ops["viaje"]
+	return maxf(0.0, viaje["horas_totales"] - viaje["horas"]) * viaje["segundos_por_hora"] / 60.0
+
+
+## Segundos reales que faltan para que se cierre el tramo (turno) actual.
+func segundos_para_tramo() -> float:
+	if not tiene_viaje():
+		return 0.0
+	var viaje: Dictionary = ops["viaje"]
+	var horas_tramo: float = viaje["horas_totales"] * float(ops["turno"]) / ops["turnos"]
+	return maxf(0.0, horas_tramo - viaje["horas"]) * viaje["segundos_por_hora"]
+
+
+func _avanzar_viaje(segundos: float) -> void:
+	var viaje: Dictionary = ops["viaje"]
+	viaje["horas"] = minf(viaje["horas"] + segundos / viaje["segundos_por_hora"], viaje["horas_totales"])
+	viaje["recorrido_km"] = minf(viaje["velocidad"] * 3.6 * viaje["horas"], viaje["distancia_km"])
+	viaje_avanzado.emit(progreso_viaje())
+	# Cada tramo del viaje es un turno: se cierra solo, salvo que haya un evento sin decidir.
+	while not ops["terminada"] and ops["evento_actual"].is_empty() \
+			and viaje["horas"] >= viaje["horas_totales"] * float(ops["turno"]) / ops["turnos"] - 0.0001:
+		terminar_turno()
+
+
+## Punto único para subir o bajar las barras (eventos, tareas, zonas de la nave).
+func cambiar_tripulacion(hambre: float, cordura: float) -> void:
+	if ops.is_empty() or ops["terminada"]:
+		return
+	ops["hambre"] = clampf(ops["hambre"] + hambre, 0.0, 100.0)
+	ops["cordura"] = clampf(ops["cordura"] + cordura, 0.0, 100.0)
+	tripulacion_cambiada.emit(ops["hambre"], ops["cordura"])
+	_revisar_tripulacion()
+
+
+## Come una ración. Devuelve false si no quedan o si la tripulación no tiene hambre.
+func comer_racion() -> bool:
+	if ops.is_empty() or ops["terminada"] or ops["raciones"] <= 0 or ops["hambre"] >= 100.0:
+		return false
+	ops["raciones"] -= 1
+	cambiar_tripulacion(get_tripulacion().get("hambre_por_racion", 0.0), 0.0)
+	return true
+
+
+func _revisar_tripulacion() -> void:
+	var motivo := ""
+	if ops["hambre"] <= 0.0:
+		motivo = "hambre"
+	elif ops["cordura"] <= 0.0:
+		motivo = "cordura"
+	if motivo == "":
+		return
+	ops["terminada"] = true
+	ops["motivo_fin"] = motivo
+	ops["turno_perdida"] = ops["turno"]
+	ops["evento_actual"] = {}
+	operaciones_terminadas.emit(motivo)
+	plan_cambiado.emit()
 
 
 func _iniciar_turno() -> void:
@@ -694,6 +857,8 @@ func _aplicar_efectos(efectos: Dictionary, objetivo_id: String) -> Array:
 		ops["multiplicador_resto"] *= efectos["multiplicador_datos_resto"]
 	if efectos.has("delta_v"):
 		ops["dv_restante"] += efectos["delta_v"]
+	if efectos.has("hambre") or efectos.has("cordura"):
+		cambiar_tripulacion(efectos.get("hambre", 0.0), efectos.get("cordura", 0.0))
 	if efectos.has("bateria"):
 		ops["bateria"] = clampf(ops["bateria"] + efectos["bateria"], 0.0, get_nave_base().get("bateria", 0.0))
 
@@ -741,14 +906,17 @@ func calcular_informe() -> Dictionary:
 	var ciencia: float = ops.get("ciencia", 0.0) if llego else 0.0
 	var salud: float = ops.get("salud", 0.0) if llego else 0.0
 	var perdida: bool = not llego or ops.get("turno_perdida", 0) > 0
+	var motivo_fin: String = ops.get("motivo_fin", "")
 
-	# Ciencia hasta 600 (900 si supera el objetivo), salud hasta 200 y presupuesto:
-	# ahorrar suma hasta 200, pero pasarse resta cuatro veces más.
+	# Ciencia hasta 600 (900 si supera el objetivo), salud hasta 200, llegar al
+	# destino de un viaje suma puntos_llegada y presupuesto: ahorrar suma hasta 100,
+	# pero pasarse resta ocho veces más.
 	var puntaje := 0
 	if llego:
 		var fraccion_sobrante := sobrante / presupuesto
-		var puntos_presupuesto := fraccion_sobrante * 200.0 if sobrante >= 0.0 else maxf(fraccion_sobrante * 800.0, -600.0)
-		puntaje = maxi(roundi(minf(ciencia / objetivo, 1.5) * 600.0 + puntos_presupuesto + salud * 2.0), 0)
+		var puntos_presupuesto := fraccion_sobrante * 100.0 if sobrante >= 0.0 else maxf(fraccion_sobrante * 800.0, -600.0)
+		var puntos_llegada: float = mision.get("viaje", {}).get("puntos_llegada", 0.0) if motivo_fin == "llegada" else 0.0
+		puntaje = maxi(roundi(minf(ciencia / objetivo, 1.5) * 600.0 + puntos_presupuesto + salud * 2.0 + puntos_llegada), 0)
 
 	var nota := "Misión perdida"
 	if llego and not perdida:
@@ -760,6 +928,10 @@ func calcular_informe() -> Dictionary:
 			nota = "Éxito parcial"
 		else:
 			nota = "Misión con problemas"
+	elif llego and motivo_fin == "frenado":
+		nota = "No pudo frenar"
+	elif llego and (motivo_fin == "hambre" or motivo_fin == "cordura"):
+		nota = "Tripulación perdida"
 	elif llego:
 		nota = "Contacto perdido"
 
@@ -771,6 +943,11 @@ func calcular_informe() -> Dictionary:
 		"objetivo": objetivo,
 		"sobrante": sobrante,
 		"salud": salud,
+		"hambre": ops.get("hambre", 0.0) if llego else 0.0,
+		"cordura": ops.get("cordura", 0.0) if llego else 0.0,
+		"raciones": ops.get("raciones", 0) if llego else 0,
+		"motivo_fin": motivo_fin,
+		"viaje": ops.get("viaje", {}).duplicate() if llego else {},
 		"frases": _frases_informe(ciencia, objetivo, sobrante, presupuesto),
 	}
 	return informe
@@ -782,8 +959,23 @@ func _frases_informe(ciencia: float, objetivo: float, sobrante: float, presupues
 		frases.append(texto_fallo_lanzamiento())
 	else:
 		frases.append(_frase("ciencia", {"ciencia": roundi(ciencia), "objetivo": roundi(objetivo), "pct": roundi(ciencia / objetivo * 100)}))
-		if ops.get("turno_perdida", 0) > 0:
-			frases.append(_frase("nave_perdida", {"turno": ops["turno_perdida"]}))
+		var viaje: Dictionary = ops.get("viaje", {})
+		if not viaje.is_empty():
+			if ops.get("motivo_fin", "") == "frenado":
+				# dv_restante es lo que sobra (o falta) sobre lo requerido para frenar.
+				var requerido: float = medidores["delta_v"]["limite"]
+				frases.append(_frase("fallo_frenado", {"dv": roundi(maxf(0.0, requerido + ops["dv_restante"])), "requerido": roundi(requerido)}))
+			elif ops.get("motivo_fin", "") == "llegada":
+				frases.append(_frase("llegada_luna", {"km": _miles(viaje["distancia_km"]), "horas": roundi(viaje["horas_totales"]), "velocidad": _miles(viaje["velocidad"])}))
+			else:
+				frases.append(_frase("viaje_incompleto", {"faltan": _miles(viaje["distancia_km"] - viaje["recorrido_km"]), "pct": roundi(progreso_viaje() * 100)}))
+		match ops.get("motivo_fin", ""):
+			"salud":
+				frases.append(_frase("nave_perdida", {"turno": ops["turno_perdida"]}))
+			"hambre":
+				frases.append(_frase("fin_hambre", {}))
+			"cordura":
+				frases.append(_frase("fin_cordura", {}))
 		var generados: float = ops.get("datos_generados", 0.0)
 		if generados > 0.0:
 			var proporcion: float = ops["datos_transmitidos"] / generados
@@ -801,11 +993,25 @@ func _frases_informe(ciencia: float, objetivo: float, sobrante: float, presupues
 			frases.append(_frase("respaldo", {"componente": componente}))
 		if ops.get("salud", 100.0) < 50.0 and ops.get("turno_perdida", 0) == 0:
 			frases.append(_frase("salud_baja", {"salud": roundi(ops["salud"])}))
+		if ops.has("cordura") and ops["cordura"] < 30.0 and ops.get("motivo_fin", "") != "cordura":
+			frases.append(_frase("cordura_baja", {"cordura": roundi(ops["cordura"])}))
+		if ops.get("raciones", 0) > 0:
+			frases.append(_frase_contada("raciones_sobrantes", ops["raciones"]))
 	if sobrante < 0.0:
 		frases.append(_frase("presupuesto_excedido", {"monto": roundi(-sobrante)}))
 	elif sobrante / presupuesto >= 0.15:
 		frases.append(_frase("presupuesto_sobrante", {"monto": roundi(sobrante), "pct": roundi(sobrante / presupuesto * 100)}))
 	return frases
+
+
+## 384400 -> "384.400"
+static func _miles(valor: float) -> String:
+	var texto := str(roundi(valor))
+	var resultado := ""
+	while texto.length() > 3:
+		resultado = "." + texto.right(3) + resultado
+		texto = texto.left(texto.length() - 3)
+	return texto + resultado
 
 
 func _frase(clave: String, valores: Dictionary) -> String:

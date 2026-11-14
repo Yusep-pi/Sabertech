@@ -417,10 +417,17 @@ func _mostrar_resultado(motivo: String) -> void:
 	var caja := Interfaz.vbox(16)
 	panel.add_child(caja)
 	var exito := motivo == ""
-	caja.add_child(Interfaz.etiqueta("¡Nave en órbita!" if exito else "Misión fallida", Interfaz.LIMA if exito else Interfaz.ALERTA, 30))
+	var titulo := ("¡Rumbo a la Luna!" if GameState.mision.has("viaje") else "¡Nave en órbita!") if exito else "Misión fallida"
+	caja.add_child(Interfaz.etiqueta(titulo, Interfaz.LIMA if exito else Interfaz.ALERTA, 30))
 
 	var texto := "El cohete hizo su trabajo y la nave llegó a destino con %d m/s de delta-v de sobra para maniobrar." % roundi(
 		GameState.medidores["delta_v"]["valor"] - GameState.medidores["delta_v"]["limite"])
+	if exito and GameState.mision.has("viaje"):
+		var sobra: float = GameState.medidores["delta_v"]["valor"] - GameState.medidores["delta_v"]["limite"]
+		if sobra >= 0.0:
+			texto = "El cohete hizo su trabajo: la nave va rumbo a la Luna con %d m/s de delta-v de sobra para frenar al llegar." % roundi(sobra)
+		else:
+			texto = "El cohete hizo su trabajo y la nave va rumbo a la Luna... pero le faltan %d m/s de delta-v para frenar al llegar." % roundi(-sobra)
 	if not exito:
 		texto = GameState.texto_fallo_lanzamiento()
 	caja.add_child(Interfaz.parrafo(texto, Interfaz.BLANCO, 18))

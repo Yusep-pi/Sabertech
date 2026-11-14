@@ -17,6 +17,8 @@ func _initialize() -> void:
 	_probar_medidores(gs)
 	_probar_lanzamiento(gs)
 	_probar_operaciones(gs)
+	_probar_tripulacion(gs)
+	_probar_viaje(gs)
 	_simular_balance(gs)
 
 	gs.free()
@@ -53,23 +55,23 @@ func _probar_seleccion(gs: Node) -> void:
 
 
 func _probar_medidores(gs: Node) -> void:
-	_armar(gs, "tierra", ["cohete_chico", "panel_chico", "antena_media", "motor_quimico", "camara", "espectrometro"])
+	_armar(gs, "tierra", ["cohete_chico", "panel_chico", "antena_media", "motor_quimico", "despensa_mediana", "camara", "espectrometro"])
 	_comprobar(gs.puede_lanzar(), "tierra: se puede lanzar")
 	_todo_verde(gs, "tierra")
-	_cerca(gs.medidores["costo"]["valor"], 225, "tierra: costo total")
-	_cerca(gs.medidores["masa"]["valor"], 1035, "tierra: masa con combustible")
+	_cerca(gs.medidores["costo"]["valor"], 235, "tierra: costo total")
+	_cerca(gs.medidores["masa"]["valor"], 1095, "tierra: masa con combustible")
 	gs.elegir_pieza("radar")
 	_comprobar(not gs.medidores["costo"]["ok"], "tierra + radar: se pasa del presupuesto")
 
-	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_quimico", "camara", "espectrometro"])
+	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro"])
 	_comprobar(not gs.medidores["masa"]["ok"], "luna + cohete chico: excede la capacidad")
 	gs.elegir_pieza("cohete_mediano")
 	_todo_verde(gs, "luna + cohete mediano")
 
-	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_ionico", "camara", "espectrometro"])
+	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_ionico", "despensa_mediana", "camara", "espectrometro"])
 	_todo_verde(gs, "luna iónica en cohete chico")
 
-	_armar(gs, "marte", ["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "espectrometro", "radar"])
+	_armar(gs, "marte", ["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "despensa_mediana", "espectrometro", "radar"])
 	_comprobar(not gs.medidores["energia"]["ok"], "marte + radar: falta energía")
 	gs.elegir_pieza("motor_quimico")
 	_comprobar(not gs.medidores["delta_v"]["ok"], "marte + químico: falta delta-v")
@@ -80,18 +82,38 @@ func _probar_medidores(gs: Node) -> void:
 
 
 func _probar_lanzamiento(gs: Node) -> void:
-	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_quimico", "camara"])
+	_armar(gs, "luna", ["cohete_chico", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara"])
 	_comprobar(gs.lanzar()["motivo"] == "masa", "lanzamiento falla por masa")
 	_comprobar(gs.texto_fallo_lanzamiento().contains("kg"), "el fallo por masa se explica con números")
 	_comprobar(gs.calcular_informe()["puntaje"] == 0, "sin lanzamiento no hay puntaje")
 
-	_armar(gs, "marte", ["cohete_pesado", "panel_grande", "antena_alta", "motor_quimico", "espectrometro"])
+	_armar(gs, "marte", ["cohete_pesado", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "espectrometro"])
 	var motivo: String = gs.lanzar()["motivo"]
 	_comprobar(motivo == "delta_v" or motivo == "cohete", "marte con químico no llega a órbita")
 
+	# En la Luna el delta-v se juzga al llegar, no al despegar.
+	_armar(gs, "luna", ["cohete_pesado", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara"], false)
+	gs.mision = gs.mision.duplicate(true)
+	gs.mision["delta_v"] = 9000.0  # una Luna imposible de frenar
+	gs.recalcular()
+	_comprobar(not gs.medidores["delta_v"]["ok"], "luna exigente: falta delta-v")
+	gs.rng.seed = 99
+	motivo = gs.lanzar()["motivo"]
+	_comprobar(motivo != "delta_v", "luna: el delta-v no se juzga al despegar (motivo %s)" % motivo)
+	gs.lanzamiento = {"exito": true, "motivo": ""}
+	gs.iniciar_operaciones()
+	gs.ops["eventos"] = {}
+	gs.ops["evento_actual"] = {}
+	while not gs.ops["terminada"]:
+		gs.terminar_turno()
+	_comprobar(gs.ops["motivo_fin"] == "frenado", "luna sin delta-v: pasa de largo al llegar (motivo %s)" % gs.ops["motivo_fin"])
+	var informe: Dictionary = gs.calcular_informe()
+	_comprobar(informe["nota"] == "No pudo frenar" and not informe["exito"], "el informe explica que no pudo frenar")
+	_comprobar(informe["frases"].any(func(f): return f.contains("frenar")), "frase de frenado")
+
 
 func _probar_operaciones(gs: Node) -> void:
-	_armar(gs, "luna", ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "camara", "espectrometro"])
+	_armar(gs, "luna", ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro"])
 	gs.lanzamiento = {"exito": true, "motivo": ""}
 	gs.iniciar_operaciones()
 	_comprobar(gs.ops["turno"] == 1 and gs.ops["eventos"].size() == 3, "operaciones arrancan con 3 eventos")
@@ -120,23 +142,125 @@ func _probar_operaciones(gs: Node) -> void:
 		_comprobar(not frase.contains("{"), "frase sin marcadores sueltos: " + frase)
 
 
+func _probar_tripulacion(gs: Node) -> void:
+	var trip: Dictionary = gs.get_tripulacion()
+	_armar(gs, "luna", ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara"], false)
+	gs.lanzamiento = {"exito": true, "motivo": ""}
+	gs.iniciar_operaciones()
+	_comprobar(gs.reloj_corriendo(), "el reloj de la tripulación corre en órbita")
+	_cerca(gs.ops["hambre"], trip["hambre_inicial"], "hambre inicial")
+	_comprobar(not gs.comer_racion(), "no se come con el hambre llena")
+
+	gs.avanzar_tiempo(60.0)
+	_cerca(gs.ops["hambre"], trip["hambre_inicial"] - trip["hambre_por_minuto"], "el hambre baja por minuto")
+	_cerca(gs.ops["cordura"], trip["cordura_inicial"] - trip["cordura_por_minuto"], "la cordura baja por minuto")
+
+	var raciones: int = gs.ops["raciones"]
+	gs.cambiar_tripulacion(-50.0, 0.0)
+	var antes: float = gs.ops["hambre"]
+	_comprobar(gs.comer_racion(), "se come una ración")
+	_comprobar(gs.ops["raciones"] == raciones - 1, "comer gasta una ración")
+	_cerca(gs.ops["hambre"], antes + trip["hambre_por_racion"], "la ración recupera hambre")
+	gs.ops["raciones"] = 0
+	gs.cambiar_tripulacion(-20.0, 0.0)
+	_comprobar(not gs.comer_racion(), "sin raciones no se come")
+
+	var cordura: float = gs.ops["cordura"]
+	gs._aplicar_efectos({"cordura": -10}, "")
+	_cerca(gs.ops["cordura"], cordura - 10.0, "un evento baja la cordura")
+
+	gs.cambiar_tripulacion(-200.0, 0.0)
+	_comprobar(gs.ops["terminada"] and gs.ops["motivo_fin"] == "hambre", "el hambre en 0 termina la misión")
+	_comprobar(not gs.reloj_corriendo(), "el reloj se detiene al terminar")
+	var informe: Dictionary = gs.calcular_informe()
+	_comprobar(informe["nota"] == "Tripulación perdida", "el informe dice tripulación perdida")
+	_comprobar(not informe["exito"], "morir de hambre no es un éxito")
+	for frase in informe["frases"]:
+		_comprobar(not frase.contains("{"), "frase sin marcadores sueltos: " + frase)
+
+	gs.iniciar_operaciones()
+	gs.cambiar_tripulacion(0.0, -200.0)
+	_comprobar(gs.ops["motivo_fin"] == "cordura", "la cordura en 0 termina la misión")
+
+
+func _probar_viaje(gs: Node) -> void:
+	var viaje: Dictionary = gs.get_mision("luna")["viaje"]
+	var base: float = viaje["velocidad_base"]
+	_cerca(gs.calcular_velocidad_viaje(viaje, 0.0, 1.0), base, "sin delta-v sobrante se viaja a la velocidad base")
+	_comprobar(gs.calcular_velocidad_viaje(viaje, 400.0, 1.0) > base, "el delta-v sobrante acelera el viaje")
+	_cerca(gs.calcular_velocidad_viaje(viaje, 100000.0, 1.0), viaje["velocidad_maxima"], "la velocidad tiene tope")
+	_comprobar(gs.calcular_velocidad_viaje(viaje, 400.0, 0.85) < gs.calcular_velocidad_viaje(viaje, 400.0, 1.0), "el iónico llega más lento")
+
+	# Tierra y Marte no tienen viaje.
+	_armar(gs, "tierra", ["cohete_chico", "panel_chico", "antena_baja", "motor_quimico", "despensa_mediana", "camara"], false)
+	gs.lanzamiento = {"exito": true, "motivo": ""}
+	gs.iniciar_operaciones()
+	_comprobar(not gs.tiene_viaje(), "la misión Tierra no tiene viaje")
+
+	var piezas_luna := ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro"]
+	_armar(gs, "luna", piezas_luna, false)
+	gs.lanzamiento = {"exito": true, "motivo": ""}
+	gs.iniciar_operaciones()
+	_comprobar(gs.tiene_viaje(), "la misión Luna tiene viaje")
+	var minutos: float = gs.minutos_para_llegar()
+	print("  [viaje] %.0f m/s, %.1f h de misión, %.1f min reales" % [gs.ops["viaje"]["velocidad"], gs.ops["viaje"]["horas_totales"], minutos])
+	_comprobar(minutos >= 12.0 and minutos <= 15.0, "el viaje dura entre 12 y 15 minutos (dio %.1f)" % minutos)
+
+	# Avanza solo: cierra tramos, espera los eventos y llega.
+	gs.ops["hambre"] = 100.0
+	var pasos := 0
+	var evento_frena := false
+	while not gs.ops["terminada"] and pasos < 5000:
+		pasos += 1
+		gs.ops["raciones"] = 9  # que la tripulación no se muera en esta prueba
+		if gs.ops["hambre"] < 60.0:
+			gs.comer_racion()
+		gs.cambiar_tripulacion(0.0, 100.0)
+		if not gs.ops["evento_actual"].is_empty():
+			var turno: int = gs.ops["turno"]
+			gs.avanzar_tiempo(60.0)
+			evento_frena = evento_frena or gs.ops["turno"] == turno
+			gs.resolver_evento(gs.ops["evento_actual"]["opciones"].size() - 1)
+		gs.avanzar_tiempo(1.0)
+	_comprobar(evento_frena, "un evento sin decidir frena el cierre del tramo")
+	_comprobar(gs.ops["motivo_fin"] == "llegada", "el viaje termina al llegar a la Luna (motivo %s)" % gs.ops["motivo_fin"])
+	_cerca(gs.progreso_viaje(), 1.0, "al llegar el progreso es 100%")
+	var informe: Dictionary = gs.calcular_informe()
+	_comprobar(informe["exito"], "llegar a la Luna es un éxito")
+	_comprobar(informe["frases"].any(func(f): return f.contains("llegó a la Luna")), "el informe cuenta la llegada")
+
+	# Morir a mitad de camino.
+	_armar(gs, "luna", piezas_luna, false)
+	gs.lanzamiento = {"exito": true, "motivo": ""}
+	gs.iniciar_operaciones()
+	gs.ops["eventos"] = {}
+	gs.avanzar_tiempo(120.0)
+	gs.cambiar_tripulacion(-200.0, 0.0)
+	_comprobar(gs.progreso_viaje() > 0.0 and gs.progreso_viaje() < 1.0, "la tripulación cayó a mitad de camino")
+	informe = gs.calcular_informe()
+	_comprobar(not informe["exito"], "no llegar no es un éxito")
+	_comprobar(informe["frases"].any(func(f): return f.contains("de la Luna")), "el informe dice cuánto faltó")
+	for frase in informe["frases"]:
+		_comprobar(not frase.contains("{"), "frase sin marcadores sueltos: " + frase)
+
+
 ## Juega muchas partidas con naves razonables y una estrategia simple
 ## (todo encendido, primera opción posible en cada evento) para ver el balance.
 func _simular_balance(gs: Node) -> void:
 	var naves := {
 		"tierra": [
-			["cohete_chico", "panel_chico", "antena_media", "motor_quimico", "camara", "espectrometro"],
-			["cohete_chico", "panel_grande", "antena_media", "motor_quimico", "camara", "espectrometro", "blindaje"],
+			["cohete_chico", "panel_chico", "antena_media", "motor_quimico", "despensa_mediana", "camara", "espectrometro"],
+			["cohete_chico", "panel_grande", "antena_media", "motor_quimico", "despensa_mediana", "camara", "espectrometro", "blindaje"],
 		],
 		"luna": [
-			["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "camara", "espectrometro"],
-			["cohete_chico", "panel_grande", "antena_alta", "motor_ionico", "camara", "espectrometro"],
-			["cohete_mediano", "rtg", "antena_alta", "motor_quimico", "espectrometro", "radar"],
+			["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara", "espectrometro"],
+			["cohete_chico", "panel_grande", "antena_alta", "motor_ionico", "despensa_mediana", "camara", "espectrometro"],
+			["cohete_mediano", "rtg", "antena_alta", "motor_quimico", "despensa_mediana", "espectrometro", "radar"],
 		],
 		"marte": [
-			["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "espectrometro", "radar"],
-			["cohete_pesado", "rtg", "antena_alta", "motor_eficiente", "espectrometro", "redundancia"],
-			["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "camara", "espectrometro", "blindaje"],
+			["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "despensa_mediana", "espectrometro", "radar"],
+			["cohete_pesado", "rtg", "antena_alta", "motor_eficiente", "despensa_mediana", "espectrometro", "redundancia"],
+			["cohete_pesado", "panel_grande", "antena_alta", "motor_eficiente", "despensa_mediana", "camara", "espectrometro", "blindaje"],
 		],
 	}
 	print("\nSimulación de balance (200 partidas por nave, estrategia simple):")
@@ -160,7 +284,7 @@ func _simular_balance(gs: Node) -> void:
 				exitos += 1 if informe["exito"] else 0
 			print("  %-7s puntaje %4d  ciencia %3d%%  éxito %3d%%  costo %3d/%d  %s" % [
 				mision, roundi(puntajes / 200), roundi(ciencia / 200 * 100), roundi(exitos / 2.0),
-				roundi(gs.medidores["costo"]["valor"]), roundi(gs.medidores["costo"]["limite"]), ", ".join(piezas.slice(4))])
+				roundi(gs.medidores["costo"]["valor"]), roundi(gs.medidores["costo"]["limite"]), ", ".join(piezas.slice(5))])
 
 
 func _armar(gs: Node, mision: String, piezas: Array, mostrar := true) -> void:
