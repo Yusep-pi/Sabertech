@@ -1,12 +1,12 @@
 extends Node
 ## Prueba la esclusa sola: ponerse el traje, despresurizar, abrir, salir a la
 ## caminata, volver, presurizar y sacarse el traje. Guarda capturas en
-## user://capturas/esclusa_*.png:
+## capturas/ (dentro del proyecto)/esclusa_*.png:
 ##   godot --path . res://tests/recorrido_esclusa.tscn
 
 const ESCLUSA := "res://scenes/esclusa/esclusa.tscn"
 
-var _carpeta := "user://capturas"
+var _carpeta := "res://capturas"  # dentro del proyecto (fuera de Git), no en el disco del sistema
 var _fallos := 0
 
 

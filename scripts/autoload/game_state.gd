@@ -29,6 +29,14 @@ const ESCENAS := {
 }
 const ESCENA_CABINA := "res://scenes/cabina/cabina.tscn"
 const ESCENA_LANZAMIENTO := "res://scenes/lanzamiento/lanzamiento.tscn"
+## Los ambientes de la nave que se recorren a pie, en orden desde la cabina:
+## cabina ⇄ habitáculo ⇄ esclusa ⇄ exterior. Se pasa de uno a otro por sus puertas.
+const AMBIENTES := {
+	"cabina": "res://scenes/cabina/cabina.tscn",
+	"habitaculo": "res://scenes/sala_dos/sala_dos.tscn",
+	"esclusa": "res://scenes/esclusa/esclusa.tscn",
+	"exterior": "res://scenes/eva/eva.tscn",
+}
 ## Daño por turno cuando la energía no alcanza ni para los sistemas básicos.
 const DANO_APAGON := 15.0
 ## Fracción de la tasa que queda si la antena se rompe (antena de emergencia).
@@ -58,6 +66,9 @@ var informe: Dictionary = {}
 var pantalla_pendiente := ""
 ## Para los niveles de prueba de la esclusa y la caminata: true al volver de afuera.
 var vuelve_de_caminata := false
+## Ambiente del que viene el jugador al cruzar una puerta ("" si no cruzó ninguna):
+## el ambiente de destino lo ubica frente a la puerta correcta.
+var origen_transicion := ""
 
 var rng := RandomNumberGenerator.new()
 
@@ -97,6 +108,9 @@ func cargar_datos(ruta: String = RUTA_DATOS) -> void:
 func ir_a(pantalla: String) -> void:
 	if pantalla == "lanzamiento":
 		get_tree().change_scene_to_file(ESCENA_LANZAMIENTO)
+		return
+	if AMBIENTES.has(pantalla):
+		get_tree().change_scene_to_file(AMBIENTES[pantalla])
 		return
 	var actual := get_tree().current_scene
 	if actual and actual.has_method("abrir_pantalla"):

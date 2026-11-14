@@ -80,9 +80,12 @@ func consola_mirada() -> String:
 
 ## Mira hacia un punto (en coordenadas globales): para arrancar mirando la consola.
 func mirar_hacia(punto: Vector3) -> void:
+	if not is_inside_tree():
+		return
 	var ojos := global_position + Vector3.UP * ALTURA_OJOS
 	var direccion := punto - ojos
-	rotation.y = atan2(-direccion.x, -direccion.z) - get_parent_node_3d().global_rotation.y
+	var padre := get_parent_node_3d()
+	rotation.y = atan2(-direccion.x, -direccion.z) - (padre.global_rotation.y if padre else 0.0)
 	camara.rotation.x = atan2(direccion.y, Vector2(direccion.x, direccion.z).length())
 
 

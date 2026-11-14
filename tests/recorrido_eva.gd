@@ -1,10 +1,10 @@
 extends Node
 ## Prueba la caminata espacial sola: propulsor y freno, cada reparación, la lluvia
 ## de micrometeoritos (expuesto y a cubierto), la victoria y la falta de oxígeno.
-## Guarda capturas en user://capturas/eva_*.png:
+## Guarda capturas en capturas/ (dentro del proyecto)/eva_*.png:
 ##   godot --path . res://tests/recorrido_eva.tscn
 
-var _carpeta := "user://capturas"
+var _carpeta := "res://capturas"  # dentro del proyecto (fuera de Git), no en el disco del sistema
 var _fallos := 0
 var _mouse_capturado := false  # solo durante la prueba del mouse, un instante
 

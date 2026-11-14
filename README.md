@@ -6,9 +6,20 @@ Godot 4.6 o más nuevo. Abrir `project.godot` y ejecutar (F5): arranca en la cab
 
 **Controles:** WASD o flechas para caminar, mouse para mirar, E o clic para usar la consola que se mira, Esc para cerrar una pantalla o soltar el mouse. En la cinemática, Espacio la salta.
 
-## Esclusa (nivel aparte, en prueba)
+## Recorrer la nave a pie
 
-`scenes/esclusa/` es la sala desde donde se sale a la caminata espacial. Tiene un ventanal grande con vista al exterior (la Tierra, las estrellas y la nave), la escotilla con su panel y un armario con el traje colgado. Se prueba sola con `scenes/esclusa/esclusa.tscn` y F6, o:
+Desde la cabina se puede caminar por toda la nave. Las puertas se cruzan **manteniendo E** junto a ellas, con una barra de progreso y un fundido a negro (`scripts/compuerta.gd`):
+
+**Cabina** ⇄ puerta trasera ⇄ **Habitáculo** ⇄ puerta sur (Módulo 03) ⇄ **Esclusa** ⇄ escotilla ⇄ **Exterior**
+
+- **Habitáculo** (`scenes/sala_dos/`, hecho por Luis): cama, refrigerador, casilleros y una ventana sobre la cama.
+- **Reglas de la esclusa:** a la nave solo se vuelve con la esclusa presurizada y sin el traje puesto, y la escotilla se abre solo en órbita (en la plataforma, por el ventanal se ve el cielo).
+- Cada ambiente ubica al jugador frente a la puerta por la que entró. La misión sigue corriendo mientras se recorre la nave: el hambre y la cordura bajan y el viaje a la Luna avanza.
+- `tests/recorrido_niveles.tscn` recorre toda la cadena, ida y vuelta.
+
+## Esclusa
+
+`scenes/esclusa/` es la sala desde donde se sale a la caminata espacial. Tiene un ventanal grande con vista al exterior (la Tierra, las estrellas y la nave), la escotilla con su panel y un armario con el traje colgado. Se llega desde el habitáculo, y también se prueba sola con `scenes/esclusa/esclusa.tscn` y F6, o:
 
 ```bash
 godot --path . res://scenes/esclusa/esclusa.tscn
@@ -16,11 +27,11 @@ godot --path . res://scenes/esclusa/esclusa.tscn
 
 - **Ida:** ponerse el traje en el armario, despresurizar y abrir desde el panel (luces rojas, baliza, vapor por la ventilación, barra de presión) y cruzar la escotilla, que lleva a la caminata.
 - **Vuelta:** al terminar la caminata se vuelve a entrar con la escotilla abierta; desde el panel se cierra y se presuriza, y en el armario se saca el traje.
-- **Puerta a la cabina:** todavía no lleva a ningún lado.
+- **Puerta interior:** vuelve al habitáculo, con la esclusa presurizada y sin el traje.
 
 El modelo es `esclusa.glb`, generado por `construir_esclusa()` en `blender/generar_modelos.py`. `tests/recorrido_esclusa.tscn` lo prueba solo.
 
-## Caminata espacial (nivel aparte, en prueba)
+## Caminata espacial
 
 `scenes/eva/` es un nivel de supervivencia que todavía no está conectado al juego. Se prueba solo: abrir `scenes/eva/eva.tscn` y pulsar F6, o:
 
@@ -93,7 +104,7 @@ godot --headless --path . -s res://tests/test_game_state.gd
 godot --path . res://tests/recorrido.tscn
 ```
 
-Las capturas del recorrido quedan en `~/.local/share/godot/app_userdata/Sabertech - Misión Espacial/capturas`.
+Las capturas de los recorridos quedan en la carpeta `capturas/` del proyecto, que Git ignora.
 
 ## Cómo se juega cada fase
 
