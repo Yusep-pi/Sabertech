@@ -28,6 +28,18 @@ const BALIZA := Vector3(0, 2.6, -2.85)
 const APERTURA := 1.75  # metros que se corre la hoja al abrir
 const PRESION := 101.0  # kPa
 const SEGUNDOS_CICLO := 5.0
+## El banco contra la pared derecha, entre el armario y los tanques: [posición, tamaño,
+## material]. Son las mismas piezas que construir_esclusa() en blender/generar_modelos.py
+## (ya pasadas a coordenadas de Godot). Solo se usa mientras esclusa.glb tenga el banco
+## viejo (una caja aqua en el medio del paso): al regenerar el modelo deja de hacer falta.
+const BANCO := [
+	[Vector3(2.23, 0.44, 0.5), Vector3(0.5, 0.08, 1.3), "casco_gris"],  # asiento
+	[Vector3(2.25, 0.2, 1.05), Vector3(0.42, 0.4, 0.08), "oscuro"],  # patas
+	[Vector3(2.25, 0.2, -0.05), Vector3(0.42, 0.4, 0.08), "oscuro"],
+	[Vector3(2.47, 0.75, 0.5), Vector3(0.06, 0.4, 1.3), "oscuro"],  # respaldo
+	[Vector3(1.98, 0.45, 0.5), Vector3(0.03, 0.03, 1.3), "aqua"],  # filo
+]
+const COLORES_BANCO := {"casco_gris": Color("#9AA7B8"), "oscuro": Color("#2A3150"), "aqua": Color("#2EC4E6")}
 const LUZ_NORMAL := Color("#DDF4FF")
 const LUZ_ALARMA := Color("#FF3B2E")
 
@@ -239,6 +251,7 @@ func _fundir(hasta: float, texto := "") -> void:
 # --- Armado -----------------------------------------------------------------
 
 func _preparar_modelo(modelo: Node) -> void:
+	_reemplazar_banco_viejo(modelo)
 	_puerta = modelo.find_child("escotilla_puerta", true, false)
 	_cerrada = _puerta.position
 	_traje = modelo.find_child("traje", true, false)
@@ -264,6 +277,31 @@ func _preparar_modelo(modelo: Node) -> void:
 	_texto_panel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_texto_panel.modulate = Interfaz.CIAN
 	add_child(_texto_panel)
+
+
+## Saca el banco viejo del modelo y arma el nuevo contra la pared. Los materiales van
+## en la malla con el nombre de los del modelo, así Estilo les pone la textura retro.
+func _reemplazar_banco_viejo(modelo: Node) -> void:
+	var viejo := modelo.find_child("esclusa_banco", true, false)
+	if not viejo:
+		return
+	viejo.free()
+	var banco := Node3D.new()
+	banco.name = "esclusa_banco_nuevo"
+	for pieza in BANCO:
+		var material := StandardMaterial3D.new()
+		material.resource_name = pieza[2]
+		material.albedo_color = COLORES_BANCO[pieza[2]]
+		var caja := BoxMesh.new()
+		caja.size = pieza[1]
+		caja.material = material
+		var malla := MeshInstance3D.new()
+		malla.mesh = caja
+		malla.position = pieza[0]
+		banco.add_child(malla)
+		if pieza == BANCO[0]:
+			malla.create_convex_collision()
+	add_child(banco)
 
 
 func _armar_exterior() -> void:

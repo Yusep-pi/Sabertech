@@ -465,8 +465,17 @@ def construir_esclusa():
 		caja(f"traje_bota_{i}", (0.24, 0.13, 0.12), (tx - 0.03, y + lado * 0.12, 0.33), "casco_gris", traje)
 	caja("traje_cinturon", (0.32, 0.5, 0.06), (tx, y, 1.0), "aqua", traje)
 
-	# Banco, tanques de oxígeno, pasamanos, luces y ventilación.
-	caja("esclusa_banco-col", (0.5, 1.6, 0.45), (0.4, -1.4, 0.23), "aqua", e)
+	# Banco contra la pared derecha, entre el armario y los tanques (para sentarse
+	# a ponerse el traje): asiento de metal, patas y respaldo oscuros y un filo aqua.
+	# Antes era una caja aqua en el medio del paso; esclusa.gd reemplaza esa versión
+	# vieja si el .glb todavía no se regeneró (BANCO en esclusa.gd: mismas medidas).
+	caja("esclusa_banco_asiento-col", (0.5, 1.3, 0.08), (2.23, -0.5, 0.44), "casco_gris", e)
+	for i, yy in enumerate((-1.05, 0.05)):
+		caja(f"esclusa_banco_pata_{i}", (0.42, 0.08, 0.4), (2.25, yy, 0.2), "oscuro", e)
+	caja("esclusa_banco_respaldo", (0.06, 1.3, 0.4), (2.47, -0.5, 0.75), "oscuro", e)
+	caja("esclusa_banco_filo", (0.03, 1.3, 0.03), (1.98, -0.5, 0.45), "aqua", e)
+
+	# Tanques de oxígeno, pasamanos, luces y ventilación.
 	for i, yy in enumerate((-2.2, -1.85, -1.5)):
 		cilindro(f"esclusa_tanque_{i}", 0.13, 0.13, 1.0, (2.3, yy, 0.6), "lima" if i == 1 else "casco", e, lados=10)
 		esfera(f"esclusa_tanque_tapa_{i}", 0.13, (2.3, yy, 1.1), "casco_gris", e)
