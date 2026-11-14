@@ -1,0 +1,180 @@
+{
+	"_unidades": "costo en M$, masa en kg, potencia y consumo en W, capacidad en kg a orbita baja, isp en s, delta_v en m/s, datos y tasa en unidades por turno",
+
+	"misiones": [
+		{
+			"id": "tierra",
+			"nombre": "Satélite de observación terrestre",
+			"dificultad": "Fácil",
+			"destino": "tierra",
+			"descripcion": "Un satélite en órbita baja para vigilar bosques, hielo y cultivos. Cerca de casa: mucho sol y comunicación fácil.",
+			"objetivo": "Entregar imágenes y mediciones de la superficie terrestre.",
+			"presupuesto": 250,
+			"delta_v": 500,
+			"distancia_ua": 1.0,
+			"factor_capacidad": 1.0,
+			"factor_datos": 1.0,
+			"calefaccion": 20,
+			"objetivo_ciencia": 400
+		},
+		{
+			"id": "luna",
+			"nombre": "Orbitador lunar",
+			"dificultad": "Media",
+			"destino": "luna",
+			"descripcion": "Una sonda que entra en órbita lunar para mapear cráteres y buscar hielo en los polos. Hay que frenar al llegar y sobrevivir a la noche lunar.",
+			"objetivo": "Mapear la superficie lunar y buscar agua congelada.",
+			"presupuesto": 400,
+			"delta_v": 1500,
+			"distancia_ua": 1.0,
+			"factor_capacidad": 0.35,
+			"factor_datos": 3.0,
+			"calefaccion": 60,
+			"objetivo_ciencia": 350
+		},
+		{
+			"id": "marte",
+			"nombre": "Orbitador a Marte",
+			"dificultad": "Difícil",
+			"destino": "marte",
+			"descripcion": "Un viaje de meses hasta Marte. Llega menos de la mitad de luz solar, la señal es débil y hace falta mucho combustible para frenar.",
+			"objetivo": "Estudiar la atmósfera y el subsuelo marciano desde órbita.",
+			"presupuesto": 550,
+			"delta_v": 2600,
+			"distancia_ua": 1.52,
+			"factor_capacidad": 0.15,
+			"factor_datos": 8.0,
+			"calefaccion": 80,
+			"objetivo_ciencia": 250
+		}
+	],
+
+	"nave_base": {
+		"id": "nave_base",
+		"nombre": "Estructura y computadora",
+		"descripcion": "El chasis, la computadora de a bordo y el control térmico. Viene con toda nave.",
+		"costo": 40,
+		"masa": 250,
+		"consumo": 50,
+		"fiabilidad": 0.99
+	},
+
+	"categorias": [
+		{ "id": "cohete", "nombre": "Cohete", "multiple": false, "obligatoria": true },
+		{ "id": "energia", "nombre": "Energía", "multiple": false, "obligatoria": true },
+		{ "id": "comunicacion", "nombre": "Comunicación", "multiple": false, "obligatoria": true },
+		{ "id": "propulsion", "nombre": "Propulsión", "multiple": false, "obligatoria": true },
+		{ "id": "instrumento", "nombre": "Instrumentos", "multiple": true, "obligatoria": false },
+		{ "id": "extra", "nombre": "Extras", "multiple": true, "obligatoria": false }
+	],
+
+	"piezas": [
+		{
+			"id": "cohete_chico", "categoria": "cohete", "nombre": "Cohete chico",
+			"descripcion": "Barato y con muchos vuelos exitosos, pero lleva poca carga.",
+			"costo": 60, "masa": 0, "fiabilidad": 0.96,
+			"capacidad": 2500
+		},
+		{
+			"id": "cohete_mediano", "categoria": "cohete", "nombre": "Cohete mediano",
+			"descripcion": "El caballo de batalla: buena capacidad y el más confiable.",
+			"costo": 120, "masa": 0, "fiabilidad": 0.97,
+			"capacidad": 8000
+		},
+		{
+			"id": "cohete_pesado", "categoria": "cohete", "nombre": "Cohete pesado",
+			"descripcion": "Enorme capacidad, pero es caro y todavía tiene pocos vuelos.",
+			"costo": 220, "masa": 0, "fiabilidad": 0.93,
+			"capacidad": 20000
+		},
+
+		{
+			"id": "panel_chico", "categoria": "energia", "nombre": "Panel solar chico",
+			"descripcion": "Liviano y barato. Rinde menos cuanto más lejos del Sol.",
+			"costo": 15, "masa": 40, "fiabilidad": 0.98,
+			"potencia": 400, "tipo": "solar"
+		},
+		{
+			"id": "panel_grande", "categoria": "energia", "nombre": "Panel solar grande",
+			"descripcion": "Mucha energía cerca del Sol. En Marte rinde menos de la mitad.",
+			"costo": 35, "masa": 110, "fiabilidad": 0.97,
+			"potencia": 1200, "tipo": "solar"
+		},
+		{
+			"id": "rtg", "categoria": "energia", "nombre": "RTG nuclear",
+			"descripcion": "Genera lo mismo en cualquier lugar, de día o de noche. Caro.",
+			"costo": 110, "masa": 60, "fiabilidad": 0.995,
+			"potencia": 350, "tipo": "rtg"
+		},
+
+		{
+			"id": "antena_baja", "categoria": "comunicacion", "nombre": "Antena de baja ganancia",
+			"descripcion": "Simple y liviana, pero transmite pocos datos.",
+			"costo": 8, "masa": 10, "consumo": 30, "fiabilidad": 0.99,
+			"tasa": 40
+		},
+		{
+			"id": "antena_media", "categoria": "comunicacion", "nombre": "Antena de ganancia media",
+			"descripcion": "Un equilibrio entre datos, masa y consumo.",
+			"costo": 20, "masa": 30, "consumo": 80, "fiabilidad": 0.98,
+			"tasa": 120
+		},
+		{
+			"id": "antena_alta", "categoria": "comunicacion", "nombre": "Antena de alta ganancia",
+			"descripcion": "Un plato grande que envía muchos datos lejos, pero pesa y consume.",
+			"costo": 45, "masa": 70, "consumo": 150, "fiabilidad": 0.97,
+			"tasa": 360
+		},
+
+		{
+			"id": "motor_quimico", "categoria": "propulsion", "nombre": "Motor químico",
+			"descripcion": "Simple y probado. Necesita mucho combustible para cambiar de velocidad.",
+			"costo": 20, "masa": 60, "fiabilidad": 0.98,
+			"isp": 320, "combustible": 600
+		},
+		{
+			"id": "motor_eficiente", "categoria": "propulsion", "nombre": "Motor eficiente",
+			"descripcion": "Saca más velocidad de cada kilo de combustible. Más caro y delicado.",
+			"costo": 45, "masa": 80, "consumo": 20, "fiabilidad": 0.96,
+			"isp": 450, "combustible": 700
+		},
+		{
+			"id": "motor_ionico", "categoria": "propulsion", "nombre": "Motor iónico",
+			"descripcion": "Muy poco combustible para muchísimo delta-v, pero consume mucha electricidad.",
+			"costo": 80, "masa": 90, "consumo": 600, "fiabilidad": 0.95,
+			"isp": 3000, "combustible": 150
+		},
+
+		{
+			"id": "camara", "categoria": "instrumento", "nombre": "Cámara",
+			"descripcion": "Fotos de la superficie. Liviana y barata.",
+			"costo": 25, "masa": 20, "consumo": 40, "fiabilidad": 0.99,
+			"datos": 30, "ciencia": 1.0
+		},
+		{
+			"id": "espectrometro", "categoria": "instrumento", "nombre": "Espectrómetro",
+			"descripcion": "Descubre de qué están hechas las cosas. Pocos datos, pero muy valiosos.",
+			"costo": 45, "masa": 35, "consumo": 70, "fiabilidad": 0.98,
+			"datos": 20, "ciencia": 2.0
+		},
+		{
+			"id": "radar", "categoria": "instrumento", "nombre": "Radar",
+			"descripcion": "Ve bajo la superficie y a través de nubes. Pesado, gasta mucha energía y genera muchos datos.",
+			"costo": 70, "masa": 80, "consumo": 200, "fiabilidad": 0.97,
+			"datos": 60, "ciencia": 1.5
+		},
+
+		{
+			"id": "redundancia", "categoria": "extra", "nombre": "Sistemas redundantes",
+			"descripcion": "Copias de respaldo de los sistemas críticos: reduce a la mitad la probabilidad de falla de la nave.",
+			"costo": 30, "masa": 40, "fiabilidad": 1.0,
+			"reduccion_fallo": 0.5
+		},
+		{
+			"id": "blindaje", "categoria": "extra", "nombre": "Blindaje contra radiación",
+			"descripcion": "Protege la electrónica de tormentas solares y rayos cósmicos.",
+			"costo": 20, "masa": 50, "fiabilidad": 1.0,
+			"proteccion": 0.5
+		}
+	]
+}
