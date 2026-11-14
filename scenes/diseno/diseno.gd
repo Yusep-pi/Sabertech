@@ -1,20 +1,16 @@
 extends Control
-## Pantalla de diseño mínima, sin arte, para probar los medidores.
+## Fase 2: diseño de la nave. Interfaz provisoria, sin arte.
 ##
 ## Los botones se arman a partir de data/datos.json, así que agregar o cambiar
 ## piezas no requiere tocar esta escena. Todo el cálculo lo hace GameState.
 
-const COLOR_FONDO := Color("#0B1030")
-const COLOR_OK := Color("#2EC4E6")
-const COLOR_ALERTA := Color("#FF8A2B")
-const COLOR_TEXTO := Color("#F2F7FA")
-const COLOR_TENUE := Color("#8FE3FF")
+const NavePreview := preload("res://scenes/diseno/nave_preview.gd")
 ## Las barras llegan hasta 150% del límite para que se vea cuánto se pasa.
 const BARRA_MAXIMO := 1.5
 
 var _botones_pieza: Dictionary = {}  # id de pieza -> BaseButton
-var _barras: Dictionary = {}  # id de medidor -> {barra, estilo, etiqueta}
-var _selector_mision: OptionButton
+var _barras: Dictionary = {}  # id de medidor -> {nombre, barra, valores}
+var _nave: NavePreview
 var _texto_mision: Label
 var _texto_seleccion: Label
 var _texto_fiabilidad: Label
@@ -23,16 +19,14 @@ var _boton_lanzar: Button
 
 
 func _ready() -> void:
-	_construir_ui()
-	GameState.mision_cambiada.connect(_on_mision_cambiada)
-	GameState.seleccion_cambiada.connect(_on_seleccion_cambiada)
-	GameState.medidores_cambiados.connect(_on_medidores_cambiados)
-
-	# Mientras no exista el briefing, arrancamos con la primera misión.
+	# Si se abre esta escena sola desde el editor, arrancamos con la primera misión.
 	if GameState.mision.is_empty() and not GameState.get_misiones().is_empty():
 		GameState.elegir_mision(GameState.get_misiones()[0]["id"])
-	else:
-		_on_mision_cambiada(GameState.mision)
+	GameState.volver_a_diseno()
+
+	_construir_ui()
+	GameState.seleccion_cambiada.connect(_on_seleccion_cambiada)
+	GameState.medidores_cambiados.connect(_on_medidores_cambiados)
 	_on_seleccion_cambiada(GameState.seleccion)
 	_on_medidores_cambiados(GameState.medidores)
 
@@ -40,26 +34,13 @@ func _ready() -> void:
 # --- Construcción -----------------------------------------------------------
 
 func _construir_ui() -> void:
-	var fondo := ColorRect.new()
-	fondo.color = COLOR_FONDO
-	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(fondo)
-
-	var margen := MarginContainer.new()
-	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for lado in ["left", "right", "top", "bottom"]:
-		margen.add_theme_constant_override("margin_" + lado, 16)
-	add_child(margen)
-
-	var columna := VBoxContainer.new()
-	columna.add_theme_constant_override("separation", 12)
-	margen.add_child(columna)
+	var columna := Interfaz.vbox(12)
+	Interfaz.preparar_pantalla(self).add_child(columna)
 
 	columna.add_child(_construir_barra_mision())
 
-	var cuerpo := HBoxContainer.new()
+	var cuerpo := Interfaz.hbox(16)
 	cuerpo.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	cuerpo.add_theme_constant_override("separation", 16)
 	columna.add_child(cuerpo)
 	cuerpo.add_child(_construir_lista_piezas())
 	cuerpo.add_child(_construir_centro())
@@ -69,40 +50,32 @@ func _construir_ui() -> void:
 
 
 func _construir_barra_mision() -> Control:
-	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 12)
-	fila.add_child(_etiqueta("Misión:", COLOR_TEXTO, 20))
-
-	_selector_mision = OptionButton.new()
-	for m in GameState.get_misiones():
-		_selector_mision.add_item("%s (%s)" % [m["nombre"], m["dificultad"]])
-		_selector_mision.set_item_metadata(_selector_mision.item_count - 1, m["id"])
-	_selector_mision.item_selected.connect(func(indice: int) -> void:
-		GameState.elegir_mision(_selector_mision.get_item_metadata(indice)))
-	fila.add_child(_selector_mision)
-
-	_texto_mision = _etiqueta("", COLOR_TENUE)
+	var fila := Interfaz.hbox(12)
+	var mision := GameState.mision
+	fila.add_child(Interfaz.etiqueta(mision.get("nombre", ""), Interfaz.BLANCO, 20))
+	_texto_mision = Interfaz.etiqueta(mision.get("objetivo", ""), Interfaz.CIAN)
 	_texto_mision.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_texto_mision.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fila.add_child(_texto_mision)
+	var cambiar := Interfaz.boton("Cambiar misión", 16)
+	cambiar.pressed.connect(GameState.ir_a.bind("briefing"))
+	fila.add_child(cambiar)
 	return fila
 
 
 func _construir_lista_piezas() -> Control:
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size.x = 420
+	scroll.custom_minimum_size.x = 440
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 
-	var lista := VBoxContainer.new()
+	var lista := Interfaz.vbox(4)
 	lista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	lista.add_theme_constant_override("separation", 4)
 	scroll.add_child(lista)
 
 	for categoria in GameState.get_categorias():
 		var titulo: String = categoria["nombre"]
 		if categoria.get("multiple", false):
 			titulo += "  (varias)"
-		lista.add_child(_etiqueta(titulo, COLOR_OK, 18))
+		lista.add_child(Interfaz.etiqueta(titulo, Interfaz.AQUA, 18))
 		for pieza in GameState.get_piezas(categoria["id"]):
 			var boton: BaseButton
 			if categoria.get("multiple", false):
@@ -121,62 +94,44 @@ func _construir_lista_piezas() -> Control:
 
 
 func _construir_centro() -> Control:
-	var centro := VBoxContainer.new()
+	var centro := Interfaz.vbox()
 	centro.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	# Lugar reservado para la nave 3D (rol de arte).
-	var nave := PanelContainer.new()
-	nave.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var marcador := _etiqueta("[ nave 3D ]", COLOR_TENUE, 22)
-	marcador.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	marcador.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	nave.add_child(marcador)
-	centro.add_child(nave)
+	_nave = NavePreview.new()
+	_nave.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	centro.add_child(_nave)
 
-	_texto_seleccion = _etiqueta("", COLOR_TEXTO)
-	_texto_seleccion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_texto_seleccion = Interfaz.parrafo("", Interfaz.BLANCO)
 	centro.add_child(_texto_seleccion)
 	return centro
 
 
 func _construir_medidores() -> Control:
-	var panel := VBoxContainer.new()
-	panel.custom_minimum_size.x = 320
-	panel.add_theme_constant_override("separation", 6)
+	var panel := Interfaz.vbox(6)
+	panel.custom_minimum_size.x = 300
 
 	for id in ["costo", "masa", "energia", "datos", "delta_v"]:
-		var nombre := _etiqueta("", COLOR_TEXTO, 18)
+		var nombre := Interfaz.etiqueta("", Interfaz.BLANCO, 18)
+		var barra := Interfaz.barra(Interfaz.AQUA, BARRA_MAXIMO)
+		var valores := Interfaz.etiqueta("", Interfaz.CIAN)
 		panel.add_child(nombre)
-
-		var barra := ProgressBar.new()
-		barra.max_value = BARRA_MAXIMO
-		barra.step = 0.0
-		barra.show_percentage = false
-		barra.custom_minimum_size.y = 18
-		var estilo := StyleBoxFlat.new()
-		estilo.bg_color = COLOR_OK
-		barra.add_theme_stylebox_override("fill", estilo)
 		panel.add_child(barra)
-
-		var valores := _etiqueta("", COLOR_TENUE)
 		panel.add_child(valores)
-		_barras[id] = {"nombre": nombre, "barra": barra, "estilo": estilo, "valores": valores}
+		_barras[id] = {"nombre": nombre, "barra": barra, "valores": valores}
 
 	panel.add_child(HSeparator.new())
-	_texto_fiabilidad = _etiqueta("", COLOR_TENUE)
+	_texto_fiabilidad = Interfaz.etiqueta("", Interfaz.CIAN)
 	panel.add_child(_texto_fiabilidad)
 	return panel
 
 
 func _construir_pie() -> Control:
-	var fila := HBoxContainer.new()
-	_aviso = _etiqueta("", COLOR_ALERTA)
+	var fila := Interfaz.hbox()
+	_aviso = Interfaz.etiqueta("", Interfaz.ALERTA)
 	_aviso.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fila.add_child(_aviso)
 
-	_boton_lanzar = Button.new()
-	_boton_lanzar.text = "  LANZAR  "
-	_boton_lanzar.add_theme_font_size_override("font_size", 22)
+	_boton_lanzar = Interfaz.boton_principal("LANZAR", 22)
 	_boton_lanzar.pressed.connect(_on_lanzar)
 	fila.add_child(_boton_lanzar)
 	return fila
@@ -184,19 +139,10 @@ func _construir_pie() -> Control:
 
 # --- Actualización ----------------------------------------------------------
 
-func _on_mision_cambiada(mision: Dictionary) -> void:
-	if mision.is_empty():
-		_texto_mision.text = ""
-		return
-	for i in _selector_mision.item_count:
-		if _selector_mision.get_item_metadata(i) == mision["id"]:
-			_selector_mision.select(i)
-	_texto_mision.text = mision.get("objetivo", "")
-
-
 func _on_seleccion_cambiada(ids: Array) -> void:
 	for id in _botones_pieza:
 		_botones_pieza[id].set_pressed_no_signal(id in ids)
+	_nave.mostrar(ids)
 
 	var nombres := []
 	for pieza in GameState.piezas_elegidas():
@@ -213,14 +159,14 @@ func _on_medidores_cambiados(medidores: Dictionary) -> void:
 		var limite: float = m["limite"]
 		var valor: float = m["valor"]
 		var proporcion := valor / limite if limite > 0.0 else (BARRA_MAXIMO if valor > 0.0 else 0.0)
-		var color := COLOR_OK if m["ok"] else COLOR_ALERTA
+		var color := Interfaz.AQUA if m["ok"] else Interfaz.ALERTA
 
 		ui["nombre"].text = m["nombre"] + ("" if m["ok"] else "  ⚠")
 		ui["barra"].value = minf(proporcion, BARRA_MAXIMO)
-		ui["estilo"].bg_color = color
+		Interfaz.color_barra(ui["barra"], color)
 		var signo := "≥" if m["mayor_es_mejor"] else "≤"
-		ui["valores"].text = "%s  %s  %s %s" % [_numero(valor), signo, _numero(limite), m["unidad"]]
-		ui["valores"].add_theme_color_override("font_color", COLOR_TENUE if m["ok"] else COLOR_ALERTA)
+		ui["valores"].text = "%d  %s  %d %s" % [roundi(valor), signo, roundi(limite), m["unidad"]]
+		ui["valores"].add_theme_color_override("font_color", Interfaz.CIAN if m["ok"] else Interfaz.ALERTA)
 
 	var detalle := GameState.detalle
 	_texto_fiabilidad.text = "Fiabilidad del lanzamiento: %d%%\nFiabilidad de la nave: %d%%" % [
@@ -244,39 +190,26 @@ func _actualizar_aviso() -> void:
 
 
 func _on_lanzar() -> void:
-	# La fase de lanzamiento todavía no existe: dejamos constancia y nada más.
-	print("Lanzar con: ", GameState.seleccion, "  medidores: ", GameState.medidores)
-	_aviso.text = "Lanzamiento pendiente: la pantalla de la fase 3 todavía no existe."
+	GameState.lanzar()
+	GameState.ir_a("lanzamiento")
 
 
 # --- Utilidades -------------------------------------------------------------
 
 func _texto_pieza(pieza: Dictionary) -> String:
-	var partes := [pieza["nombre"], "%s M$" % _numero(pieza.get("costo", 0.0))]
+	var partes := [pieza["nombre"], "%d M$" % roundi(pieza.get("costo", 0.0))]
 	if pieza.get("masa", 0.0) > 0.0:
-		partes.append("%s kg" % _numero(pieza["masa"]))
+		partes.append("%d kg" % roundi(pieza["masa"]))
 	if pieza.get("potencia", 0.0) > 0.0:
-		partes.append("+%s W" % _numero(pieza["potencia"]))
+		partes.append("+%d W" % roundi(pieza["potencia"]))
 	if pieza.get("consumo", 0.0) > 0.0:
-		partes.append("−%s W" % _numero(pieza["consumo"]))
+		partes.append("−%d W" % roundi(pieza["consumo"]))
 	if pieza.has("capacidad"):
-		partes.append("carga %s kg" % _numero(pieza["capacidad"]))
+		partes.append("carga %d kg" % roundi(pieza["capacidad"]))
 	if pieza.has("isp"):
-		partes.append("Isp %s s" % _numero(pieza["isp"]))
+		partes.append("Isp %d s" % roundi(pieza["isp"]))
 	if pieza.has("tasa"):
-		partes.append("%s u/turno" % _numero(pieza["tasa"]))
+		partes.append("%d u/turno" % roundi(pieza["tasa"]))
 	if pieza.has("datos"):
-		partes.append("%s datos" % _numero(pieza["datos"]))
+		partes.append("%d datos" % roundi(pieza["datos"]))
 	return "  ·  ".join(partes)
-
-
-static func _numero(valor: float) -> String:
-	return str(roundi(valor))
-
-
-static func _etiqueta(texto: String, color: Color, tamano: int = 16) -> Label:
-	var etiqueta := Label.new()
-	etiqueta.text = texto
-	etiqueta.add_theme_color_override("font_color", color)
-	etiqueta.add_theme_font_size_override("font_size", tamano)
-	return etiqueta

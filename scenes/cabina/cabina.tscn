@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/cabina/cabina.gd" id="1_cabina"]
+
+[node name="Cabina" type="Node3D"]
+script = ExtResource("1_cabina")
