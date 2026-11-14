@@ -34,6 +34,15 @@ El astronauta sale por la escotilla con oxígeno, combustible y traje limitados.
 
 La nave es la elegida en el diseño o, si no hay ninguna, `nave_por_defecto`. Los valores se ajustan en el bloque `eva` de `datos.json`. `tests/recorrido_eva.tscn` lo prueba solo y guarda capturas.
 
+## Estilo visual: N64 con luz moderna
+
+Lo maneja el autoload `Estilo` (`scripts/autoload/estilo.gd`) y se aplica solo a todas las escenas:
+
+- **Luz:** tonemapping filmic, bloom en pantallas y luces, sombreado ambiental en rincones y uniones (SSAO), luz rebotada entre superficies (SSIL), más contraste y saturación, y en la cabina y la esclusa una niebla volumétrica suave que marca la luz que entra por las ventanas.
+- **Filtro retro** (`scripts/retro.gdshader`): píxeles el doble de grandes, menos niveles de color con tramado ordenado como el de la N64, viñeta y un grano sutil. La interfaz queda nítida. **F2** alterna entre Retro, Retro fuerte y Moderno (sin filtro).
+- **Texturas:** cada imagen que se guarde en `assets/texturas/` con el nombre de un material (`casco.png`, `pared.png`...) se aplica sola con el material retro (`scripts/material_retro.gdshader`): píxel nítido, proyección triplanar (los modelos no tienen coordenadas de mapeado), relieve con `<nombre>_normal.png`, brillo y metal según el material, y manchas de tono y desgaste que no repiten, para que no se note el mosaico. En superficies grandes (pasto, concreto) se mezcla además una segunda lectura a otra escala. Los relieves se regeneran con `python3 arte/generar_relieves.py` cada vez que cambie una textura. Los valores de cada material están en `MATERIALES`, en `estilo.gd`.
+- **Contornos y sombras:** una línea fina azul noche en aristas y siluetas (`scripts/contornos.gdshader`); todas las luces proyectan sombra y el sol tiene penumbra suave. Lo mismo para `planeta_<destino>.png` y `fondo_espacio.png`. La lista completa y los prompts para generarlas con Gemini están en [arte/PROMPTS_GEMINI.md](arte/PROMPTS_GEMINI.md). Las 13 actuales salieron de esos prompts y están reducidas a 128 px (texturas), 512×256 (planetas) y 1024×512 (fondo). Los originales de 1024 px quedaron fuera del repositorio, en `HackathonSpaceChallenge/texturas_gemini/`.
+
 ## Cómo está armado el 3D
 
 - **Cabina (primera persona)** — `scenes/cabina/`. Es el lugar principal. Antes del lanzamiento la nave está sobre la plataforma (por la ventana se ve la torre) y la *computadora de misión* (al frente) abre el briefing y el diseño. Después del lanzamiento la nave está en órbita (por la ventana se ve el destino) y cualquier consola abre las operaciones; al terminar, el informe. Las pantallas de cada consola muestran datos en vivo.

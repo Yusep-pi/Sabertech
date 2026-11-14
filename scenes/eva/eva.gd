@@ -322,7 +322,7 @@ func _marcador_3d(texto: String, posicion: Vector3, color: Color) -> Label3D:
 	marcador.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	marcador.no_depth_test = true
 	marcador.fixed_size = true
-	marcador.pixel_size = 0.0007
+	marcador.pixel_size = 0.0011
 	marcador.font_size = 40
 	marcador.outline_size = 10
 	marcador.outline_modulate = Interfaz.FONDO
