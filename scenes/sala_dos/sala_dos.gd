@@ -146,15 +146,20 @@ func _crear_compuerta() -> void:
 
 func _crear_estructura_sala() -> void:
 	# Sala cuadrada de 7.0m x 7.0m x 3.2m de altura interior.
+	# Los nombres "pared", "piso", "oscuro" y "casco_gris" son los de la cabina y
+	# la esclusa: el autoload Estilo les pone la misma textura retro (assets/texturas).
 	var mat_pared := StandardMaterial3D.new()
+	mat_pared.resource_name = "pared"
 	mat_pared.albedo_color = Color("#141C3B")
 	mat_pared.roughness = 0.65
 
 	var mat_piso := StandardMaterial3D.new()
+	mat_piso.resource_name = "piso"
 	mat_piso.albedo_color = Color("#0C1128")
 	mat_piso.roughness = 0.45
 
 	var mat_techo := StandardMaterial3D.new()
+	mat_techo.resource_name = "pared"
 	mat_techo.albedo_color = Color("#111736")
 	mat_techo.roughness = 0.8
 
@@ -165,6 +170,7 @@ func _crear_estructura_sala() -> void:
 	mat_franja.emission = Color(Interfaz.AQUA) * 0.4
 
 	var mat_marco := StandardMaterial3D.new()
+	mat_marco.resource_name = "oscuro"
 	mat_marco.albedo_color = Color("#2C3A66")
 	mat_marco.metallic = 0.6
 	mat_marco.roughness = 0.3
@@ -234,6 +240,7 @@ func _crear_estructura_sala() -> void:
 
 	# Hoja y marco de compuerta hacia la cabina
 	var mat_puerta := StandardMaterial3D.new()
+	mat_puerta.resource_name = "casco_gris"
 	mat_puerta.albedo_color = Color("#1D274D")
 	mat_puerta.metallic = 0.5
 	mat_puerta.roughness = 0.4
@@ -399,6 +406,7 @@ func _crear_puerta_decorativa() -> void:
 
 	# 1. Hoja sellada, rehundida en el hueco de la pared
 	var mat_hoja := StandardMaterial3D.new()
+	mat_hoja.resource_name = "casco_gris"
 	mat_hoja.albedo_color = Color("#1B2447")
 	mat_hoja.metallic = 0.55
 	mat_hoja.roughness = 0.45
@@ -406,6 +414,7 @@ func _crear_puerta_decorativa() -> void:
 
 	# 2. Marco metálico por el lado de la sala
 	var mat_marco := StandardMaterial3D.new()
+	mat_marco.resource_name = "oscuro"
 	mat_marco.albedo_color = Color("#2C3A66")
 	mat_marco.metallic = 0.7
 	mat_marco.roughness = 0.25
@@ -634,10 +643,11 @@ func _mostrar_mensaje(texto: String) -> void:
 func _crear_malla(pos: Vector3, tam: Vector3, mat: Material) -> MeshInstance3D:
 	var caja := BoxMesh.new()
 	caja.size = tam
+	# En la malla (no material_override): así Estilo ve el nombre y le pone textura.
+	caja.material = mat
 	var inst := MeshInstance3D.new()
 	inst.mesh = caja
 	inst.position = pos
-	inst.material_override = mat
 	return inst
 
 
@@ -647,9 +657,9 @@ func _crear_bloque_con_colision(pos: Vector3, tam: Vector3, mat: Material, padre
 
 	var caja := BoxMesh.new()
 	caja.size = tam
+	caja.material = mat
 	var inst := MeshInstance3D.new()
 	inst.mesh = caja
-	inst.material_override = mat
 	body.add_child(inst)
 
 	var col := CollisionShape3D.new()
