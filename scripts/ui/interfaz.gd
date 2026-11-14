@@ -96,6 +96,25 @@ static func color_barra(barra_a_pintar: ProgressBar, color: Color) -> void:
 	(barra_a_pintar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = color
 
 
+## Borde oscuro del visor del casco, para cuando se tiene puesto el traje.
+static func visor_casco() -> TextureRect:
+	var gradiente := Gradient.new()
+	gradiente.set_color(0, Color(0, 0, 0, 0))
+	gradiente.set_color(1, Color(FONDO, 0.85))
+	gradiente.add_point(0.7, Color(0, 0, 0, 0))
+	var textura := GradientTexture2D.new()
+	textura.gradient = gradiente
+	textura.fill = GradientTexture2D.FILL_RADIAL
+	textura.fill_from = Vector2(0.5, 0.5)
+	textura.fill_to = Vector2(1.05, 0.5)
+	var visor := TextureRect.new()
+	visor.texture = textura
+	visor.stretch_mode = TextureRect.STRETCH_SCALE
+	visor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	visor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return visor
+
+
 static func vbox(separacion: int = 8) -> VBoxContainer:
 	var caja := VBoxContainer.new()
 	caja.add_theme_constant_override("separation", separacion)

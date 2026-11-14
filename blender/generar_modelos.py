@@ -377,6 +377,109 @@ def construir_cabina():
 
 # --- Revisión ---------------------------------------------------------------
 
+def construir_esclusa():
+	"""Esclusa de 5 x 6 x 3 m: ventanal a la izquierda (-X), escotilla al frente (+Y),
+	armario con el traje a la derecha (+X) y la puerta a la cabina atrás (-Y)."""
+	raiz = vacio("esclusa")
+	e = vacio("esclusa_estructura", raiz)
+	caja("esclusa_piso-col", (5.4, 6.4, 0.2), (0, 0, -0.1), "piso", e)
+	for i in range(5):
+		caja(f"esclusa_piso_franja_{i}", (5.0, 0.04, 0.01), (0, -2.4 + i * 1.1, 0.005), "oscuro", e)
+	caja("esclusa_techo-col", (5.4, 6.4, 0.2), (0, 0, 3.1), "pared", e)
+	caja("esclusa_pared_der-col", (0.2, 6.4, 3.2), (2.6, 0, 1.5), "pared", e)
+	caja("esclusa_pared_tras-col", (5.4, 0.2, 3.2), (0, -3.1, 1.5), "pared", e)
+
+	# Pared izquierda con el ventanal: base, dintel, columnas y vidrio.
+	caja("esclusa_pared_izq_baja-col", (0.2, 6.4, 0.9), (-2.6, 0, 0.45), "pared", e)
+	caja("esclusa_pared_izq_alta-col", (0.2, 6.4, 0.65), (-2.6, 0, 2.88), "pared", e)
+	caja("esclusa_pared_izq_fondo-col", (0.2, 1.1, 1.7), (-2.6, -2.65, 1.7), "pared", e)
+	caja("esclusa_pared_izq_frente-col", (0.2, 1.1, 1.7), (-2.6, 2.65, 1.7), "pared", e)
+	for i, y in enumerate((-2.1, -0.7, 0.7, 2.1)):
+		caja(f"esclusa_ventanal_marco_{i}", (0.3, 0.14, 1.66), (-2.55, y, 1.72), "oscuro", e)
+	caja("esclusa_ventanal_marco_bajo", (0.3, 4.3, 0.12), (-2.55, 0, 0.92), "oscuro", e)
+	caja("esclusa_ventanal_marco_alto", (0.3, 4.3, 0.12), (-2.55, 0, 2.52), "oscuro", e)
+	caja("esclusa_vidrio", (0.02, 4.2, 1.6), (-2.66, 0, 1.72), "vidrio", e)
+
+	# Pared del frente con el hueco de la escotilla (1.6 x 2.0 m).
+	caja("esclusa_pared_frente_izq-col", (1.8, 0.2, 3.2), (-1.7, 3.1, 1.5), "pared", e)
+	caja("esclusa_pared_frente_der-col", (1.8, 0.2, 3.2), (1.7, 3.1, 1.5), "pared", e)
+	caja("esclusa_pared_frente_alta-col", (1.6, 0.2, 1.0), (0, 3.1, 2.7), "pared", e)
+	caja("esclusa_pared_frente_umbral-col", (1.6, 0.2, 0.2), (0, 3.1, 0.1), "pared", e)
+	# Marco con franjas de peligro.
+	for i in range(8):
+		color = "naranja" if i % 2 == 0 else "negro"
+		caja(f"esclusa_marco_izq_{i}", (0.16, 0.3, 0.26), (-0.88, 3.0, 0.33 + i * 0.26), color, e)
+		caja(f"esclusa_marco_der_{i}", (0.16, 0.3, 0.26), (0.88, 3.0, 0.33 + i * 0.26), color, e)
+	caja("esclusa_marco_arriba", (1.92, 0.3, 0.16), (0, 3.0, 2.28), "oscuro", e)
+	for i in range(6):
+		caja(f"esclusa_piso_peligro_{i}", (0.3, 0.6, 0.01), (-0.75 + i * 0.3, 2.6, 0.006), "naranja" if i % 2 == 0 else "negro", e)
+
+	# La hoja de la escotilla: se desliza hacia la derecha al abrir.
+	# El nodo queda en el origen: sus piezas ya tienen la posición final y el juego lo desplaza entero.
+	puerta = vacio("escotilla_puerta", raiz)
+	caja("escotilla_hoja-col", (1.6, 0.12, 2.0), (0, 3.12, 1.2), "casco_gris", puerta)
+	cilindro("escotilla_mirilla", 0.22, 0.22, 0.14, (0, 3.08, 1.65), "pantalla", puerta, rot=(90, 0, 0), lados=12)
+	cilindro("escotilla_volante", 0.3, 0.3, 0.06, (0, 3.03, 1.0), "oscuro", puerta, rot=(90, 0, 0), lados=12)
+	caja("escotilla_franja", (1.6, 0.13, 0.12), (0, 3.11, 0.5), "naranja", puerta)
+
+	baliza = vacio("baliza", raiz)
+	cilindro("baliza_base", 0.14, 0.14, 0.08, (0, 2.95, 2.62), "oscuro", baliza)
+	cilindro("baliza_luz", 0.1, 0.08, 0.16, (0, 2.95, 2.74), "naranja", baliza)
+
+	# Panel de la escotilla, a la derecha del hueco.
+	panel = vacio("consola_escotilla", raiz)
+	caja("consola_escotilla_caja", (0.6, 0.15, 0.85), (1.45, 2.92, 1.35), "oscuro", panel)
+	caja("pantalla_escotilla", (0.48, 0.02, 0.36), (1.45, 2.84, 1.52), "pantalla", panel)
+	caja("consola_escotilla_boton", (0.16, 0.06, 0.16), (1.33, 2.84, 1.1), "naranja", panel)
+	caja("consola_escotilla_boton_2", (0.16, 0.06, 0.16), (1.57, 2.84, 1.1), "lima", panel)
+
+	# Puerta interior, hacia la cabina.
+	interior = vacio("consola_puerta", raiz)
+	caja("consola_puerta_hoja-col", (1.3, 0.1, 2.3), (0, -2.98, 1.15), "casco_gris", interior)
+	caja("consola_puerta_franja", (1.32, 0.11, 0.12), (0, -2.97, 1.4), "aqua", interior)
+
+	# Armario abierto con el traje colgando, mirando hacia la sala (-X).
+	armario = vacio("consola_armario", raiz)
+	x, y = 2.15, 1.0
+	caja("consola_armario_fondo-col", (0.08, 1.4, 2.4), (x + 0.3, y, 1.2), "oscuro", armario)
+	caja("consola_armario_lado_a-col", (0.7, 0.08, 2.4), (x, y - 0.7, 1.2), "casco_gris", armario)
+	caja("consola_armario_lado_b-col", (0.7, 0.08, 2.4), (x, y + 0.7, 1.2), "casco_gris", armario)
+	caja("consola_armario_techo", (0.7, 1.48, 0.08), (x, y, 2.4), "casco_gris", armario)
+	caja("consola_armario_base", (0.7, 1.48, 0.12), (x, y, 0.06), "casco_gris", armario)
+	cilindro("consola_armario_barra", 0.03, 0.03, 1.3, (x, y, 2.2), "casco_gris", armario, rot=(90, 0, 0))
+	caja("consola_armario_luz", (0.05, 1.2, 0.04), (x + 0.25, y, 2.32), "cian", armario)
+
+	traje = vacio("traje", armario)
+	tx = x - 0.05
+	caja("traje_gancho", (0.03, 0.03, 0.2), (tx, y, 2.1), "casco_gris", traje)
+	esfera("traje_casco", 0.21, (tx, y, 1.82), "casco", traje, segmentos=10, anillos=7)
+	caja("traje_visor", (0.06, 0.26, 0.16), (tx - 0.19, y, 1.83), "dorado", traje)
+	caja("traje_cuello", (0.26, 0.3, 0.08), (tx, y, 1.6), "aqua", traje)
+	caja("traje_torso", (0.3, 0.48, 0.58), (tx, y, 1.28), "casco", traje)
+	caja("traje_panel_pecho", (0.04, 0.22, 0.16), (tx - 0.16, y, 1.38), "oscuro", traje)
+	caja("traje_mochila", (0.22, 0.44, 0.56), (tx + 0.25, y, 1.3), "casco_gris", traje)
+	for i, lado in enumerate((-1, 1)):
+		cilindro(f"traje_brazo_{i}", 0.07, 0.08, 0.6, (tx, y + lado * 0.32, 1.22), "casco", traje, rot=(lado * 8, 0, 0))
+		esfera(f"traje_guante_{i}", 0.07, (tx, y + lado * 0.36, 0.9), "aqua", traje)
+		cilindro(f"traje_pierna_{i}", 0.09, 0.1, 0.62, (tx, y + lado * 0.12, 0.68), "casco", traje)
+		caja(f"traje_bota_{i}", (0.24, 0.13, 0.12), (tx - 0.03, y + lado * 0.12, 0.33), "casco_gris", traje)
+	caja("traje_cinturon", (0.32, 0.5, 0.06), (tx, y, 1.0), "aqua", traje)
+
+	# Banco, tanques de oxígeno, pasamanos, luces y ventilación.
+	caja("esclusa_banco-col", (0.5, 1.6, 0.45), (0.4, -1.4, 0.23), "aqua", e)
+	for i, yy in enumerate((-2.2, -1.85, -1.5)):
+		cilindro(f"esclusa_tanque_{i}", 0.13, 0.13, 1.0, (2.3, yy, 0.6), "lima" if i == 1 else "casco", e, lados=10)
+		esfera(f"esclusa_tanque_tapa_{i}", 0.13, (2.3, yy, 1.1), "casco_gris", e)
+	caja("esclusa_tanques_soporte", (0.06, 1.0, 0.08), (2.46, -1.85, 0.9), "oscuro", e)
+	for i, xx in enumerate((-2.42, 2.42)):
+		cilindro(f"esclusa_pasamanos_{i}", 0.035, 0.035, 5.6, (xx, 0, 1.05 if xx > 0 else 2.6), "naranja", e, rot=(90, 0, 0))
+	for i, yy in enumerate((-1.6, 1.0)):
+		caja(f"esclusa_luz_{i}", (2.6, 0.25, 0.05), (0, yy, 2.98), "cian", e)
+	for i in range(4):
+		caja(f"esclusa_ventilacion_{i}", (0.6, 0.06, 0.04), (0.9, 1.9 + i * 0.12, 2.99), "oscuro", e)
+	return raiz
+
+
 def render_revision(nombre, objetivo, distancia, altura, angulo=35):
 	escena = bpy.context.scene
 	escena.render.engine = "BLENDER_WORKBENCH"
@@ -418,23 +521,27 @@ def main():
 	]
 	plataforma = construir_plataforma()
 	cabina = construir_cabina()
+	esclusa = construir_esclusa()
 
 	exportar([nave], "nave.glb")
 	exportar(cohetes, "cohetes.glb")
 	exportar([plataforma], "plataforma.glb")
 	exportar([cabina], "cabina.glb")
+	exportar([esclusa], "esclusa.glb")
 
 	# Para mirar y retocar en Blender, separamos los modelos en el espacio.
 	for i, cohete in enumerate(cohetes):
 		mover(cohete, (i * 8, 0, 0))
 	mover(plataforma, (0, 300, 0))
 	mover(cabina, (-30, 0, 0))
+	mover(esclusa, (-50, 0, 0))
 	mover(nave, (-12, 0, 2))
 
 	# Con la nave sola se ven todas las piezas a la vez (en el juego se eligen de a una por categoría).
 	render_revision("nave", (-12, 0, 2), 11, 4, angulo=150)
 	render_revision("cohetes", (8, 0, 12), 55, 12, angulo=160)
 	render_revision("cabina", (-30, 1, 1.4), 4.5, 0.2, angulo=180)
+	render_revision("esclusa", (-50, 1.5, 1.3), 4.0, 0.4, angulo=200)
 	render_revision("plataforma", (0, 300, 10), 70, 25, angulo=150)
 
 	bpy.ops.wm.save_as_mainfile(filepath=os.path.join(RAIZ, "blender", "sabertech.blend"))

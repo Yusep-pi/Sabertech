@@ -50,6 +50,8 @@ var plan: Dictionary = {}
 var informe: Dictionary = {}
 ## Pantalla que la cabina abre apenas carga ("" para ninguna).
 var pantalla_pendiente := ""
+## Para los niveles de prueba de la esclusa y la caminata: true al volver de afuera.
+var vuelve_de_caminata := false
 
 var rng := RandomNumberGenerator.new()
 

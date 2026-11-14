@@ -6,6 +6,34 @@ Godot 4.6 o más nuevo. Abrir `project.godot` y ejecutar (F5): arranca en la cab
 
 **Controles:** WASD o flechas para caminar, mouse para mirar, E o clic para usar la consola que se mira, Esc para cerrar una pantalla o soltar el mouse. En la cinemática, Espacio la salta.
 
+## Esclusa (nivel aparte, en prueba)
+
+`scenes/esclusa/` es la sala desde donde se sale a la caminata espacial. Tiene un ventanal grande con vista al exterior (la Tierra, las estrellas y la nave), la escotilla con su panel y un armario con el traje colgado. Se prueba sola con `scenes/esclusa/esclusa.tscn` y F6, o:
+
+```bash
+godot --path . res://scenes/esclusa/esclusa.tscn
+```
+
+- **Ida:** ponerse el traje en el armario, despresurizar y abrir desde el panel (luces rojas, baliza, vapor por la ventilación, barra de presión) y cruzar la escotilla, que lleva a la caminata.
+- **Vuelta:** al terminar la caminata se vuelve a entrar con la escotilla abierta; desde el panel se cierra y se presuriza, y en el armario se saca el traje.
+- **Puerta a la cabina:** todavía no lleva a ningún lado.
+
+El modelo es `esclusa.glb`, generado por `construir_esclusa()` en `blender/generar_modelos.py`. `tests/recorrido_esclusa.tscn` lo prueba solo.
+
+## Caminata espacial (nivel aparte, en prueba)
+
+`scenes/eva/` es un nivel de supervivencia que todavía no está conectado al juego. Se prueba solo: abrir `scenes/eva/eva.tscn` y pulsar F6, o:
+
+```bash
+godot --path . res://scenes/eva/eva.tscn
+```
+
+El astronauta sale por la escotilla con oxígeno, combustible y traje limitados. Tiene que arreglar 4 problemas en el exterior de la nave y volver a la escotilla, donde además recarga oxígeno y combustible. Se mueve en gravedad cero con una mochila propulsora: la inercia se conserva, frenar gasta combustible y los choques fuertes dañan el traje. Cada tanto llega una lluvia de micrometeoritos desde un costado, y hay que cubrirse detrás de la nave.
+
+**Controles:** WASD para propulsar, Espacio y Ctrl para subir y bajar, Shift para el turbo, X para frenar, Z y C para rotar, mantener E para reparar.
+
+La nave es la elegida en el diseño o, si no hay ninguna, `nave_por_defecto`. Los valores se ajustan en el bloque `eva` de `datos.json`. `tests/recorrido_eva.tscn` lo prueba solo y guarda capturas.
+
 ## Cómo está armado el 3D
 
 - **Cabina (primera persona)** — `scenes/cabina/`. Es el lugar principal. Antes del lanzamiento la nave está sobre la plataforma (por la ventana se ve la torre) y la *computadora de misión* (al frente) abre el briefing y el diseño. Después del lanzamiento la nave está en órbita (por la ventana se ve el destino) y cualquier consola abre las operaciones; al terminar, el informe. Las pantallas de cada consola muestran datos en vivo.

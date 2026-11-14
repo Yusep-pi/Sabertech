@@ -6,6 +6,36 @@
 		"eventos_por_partida": 3
 	},
 
+	"_eva": "caminata espacial (nivel aparte, todavia sin integrar): tiempos en segundos, distancias en metros, empuje en m/s2; el traje se dana al chocar por encima de velocidad_segura; las tareas usan la primera pieza instalada de su lista",
+	"eva": {
+		"oxigeno_segundos": 240,
+		"combustible": 100,
+		"empuje": 3.0,
+		"consumo_propulsor": 6,
+		"velocidad_maxima": 9,
+		"velocidad_segura": 2.5,
+		"dano_por_choque": 8,
+		"escala_nave": 4,
+		"distancia_maxima": 90,
+		"recarga_oxigeno": 40,
+		"recarga_combustible": 30,
+		"distancia_tarea": 3.5,
+		"lluvia": { "primera": 45, "cada_min": 60, "cada_max": 90, "aviso": 12, "duracion": 7, "dano_por_segundo": 16 },
+		"nave_por_defecto": ["panel_grande", "antena_alta", "motor_quimico", "camara", "espectrometro", "radar"],
+		"_tareas": "cada tarea abre un panel: las perillas van de 0 a 10 y cada una mueve varios indicadores; se resuelve con todos los indicadores en la zona verde",
+		"tolerancia": 1,
+		"tareas": [
+			{ "id": "panel", "piezas": ["panel_grande", "panel_avanzado", "panel_chico"], "titulo": "Destrabar el panel solar",
+				"controles": ["Motor del eje X", "Motor del eje Y"], "indicadores": ["Tensión del mecanismo"], "interruptores": ["Freno del eje"] },
+			{ "id": "antena", "piezas": ["antena_alta", "antena_laser", "antena_media", "antena_baja"], "titulo": "Realinear la antena",
+				"controles": ["Azimut", "Elevación"], "indicadores": ["Señal", "Ruido"], "interruptores": [] },
+			{ "id": "motor", "piezas": ["motor_quimico", "motor_eficiente", "motor_nuclear", "motor_ionico"], "titulo": "Sellar una fuga en el motor",
+				"controles": ["Válvula A", "Válvula B", "Válvula C"], "indicadores": ["Presión", "Temperatura"], "interruptores": [] },
+			{ "id": "instrumento", "piezas": ["radar", "espectrometro", "camara", "magnetometro"], "titulo": "Recalibrar un instrumento",
+				"controles": ["Foco", "Ganancia"], "indicadores": ["Nitidez", "Brillo"], "interruptores": ["Filtro"] }
+		]
+	},
+
 	"misiones": [
 		{
 			"id": "tierra",
