@@ -158,10 +158,25 @@ front view, no text. Designed to be sliced as a 9-patch.
 
 Notas: generar en grande y reducir a 128/256 px; probar cada textura repetida 2x2; quitar el magenta con color key; generar todo en la misma conversación y usar los assets buenos como referencia.
 
-## Siguiente paso
+## Decisiones del sábado 14
 
-Construir la base que destraba al resto del equipo, en este orden:
+- **Primero jugabilidad, después arte.** Se completa el juego con gráficos provisorios y sin generar nada en Gemini, hasta asegurar que es divertido. Recién después se pasa al estilo N64.
+- **Referencias de ambiente para la etapa de arte:** No Man's Sky y Outer Wilds, en especial la parte jugable en primera persona dentro de la nave. Son inspiración de tono y de cómo se siente estar a bordo, no algo para copiar.
+- **Idea a evaluar cuando la jugabilidad esté confirmada:** jugar la fase de operaciones en primera persona dentro de la cabina, con consolas físicas para energía, antena e instrumentos. Sería una capa visual sobre la misma lógica de `GameState`, sin cambiar las reglas.
 
-1. Archivo de datos con piezas y misiones (valores provisorios razonables hasta que contenido entregue la tabla).
-2. Autoload `GameState` con las fórmulas, los 5 medidores y señales de cambio.
-3. Pantalla de diseño mínima (UI sin arte) para probar los medidores.
+## Estado
+
+Hecho (gráficos provisorios):
+
+1. Datos de misiones, piezas, eventos y frases en `data/datos.json`, con valores provisorios balanceados con simulación.
+2. `GameState` con medidores, lanzamiento, turnos de operación, eventos e informe.
+3. Las 5 pantallas conectadas: se juega una partida completa.
+
+4. **Pasaje a 3D (también provisorio, sin texturas):**
+   - **Premisa:** la misión pasa a ser tripulada. El jugador está en primera persona dentro de la cabina de la nave.
+   - **Antes del lanzamiento:** la nave está sobre la plataforma y la computadora de misión abre el briefing y el diseño.
+   - **Lanzamiento:** es una cinemática en tercera persona con varios planos y cortes de cámara suaves.
+   - **En órbita:** se vuelve a la cabina, se ve el destino por la ventana y las consolas abren las operaciones.
+   - **Modelos:** se generan con `blender/generar_modelos.py`.
+
+Siguiente: jugar varias partidas como equipo, anotar qué aburre o confunde, y ajustar números y reglas. Después, texturas N64 (Gemini) sobre los modelos actuales, manteniendo los nombres de nodos.

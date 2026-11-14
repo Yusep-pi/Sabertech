@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Sabertech - Misión Espacial"
-run/main_scene="res://scenes/diseno/diseno.tscn"
+run/main_scene="res://scenes/cabina/cabina.tscn"
 config/features=PackedStringArray("4.6")
 
 [autoload]
