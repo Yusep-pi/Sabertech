@@ -17,6 +17,9 @@ signal tripulacion_cambiada(hambre: float, cordura: float)
 signal operaciones_terminadas(motivo: String)
 ## Avanzó el viaje al destino (solo misiones con "viaje"). progreso de 0 a 1.
 signal viaje_avanzado(progreso: float)
+## La tripulación se durmió o se despertó. motivo al despertar: "jugador",
+## "descansado", "hambre", "evento" o "fin".
+signal sueno_cambiado(durmiendo: bool, motivo: String)
 
 const RUTA_DATOS := "res://data/datos.json"
 const G0 := 9.81
@@ -408,6 +411,8 @@ func iniciar_operaciones() -> void:
 		"raciones": int(pieza_elegida("viveres").get("raciones", tripulacion.get("raciones", 0))),
 		"motivo_fin": "",  # "", "turnos", "llegada", "salud", "hambre" o "cordura"
 		"viaje": {},  # ver _preparar_viaje; {} si la misión no tiene viaje
+		"durmiendo": false,
+		"segundos_dormidos": 0.0,  # tiempo real que pasó durmiendo
 	}
 	ops["viaje"] = _preparar_viaje()
 	plan = {"instrumentos": {}, "transmitir": true, "calefaccion": true}
@@ -599,6 +604,7 @@ func terminar_turno() -> Dictionary:
 				ops["motivo_fin"] = "llegada"
 	turno_terminado.emit(resumen)
 	if ops["terminada"] and not ya_terminada:
+		despertar("fin")
 		operaciones_terminadas.emit(ops["motivo_fin"])
 	else:
 		_iniciar_turno()
@@ -616,14 +622,72 @@ func reloj_corriendo() -> bool:
 
 
 ## Avanza el reloj de la tripulación: hambre y cordura bajan por minuto.
+## Durmiendo, la cordura sube, el hambre baja a su propio ritmo y el viaje se acelera.
 func avanzar_tiempo(segundos: float) -> void:
 	if ops.is_empty() or ops["terminada"]:
 		return
 	var minutos := segundos / 60.0
 	var tripulacion := get_tripulacion()
-	cambiar_tripulacion(-tripulacion.get("hambre_por_minuto", 0.0) * minutos, -tripulacion.get("cordura_por_minuto", 0.0) * minutos)
-	if tiene_viaje() and not ops["terminada"]:
-		_avanzar_viaje(segundos)
+	var dormido := durmiendo()
+	if dormido:
+		var cfg: Dictionary = tripulacion.get("dormir", {})
+		ops["segundos_dormidos"] += segundos
+		cambiar_tripulacion(-cfg.get("hambre_por_minuto", 0.0) * minutos, cfg.get("cordura_por_minuto", 0.0) * minutos)
+	else:
+		cambiar_tripulacion(-tripulacion.get("hambre_por_minuto", 0.0) * minutos, -tripulacion.get("cordura_por_minuto", 0.0) * minutos)
+	if ops["terminada"]:
+		return
+	if tiene_viaje():
+		var aceleracion: float = tripulacion.get("dormir", {}).get("aceleracion", 1.0) if dormido else 1.0
+		_avanzar_viaje(segundos * aceleracion)
+	if durmiendo():
+		_revisar_sueno()
+
+
+# --- Dormir -----------------------------------------------------------------
+
+func durmiendo() -> bool:
+	return ops.get("durmiendo", false)
+
+
+## "" si la tripulación puede irse a dormir ahora, o el motivo por el que no.
+func motivo_no_dormir() -> String:
+	if not reloj_corriendo():
+		return "Ahora no hace falta dormir."
+	var cfg: Dictionary = get_tripulacion().get("dormir", {})
+	if not ops["evento_actual"].is_empty():
+		return "Hay una alerta en la cabina: resolvela antes de dormir."
+	if ops["hambre"] <= cfg.get("hambre_minima", 0.0):
+		return "Con tanta hambre no se puede dormir. Comé algo primero."
+	if ops["cordura"] > cfg.get("cordura_maxima_para_dormir", 100.0):
+		return "La tripulación no tiene sueño todavía (cordura %d%%)." % roundi(ops["cordura"])
+	return ""
+
+
+## Se duerme si se puede. Devuelve "" si se durmió, o el motivo por el que no.
+func dormir() -> String:
+	var motivo := motivo_no_dormir()
+	if motivo == "" and not durmiendo():
+		ops["durmiendo"] = true
+		sueno_cambiado.emit(true, "")
+	return motivo
+
+
+func despertar(motivo := "jugador") -> void:
+	if not durmiendo():
+		return
+	ops["durmiendo"] = false
+	sueno_cambiado.emit(false, motivo)
+
+
+func _revisar_sueno() -> void:
+	var cfg: Dictionary = get_tripulacion().get("dormir", {})
+	if not ops["evento_actual"].is_empty():
+		despertar("evento")
+	elif ops["hambre"] <= cfg.get("hambre_minima", 0.0):
+		despertar("hambre")
+	elif ops["cordura"] >= 100.0:
+		despertar("descansado")
 
 
 # --- Viaje ------------------------------------------------------------------
@@ -724,6 +788,7 @@ func _revisar_tripulacion() -> void:
 	ops["motivo_fin"] = motivo
 	ops["turno_perdida"] = ops["turno"]
 	ops["evento_actual"] = {}
+	despertar("fin")
 	operaciones_terminadas.emit(motivo)
 	plan_cambiado.emit()
 
@@ -735,6 +800,8 @@ func _iniciar_turno() -> void:
 	var id_evento: String = ops["eventos"].get(ops["turno"], "")
 	if id_evento != "":
 		ops["evento_actual"] = _preparar_evento(id_evento)
+		# Una alarma despierta a cualquiera.
+		despertar("evento")
 	_ajustar_plan()
 	turno_iniciado.emit(ops["turno"])
 	plan_cambiado.emit()
@@ -963,6 +1030,7 @@ func calcular_informe() -> Dictionary:
 		"cordura": ops.get("cordura", 0.0) if llego else 0.0,
 		"raciones": ops.get("raciones", 0) if llego else 0,
 		"motivo_fin": motivo_fin,
+		"segundos_dormidos": ops.get("segundos_dormidos", 0.0) if llego else 0.0,
 		"viaje": ops.get("viaje", {}).duplicate() if llego else {},
 		"frases": _frases_informe(ciencia, objetivo, sobrante, presupuesto),
 	}

@@ -6,6 +6,9 @@ extends Node3D
 ## quedarse sin aire. Cada tanto llega una lluvia de micrometeoritos: hay que
 ## cubrirse detrás de la nave. En la escotilla se recargan oxígeno y combustible.
 ## Todos los valores están en el bloque "eva" de data/datos.json.
+## En órbita afecta a la tripulación (tripulacion.zonas.eva): afuera da más
+## hambre, y los golpes, la lluvia y el poco oxígeno bajan la cordura; cada
+## problema resuelto y volver entero la suben.
 ##
 ## Se prueba sola: abrir scenes/eva/eva.tscn y pulsar F6.
 
@@ -17,6 +20,8 @@ const ESCENA_ESCLUSA := "res://scenes/esclusa/esclusa.tscn"
 const ZOOM_SEGUNDOS := 0.5
 
 var _cfg: Dictionary
+## Efectos sobre el hambre y la cordura (tripulacion.zonas.eva).
+var _efectos: Dictionary
 var _nave: Nave3D
 var _astronauta: Astronauta
 var _escotilla := Vector3.ZERO
@@ -48,6 +53,7 @@ var _fin: CanvasLayer
 
 func _ready() -> void:
 	_cfg = GameState.datos.get("eva", {})
+	_efectos = GameState.get_tripulacion().get("zonas", {}).get("eva", {})
 	_oxigeno = _cfg.get("oxigeno_segundos", 240.0)
 	_lluvia_reloj = _cfg["lluvia"]["primera"]
 
@@ -98,6 +104,7 @@ func _process(delta: float) -> void:
 		_astronauta.combustible = minf(_astronauta.combustible + _cfg.get("recarga_combustible", 30.0) * delta, _cfg.get("combustible", 100.0))
 
 	_actualizar_lluvia(delta, en_escotilla)
+	_afectar_tripulacion(delta, en_escotilla)
 	_revisar_final(en_escotilla)
 	_actualizar_hud(en_escotilla)
 
@@ -401,6 +408,7 @@ func _on_panel_resuelto(tarea: Dictionary) -> void:
 		tarea["efecto"].queue_free()
 		tarea["efecto"] = null
 	_cerrar_panel()
+	GameState.cambiar_tripulacion(0.0, _efectos.get("cordura_por_tarea", 0.0))
 	var faltan := tareas_pendientes()
 	_mostrar_mensaje("¡Funciona! " + ("Volvé a la escotilla." if faltan == 0 else "Quedan %d problemas." % faltan))
 
@@ -462,6 +470,7 @@ func _on_choque(velocidad: float) -> void:
 	var segura: float = _cfg.get("velocidad_segura", 2.5)
 	if velocidad > segura and _estado == "jugando":
 		_traje -= (velocidad - segura) * _cfg.get("dano_por_choque", 8.0)
+		GameState.cambiar_tripulacion(0.0, -_efectos.get("cordura_por_golpe", 0.0))
 		_golpe.color.a = 0.5
 		_mostrar_mensaje("¡Golpe a %.1f m/s! El traje se dañó. Frená con X antes de llegar." % velocidad)
 
@@ -478,8 +487,19 @@ func _revisar_final(en_escotilla: bool) -> void:
 		_terminar(true, "Todos los problemas resueltos y de vuelta en la nave.")
 
 
+## Afuera se hace fuerza (más hambre); la lluvia encima y el aire que se acaba asustan.
+func _afectar_tripulacion(delta: float, en_escotilla: bool) -> void:
+	var cordura := 0.0
+	if _lluvia_fase == "activa" and not en_escotilla and expuesto_a_la_lluvia():
+		cordura -= _efectos.get("cordura_por_segundo_lluvia", 0.0) * delta
+	if _oxigeno < _efectos.get("segundos_sin_aire", 0.0):
+		cordura -= _efectos.get("cordura_por_segundo_sin_aire", 0.0) * delta
+	GameState.cambiar_tripulacion(-_efectos.get("hambre_por_minuto", 0.0) * delta / 60.0, cordura)
+
+
 func _terminar(victoria: bool, motivo: String) -> void:
 	_estado = "victoria" if victoria else "derrota"
+	GameState.cambiar_tripulacion(0.0, _efectos.get("cordura_por_exito", 0.0) if victoria else -_efectos.get("cordura_por_fracaso", 0.0))
 	if not _tarea_abierta.is_empty():
 		_tarea_abierta["panel"].visible = false
 		_tarea_abierta = {}
@@ -611,6 +631,11 @@ func _crear_hud() -> void:
 	# lo atrapa (la mira, por ejemplo), el astronauta no puede mirar. Nada del casco lo atrapa.
 	for control in hud.find_children("*", "Control", true, false):
 		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var tripulacion := HudTripulacion.new()
+	tripulacion.ubicacion = HudTripulacion.TIRA_ABAJO
+	tripulacion.permitir_comer = false
+	add_child(tripulacion)
 
 
 func _actualizar_hud(en_escotilla: bool) -> void:

@@ -2,8 +2,8 @@ extends Node3D
 ## Sala 2 de la nave: Habitáculo / Módulo de descanso de la tripulación (de Luis).
 ##
 ## Sala de planta cuadrada (a diferencia de la cabina alargada/cónica), equipada con:
-## - Cama de tripulación (maqueta low-poly decorativa sin interacción).
-## - Refrigerador / despensa criogénica (maqueta low-poly decorativa sin interacción).
+## - Cama de tripulación: E para dormir (recupera cordura, da hambre y acelera el viaje).
+## - Refrigerador / despensa criogénica: E para comer una ración.
 ## - Ventana panorámica con vista exterior (espacio/órbita o cielo) sobre la cama.
 ## - Puerta norte: vuelve a la cabina. Puerta sur (Módulo 03): lleva a la esclusa.
 ##   Las dos se cruzan manteniendo E (ver scripts/compuerta.gd).
@@ -11,6 +11,10 @@ extends Node3D
 const Jugador := preload("res://scenes/cabina/jugador.gd")
 ## Los carteles flotantes van sobre el marco de cada puerta, bien visibles.
 const ALTURA_CARTEL := 2.75
+const NOMBRES_CONSOLA := {
+	"consola_cama": "Dormir",
+	"consola_refrigerador": "Comer una ración",
+}
 
 var _jugador: Jugador
 var _interior: Node3D
@@ -20,6 +24,8 @@ var _marcador_esclusa: Label3D
 var _compuerta: Compuerta
 var _mira: Control
 var _mensaje: Label
+var _indicacion: Label
+var _tripulacion: HudTripulacion
 
 
 func _ready() -> void:
@@ -40,6 +46,7 @@ func _ready() -> void:
 		_armar_plataforma()
 
 	_jugador = Jugador.new()
+	_jugador.consola_usada.connect(_usar)
 	_interior.add_child(_jugador)
 	# Aparece frente a la puerta por la que entró, mirando hacia el centro de la sala.
 	if GameState.origen_transicion == "esclusa":
@@ -50,6 +57,7 @@ func _ready() -> void:
 
 	_crear_hud()
 	_crear_compuerta()
+	GameState.sueno_cambiado.connect(_on_sueno_cambiado)
 	GameState.origen_transicion = ""
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -62,6 +70,8 @@ func _process(delta: float) -> void:
 	var flotar := sin(Time.get_ticks_msec() / 350.0) * 0.04
 	_marcador_puerta.position.y = ALTURA_CARTEL + flotar
 	_marcador_esclusa.position.y = ALTURA_CARTEL + flotar
+	var consola := _jugador.consola_mirada() if _jugador.activo else ""
+	_indicacion.text = "[E] " + NOMBRES_CONSOLA[consola] if NOMBRES_CONSOLA.has(consola) else ""
 
 
 func _input(evento: InputEvent) -> void:
@@ -71,6 +81,26 @@ func _input(evento: InputEvent) -> void:
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		get_viewport().set_input_as_handled()
+
+
+# --- Cama y refrigerador ----------------------------------------------------
+
+func _usar(consola: String) -> void:
+	match consola:
+		"consola_cama":
+			var motivo := GameState.dormir()
+			if motivo != "":
+				_tripulacion.avisar(motivo)
+		"consola_refrigerador":
+			if GameState.reloj_corriendo():
+				_tripulacion.comer()
+			else:
+				_tripulacion.avisar("Las raciones son para el viaje.")
+
+
+func _on_sueno_cambiado(dormido: bool, _motivo: String) -> void:
+	_jugador.activo = not dormido
+	_mira.visible = not dormido
 
 
 # --- Puertas ----------------------------------------------------------------
@@ -192,11 +222,12 @@ func _crear_estructura_sala() -> void:
 	_crear_bloque_con_colision(Vector3(0, 2.7, 3.55), Vector3(1.6, 0.8, 0.2), mat_pared)
 
 
-# --- Mobiliario: Cama (Sin interacción) ---------------------------------------
+# --- Mobiliario: Cama ---------------------------------------------------------
 
 func _crear_cama() -> void:
 	var nodo_cama := Node3D.new()
-	nodo_cama.name = "CamaTripulacion"
+	# "consola_": el jugador la puede usar (ver jugador.gd).
+	nodo_cama.name = "consola_cama"
 	# Pegada a la pared lateral derecha
 	nodo_cama.position = Vector3(2.35, 0.0, 0.4)
 	_interior.add_child(nodo_cama)
@@ -269,11 +300,11 @@ func _crear_cama() -> void:
 	nodo_cama.add_child(reloj)
 
 
-# --- Mobiliario: Refrigerador (Sin interacción) ------------------------------
+# --- Mobiliario: Refrigerador ------------------------------------------------
 
 func _crear_refrigerador() -> void:
 	var nodo_refri := Node3D.new()
-	nodo_refri.name = "RefrigeradorRaciones"
+	nodo_refri.name = "consola_refrigerador"
 	# Apoyado a ras contra la pared oeste (cara interna en X = -3.45).
 	nodo_refri.position = Vector3(-3.025, 0.0, -0.7)
 	_interior.add_child(nodo_refri)
@@ -532,10 +563,20 @@ func _crear_hud() -> void:
 	_mensaje.offset_top = 60
 	hud.add_child(_mensaje)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · Mantener E: puertas · Esc: soltar mouse", Color(Interfaz.CIAN, 0.7), 14)
+	_indicacion = Interfaz.etiqueta("", Interfaz.BLANCO, 20)
+	_indicacion.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_indicacion.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_indicacion.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_indicacion.offset_top = 30
+	hud.add_child(_indicacion)
+
+	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E: usar · Mantener E: puertas · F: comer · Esc: soltar mouse", Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)
+
+	_tripulacion = HudTripulacion.new()
+	add_child(_tripulacion)
 
 
 func _mostrar_mensaje(texto: String) -> void:

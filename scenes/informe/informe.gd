@@ -68,7 +68,11 @@ func _panel_numeros(informe: Dictionary) -> Control:
 		var viaje: Dictionary = ops.get("viaje", {})
 		if not viaje.is_empty():
 			var horas: float = viaje["horas_totales"] if ops["motivo_fin"] == "llegada" else viaje["horas"]
-			filas.append(["Viaje a la Luna", "%s km en %d h" % [GameState._miles(viaje["recorrido_km"]), roundi(horas)]])
+			var texto_viaje := "%s km en %d h" % [GameState._miles(viaje["recorrido_km"]), roundi(horas)]
+			var dormido: float = ops.get("segundos_dormidos", 0.0)
+			if dormido >= 30.0:
+				texto_viaje += " · %d min durmiendo" % maxi(1, roundi(dormido / 60.0))
+			filas.append(["Viaje a la Luna", texto_viaje])
 	for fila in filas:
 		var linea := Interfaz.hbox()
 		var nombre := Interfaz.etiqueta(fila[0], Interfaz.CIAN, 17)

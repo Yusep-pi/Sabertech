@@ -19,6 +19,7 @@ func _initialize() -> void:
 	_probar_operaciones(gs)
 	_probar_tripulacion(gs)
 	_probar_viaje(gs)
+	_probar_dormir(gs)
 	_simular_balance(gs)
 
 	gs.free()
@@ -242,6 +243,62 @@ func _probar_viaje(gs: Node) -> void:
 	_comprobar(informe["frases"].any(func(f): return f.contains("de la Luna")), "el informe dice cuánto faltó")
 	for frase in informe["frases"]:
 		_comprobar(not frase.contains("{"), "frase sin marcadores sueltos: " + frase)
+
+
+func _probar_dormir(gs: Node) -> void:
+	var cfg: Dictionary = gs.get_tripulacion()["dormir"]
+	_armar(gs, "luna", ["cohete_mediano", "panel_grande", "antena_alta", "motor_quimico", "despensa_mediana", "camara"], false)
+	gs.lanzamiento = {"exito": true, "motivo": ""}
+	gs.iniciar_operaciones()
+	gs.ops["eventos"] = {}  # sin eventos que despierten
+	gs.ops["evento_actual"] = {}
+	_comprobar(gs.dormir() != "" and not gs.durmiendo(), "con la cordura alta no hay sueño")
+
+	gs.ops["cordura"] = 80.0
+	_comprobar(gs.dormir() == "" and gs.durmiendo(), "con la cordura baja se duerme")
+	var hambre: float = gs.ops["hambre"]
+	var cordura: float = gs.ops["cordura"]
+	var horas: float = gs.ops["viaje"]["horas"]
+	gs.avanzar_tiempo(60.0)
+	_cerca(gs.ops["hambre"], hambre - cfg["hambre_por_minuto"], "durmiendo baja el hambre")
+	_cerca(gs.ops["cordura"], cordura + cfg["cordura_por_minuto"], "durmiendo sube la cordura")
+	var avance_dormido: float = gs.ops["viaje"]["horas"] - horas
+	_cerca(avance_dormido, 60.0 * cfg["aceleracion"] / gs.ops["viaje"]["segundos_por_hora"], "durmiendo el viaje se acelera")
+
+	_avanzar(gs, 600.0)
+	_comprobar(not gs.durmiendo() and not gs.ops["terminada"], "se despierta solo al recuperar la cordura")
+	_cerca(gs.ops["cordura"], 100.0, "despierta con la cordura llena")
+
+	gs.ops["cordura"] = 80.0
+	gs.dormir()
+	gs.despertar()
+	_comprobar(not gs.durmiendo(), "el jugador puede despertar")
+
+	gs.cambiar_tripulacion(0.0, 0.0)
+	gs.ops["hambre"] = cfg["hambre_minima"] + 1.0
+	_comprobar(gs.dormir() == "", "se duerme con poca hambre de margen")
+	_avanzar(gs, 10.0)
+	_comprobar(not gs.durmiendo() and not gs.ops["terminada"], "el hambre despierta")
+	_comprobar(gs.dormir() != "", "con mucha hambre no se duerme")
+
+	gs.comer_racion()
+	gs.comer_racion()
+	gs.ops["eventos"] = {gs.ops["turno"] + 1: "tormenta_solar"}
+	gs.ops["cordura"] = 60.0
+	_comprobar(gs.dormir() == "", "se duerme antes del evento")
+	_avanzar(gs, gs.segundos_para_tramo() / cfg["aceleracion"] + 1.0)
+	_comprobar(not gs.ops["evento_actual"].is_empty() and not gs.durmiendo(), "un evento despierta a la tripulación")
+	_comprobar(gs.dormir() != "", "con un evento pendiente no se duerme")
+	_comprobar(gs.ops["segundos_dormidos"] > 0.0, "se cuenta el tiempo dormido")
+
+
+## Avanza el reloj de a medio segundo, como en el juego; para si la tripulación se despierta.
+func _avanzar(gs: Node, segundos: float) -> void:
+	var paso := 0.5
+	var t := 0.0
+	while t < segundos and not gs.ops["terminada"] and gs.durmiendo():
+		gs.avanzar_tiempo(minf(paso, segundos - t))
+		t += paso
 
 
 ## Juega muchas partidas con naves razonables y una estrategia simple

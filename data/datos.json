@@ -115,7 +115,28 @@
 		"cordura_por_minuto": 3,
 		"raciones": 4,
 		"hambre_por_racion": 35,
-		"cordura_por_frio": 8
+		"cordura_por_frio": 8,
+		"_dormir": "la cama del habitaculo: por minuto real dormido el hambre baja hambre_por_minuto y la cordura sube cordura_por_minuto; el viaje avanza aceleracion veces mas rapido. Solo se duerme con cordura <= cordura_maxima_para_dormir y hambre > hambre_minima; se despierta solo al llegar a 100 de cordura, con hambre_minima o con un evento",
+		"dormir": {
+			"aceleracion": 3,
+			"hambre_por_minuto": 18,
+			"cordura_por_minuto": 10,
+			"cordura_maxima_para_dormir": 85,
+			"hambre_minima": 20
+		},
+		"_zonas": "efectos de las zonas de la nave sobre la tripulacion. eva: hambre extra por minuto afuera (esfuerzo), cordura por segundo expuesto a la lluvia o con poco oxigeno, por golpe fuerte, por problema resuelto y al terminar la caminata",
+		"zonas": {
+			"eva": {
+				"hambre_por_minuto": 10,
+				"cordura_por_segundo_lluvia": 1.5,
+				"cordura_por_segundo_sin_aire": 0.5,
+				"segundos_sin_aire": 45,
+				"cordura_por_golpe": 4,
+				"cordura_por_tarea": 6,
+				"cordura_por_exito": 10,
+				"cordura_por_fracaso": 15
+			}
+		}
 	},
 
 	"nave_base": {

@@ -31,8 +31,6 @@ const POSICION_MARCADOR := Vector3(0, 1.95, -3.6)
 const PUERTA_TRASERA := Vector3(0, 1.15, 3.98)
 const COLOR_PLANETA := {"tierra": Color("#2E6FD0"), "luna": Color("#A3A6B0"), "marte": Color("#C1552B")}
 const REFRESCO_PANTALLAS := 0.3
-## Debajo de este valor las barras de la tripulación se pintan de alerta.
-const UMBRAL_TRIPULACION := 25.0
 ## Viaje a la Luna: dónde se ven la Tierra y la Luna al salir y al llegar.
 const TIERRA_INICIO := Vector3(-60, -105, -320)
 const TIERRA_FIN := Vector3(260, -60, 900)
@@ -58,18 +56,9 @@ var _indicacion: Label
 var _objetivo: Label
 var _mensaje: Label
 var _tiempo_refresco := 0.0
-var _panel_tripulacion: Control
-var _barras_tripulacion: Dictionary = {}  # hambre, cordura -> {texto, barra}
-var _texto_raciones: Label
-var _caja_tripulacion: BoxContainer
-var _grupo_viaje: Control
-var _titulo_viaje: Label
-var _compacto := false
-var _texto_viaje: Label
-var _barra_viaje: ProgressBar
+var _tripulacion: HudTripulacion
 var _tierra: Node3D
 var _luna: Node3D
-var _titulo_tripulacion: Label
 
 
 func _ready() -> void:
@@ -100,10 +89,8 @@ func _ready() -> void:
 	_crear_compuerta()
 	_crear_marcador()
 	_crear_hud()
-	GameState.tripulacion_cambiada.connect(func(_h: float, _c: float) -> void: _actualizar_tripulacion())
 	GameState.operaciones_terminadas.connect(_on_operaciones_terminadas)
 	GameState.viaje_avanzado.connect(func(_p: float) -> void: _actualizar_ventana_viaje())
-	_actualizar_tripulacion()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 	var pendiente := GameState.pantalla_pendiente
@@ -134,10 +121,6 @@ func _process(delta: float) -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_F and GameState.reloj_corriendo():
-		_comer()
-		get_viewport().set_input_as_handled()
-		return
 	if evento is InputEventKey and evento.pressed and evento.physical_keycode == KEY_ESCAPE:
 		if _pantalla_abierta:
 			cerrar_pantalla()
@@ -165,7 +148,7 @@ func abrir_pantalla(pantalla: String) -> void:
 	_pantalla_abierta.add_child(volver)
 	_jugador.activo = false
 	_mira.visible = false
-	_ubicar_tripulacion(true)
+	_tripulacion.ubicacion = HudTripulacion.TIRA_ARRIBA
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
@@ -181,7 +164,7 @@ func cerrar_pantalla() -> void:
 				_mostrar_mensaje("Quedan %d turnos. Volvé a cualquier consola para seguir operando." % quedan)
 	_jugador.activo = true
 	_mira.visible = true
-	_ubicar_tripulacion(false)
+	_tripulacion.ubicacion = HudTripulacion.PANEL
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
@@ -538,40 +521,9 @@ func _crear_hud() -> void:
 	add_child(_capa_pantalla)
 
 	# La tripulación va por encima de las pantallas: el reloj corre aunque haya una abierta.
-	var capa_tripulacion := CanvasLayer.new()
-	capa_tripulacion.layer = 6
-	add_child(capa_tripulacion)
-	_panel_tripulacion = Interfaz.panel(Color(Interfaz.PANEL, 0.85), 10)
-	_panel_tripulacion.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	capa_tripulacion.add_child(_panel_tripulacion)
-	_caja_tripulacion = BoxContainer.new()
-	_caja_tripulacion.add_theme_constant_override("separation", 6)
-	_panel_tripulacion.add_child(_caja_tripulacion)
-	_titulo_tripulacion = Interfaz.etiqueta("Tripulación", Interfaz.AQUA, 16)
-	_caja_tripulacion.add_child(_titulo_tripulacion)
-	for clave in ["hambre", "cordura"]:
-		var grupo := Interfaz.vbox(2)
-		grupo.custom_minimum_size.x = 120
-		var texto := Interfaz.etiqueta("", Interfaz.BLANCO, 14)
-		var barra := Interfaz.barra(Interfaz.LIMA)
-		barra.custom_minimum_size.y = 10
-		grupo.add_child(texto)
-		grupo.add_child(barra)
-		_caja_tripulacion.add_child(grupo)
-		_barras_tripulacion[clave] = {"texto": texto, "barra": barra}
-	_texto_raciones = Interfaz.etiqueta("", Interfaz.CIAN, 14)
-	_caja_tripulacion.add_child(_texto_raciones)
-	_grupo_viaje = Interfaz.vbox(2)
-	_grupo_viaje.custom_minimum_size.x = 200
-	_titulo_viaje = Interfaz.etiqueta("Viaje a la Luna", Interfaz.AQUA, 14)
-	_grupo_viaje.add_child(_titulo_viaje)
-	_barra_viaje = Interfaz.barra(Interfaz.CIAN)
-	_barra_viaje.custom_minimum_size.y = 10
-	_grupo_viaje.add_child(_barra_viaje)
-	_texto_viaje = Interfaz.etiqueta("", Interfaz.BLANCO, 13)
-	_grupo_viaje.add_child(_texto_viaje)
-	_caja_tripulacion.add_child(_grupo_viaje)
-	_ubicar_tripulacion(false)
+	_tripulacion = HudTripulacion.new()
+	_tripulacion.en_cabina = true
+	add_child(_tripulacion)
 
 
 func _actualizar_hud() -> void:
@@ -589,66 +541,7 @@ func _actualizar_hud() -> void:
 		_objetivo.text = "Objetivo: operá la nave (turno %d de %d). Cualquier consola sirve." % [GameState.ops["turno"], GameState.ops["turnos"]]
 
 
-# --- Tripulación ------------------------------------------------------------
-
-## En la cabina el panel va arriba a la derecha; con una pantalla abierta pasa a
-## una tira compacta arriba al centro, para no tapar los datos de la pantalla.
-func _ubicar_tripulacion(compacto: bool) -> void:
-	_compacto = compacto
-	_caja_tripulacion.vertical = not compacto
-	_titulo_tripulacion.visible = not compacto
-	_titulo_viaje.visible = not compacto
-	_grupo_viaje.custom_minimum_size.x = 150.0 if compacto else 200.0
-	if GameState.en_orbita():
-		_actualizar_tripulacion()
-	_panel_tripulacion.custom_minimum_size.x = 0.0 if compacto else 240.0
-	_panel_tripulacion.reset_size()
-	if compacto:
-		_panel_tripulacion.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE)
-		_panel_tripulacion.grow_horizontal = Control.GROW_DIRECTION_BOTH
-		_panel_tripulacion.position.y = 6
-	else:
-		_panel_tripulacion.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE)
-		_panel_tripulacion.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		_panel_tripulacion.position += Vector2(-16, 12)
-
-
-func _actualizar_tripulacion() -> void:
-	# Al terminar la misión las barras se ocultan: los valores finales están en el informe.
-	_panel_tripulacion.visible = GameState.en_orbita() and not GameState.ops["terminada"]
-	if not _panel_tripulacion.visible:
-		return
-	var ops := GameState.ops
-	for clave in _barras_tripulacion:
-		var valor: float = ops[clave]
-		_barras_tripulacion[clave]["texto"].text = "%s: %d%%" % [clave.capitalize(), roundi(valor)]
-		_barras_tripulacion[clave]["barra"].value = valor / 100.0
-		Interfaz.color_barra(_barras_tripulacion[clave]["barra"], Interfaz.ALERTA if valor < UMBRAL_TRIPULACION else Interfaz.LIMA)
-	_texto_raciones.text = "Raciones: %d  ·  [F] comer" % ops["raciones"]
-	_grupo_viaje.visible = GameState.tiene_viaje()
-	if _grupo_viaje.visible:
-		var viaje: Dictionary = ops["viaje"]
-		_barra_viaje.value = GameState.progreso_viaje()
-		var minutos := GameState.minutos_para_llegar()
-		var llegada := "%d:%02d" % [floori(minutos), floori(fmod(minutos * 60.0, 60.0))]
-		if _compacto:
-			_texto_viaje.text = "Luna %d%% · llegada en %s" % [floori(GameState.progreso_viaje() * 100), llegada]
-		else:
-			_texto_viaje.text = "%s / %s km · %s m/s\nLlegada en %s" % [
-				GameState._miles(viaje["recorrido_km"]), GameState._miles(viaje["distancia_km"]), GameState._miles(viaje["velocidad"]), llegada]
-
-
-func _comer() -> void:
-	if GameState.comer_racion():
-		_mostrar_mensaje("Comiste una ración (quedan %d)." % GameState.ops["raciones"])
-	elif GameState.ops["raciones"] <= 0:
-		_mostrar_mensaje("No quedan raciones en la despensa.")
-	else:
-		_mostrar_mensaje("La tripulación no tiene hambre todavía.")
-
-
 func _on_operaciones_terminadas(motivo: String) -> void:
-	_actualizar_tripulacion()
 	if MENSAJES_FIN.has(motivo):
 		_mostrar_mensaje(MENSAJES_FIN[motivo])
 

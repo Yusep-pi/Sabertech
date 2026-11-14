@@ -69,6 +69,11 @@ func _ready() -> void:
 	_jugador.consola_usada.connect(_usar)
 	add_child(_jugador)
 	_crear_compuerta()
+	# Con el traje no se come: las raciones se comen en el habitáculo o en la cabina.
+	var tripulacion := HudTripulacion.new()
+	tripulacion.ubicacion = HudTripulacion.TIRA_ABAJO
+	tripulacion.permitir_comer = false
+	add_child(tripulacion)
 
 	if GameState.vuelve_de_caminata:
 		# Volvemos de afuera: con el traje puesto, la escotilla abierta y la sala sin aire.
