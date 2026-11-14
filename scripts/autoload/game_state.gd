@@ -981,6 +981,33 @@ func _barajar(lista: Array) -> void:
 
 ## Calcula el puntaje y las frases que explican el resultado.
 ## {exito, puntaje, nota, ciencia, objetivo, sobrante, salud, frases}
+## Reglas del puntaje (las usan el informe y el tablero del habitáculo).
+const PUNTOS_CIENCIA := 600.0  ## por cumplir el objetivo de ciencia
+const TOPE_CIENCIA := 1.5  ## la ciencia cuenta hasta el 150% del objetivo
+const PUNTOS_POR_SALUD := 2.0  ## por cada punto de salud de la nave
+const PUNTOS_AHORRO := 100.0  ## ahorrar todo el presupuesto (cada 1% ahorrado suma 1)
+const MULTA_EXCESO := 800.0  ## pasarse del presupuesto resta 8 por cada 1%
+const MULTA_MAXIMA := 600.0
+## Notas por puntaje, de mayor a menor.
+const NOTAS := [[850, "Misión legendaria"], [650, "Misión exitosa"], [400, "Éxito parcial"], [0, "Misión con problemas"]]
+
+
+## Puntos de la partida hasta ahora: {ciencia, llegada, salud, presupuesto, total}.
+## Sirve durante el viaje (lo que se lleva) y al final (lo que da el informe).
+func desglose_puntaje() -> Dictionary:
+	var presupuesto: float = mision.get("presupuesto", 1.0)
+	var costo: float = medidores.get("costo", {}).get("valor", 0.0)
+	var fraccion := (presupuesto - costo) / presupuesto
+	var puntos := {
+		"ciencia": minf(ops.get("ciencia", 0.0) / mision.get("objetivo_ciencia", 1.0), TOPE_CIENCIA) * PUNTOS_CIENCIA,
+		"llegada": float(mision.get("viaje", {}).get("puntos_llegada", 0.0)) if ops.get("motivo_fin", "") == "llegada" else 0.0,
+		"salud": ops.get("salud", 0.0) * PUNTOS_POR_SALUD,
+		"presupuesto": fraccion * PUNTOS_AHORRO if fraccion >= 0.0 else maxf(fraccion * MULTA_EXCESO, -MULTA_MAXIMA),
+	}
+	puntos["total"] = maxi(roundi(puntos["ciencia"] + puntos["llegada"] + puntos["salud"] + puntos["presupuesto"]), 0)
+	return puntos
+
+
 func calcular_informe() -> Dictionary:
 	var presupuesto: float = mision.get("presupuesto", 1.0)
 	var sobrante: float = presupuesto - medidores["costo"]["valor"]
@@ -991,26 +1018,14 @@ func calcular_informe() -> Dictionary:
 	var perdida: bool = not llego or ops.get("turno_perdida", 0) > 0
 	var motivo_fin: String = ops.get("motivo_fin", "")
 
-	# Ciencia hasta 600 (900 si supera el objetivo), salud hasta 200, llegar al
-	# destino de un viaje suma puntos_llegada y presupuesto: ahorrar suma hasta 100,
-	# pero pasarse resta ocho veces más.
-	var puntaje := 0
-	if llego:
-		var fraccion_sobrante := sobrante / presupuesto
-		var puntos_presupuesto := fraccion_sobrante * 100.0 if sobrante >= 0.0 else maxf(fraccion_sobrante * 800.0, -600.0)
-		var puntos_llegada: float = mision.get("viaje", {}).get("puntos_llegada", 0.0) if motivo_fin == "llegada" else 0.0
-		puntaje = maxi(roundi(minf(ciencia / objetivo, 1.5) * 600.0 + puntos_presupuesto + salud * 2.0 + puntos_llegada), 0)
+	var puntaje: int = desglose_puntaje()["total"] if llego else 0
 
 	var nota := "Misión perdida"
 	if llego and not perdida:
-		if puntaje >= 850:
-			nota = "Misión legendaria"
-		elif puntaje >= 650:
-			nota = "Misión exitosa"
-		elif puntaje >= 400:
-			nota = "Éxito parcial"
-		else:
-			nota = "Misión con problemas"
+		for umbral in NOTAS:
+			if puntaje >= umbral[0]:
+				nota = umbral[1]
+				break
 	elif llego and motivo_fin == "frenado":
 		nota = "No pudo frenar"
 	elif llego and (motivo_fin == "hambre" or motivo_fin == "cordura"):

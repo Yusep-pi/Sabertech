@@ -38,6 +38,25 @@ func _recorrer() -> void:
 	_comprobar(sala.name == "SalaDos", "se llega al habitáculo")
 	_comprobar(sala._tripulacion.visible and sala._tripulacion._panel.visible, "el habitáculo muestra la tripulación")
 
+	# Tablero de puntos: muestra la partida en curso.
+	var tablero: TableroPuntos = sala.find_child("consola_tablero", true, false)
+	_comprobar(tablero != null, "el habitáculo tiene el tablero de puntos")
+	GameState.ops["ciencia"] = 120.0
+	sala._jugador.position = Vector3(-1.2, 0.05, -2.3)
+	sala._jugador.mirar_hacia(sala._interior.to_global(Vector3(-3.4, 1.65, -2.3)))
+	await _esperar(TableroPuntos.REFRESCO + 0.3)
+	_comprobar(tablero._en_vivo.text.contains("TOTAL"), "el tablero muestra el puntaje en vivo")
+	_comprobar(sala._jugador.consola_mirada() == "consola_tablero", "se puede mirar el tablero")
+	await _capturar("tablero_01_habitaculo")
+	sala._jugador.consola_usada.emit("consola_tablero")
+	await _esperar(0.3)
+	_comprobar(sala._guia != null and not sala._jugador.activo, "E en el tablero abre la guía de puntos")
+	await _capturar("tablero_02_guia")
+	_tecla(KEY_ESCAPE, true)
+	_tecla(KEY_ESCAPE, false)
+	await _esperar(0.3)
+	_comprobar(sala._guia == null and sala._jugador.activo, "Esc cierra la guía")
+
 	# Refrigerador: comer una ración.
 	GameState.cambiar_tripulacion(-50.0, 0.0)
 	var raciones: int = GameState.ops["raciones"]

@@ -4,6 +4,7 @@ extends Node3D
 ## Sala de planta cuadrada (a diferencia de la cabina alargada/cónica), equipada con:
 ## - Cama de tripulación: E para dormir (recupera cordura, da hambre y acelera el viaje).
 ## - Refrigerador / despensa criogénica: E para comer una ración.
+## - Tablero de puntos en la pared oeste: cómo se suma y cuánto lleva la partida.
 ## - Ventana panorámica con vista exterior (espacio/órbita o cielo) sobre la cama.
 ## - Puerta norte: vuelve a la cabina. Puerta sur (Módulo 03): lleva a la esclusa.
 ##   Las dos se cruzan manteniendo E (ver scripts/compuerta.gd).
@@ -14,6 +15,7 @@ const ALTURA_CARTEL := 2.75
 const NOMBRES_CONSOLA := {
 	"consola_cama": "Dormir",
 	"consola_refrigerador": "Comer una ración",
+	"consola_tablero": "Cómo sumar puntos",
 }
 
 var _jugador: Jugador
@@ -26,6 +28,8 @@ var _mira: Control
 var _mensaje: Label
 var _indicacion: Label
 var _tripulacion: HudTripulacion
+var _capa_guia: CanvasLayer
+var _guia: Control  # la guía de puntos abierta, o null
 
 
 func _ready() -> void:
@@ -36,6 +40,7 @@ func _ready() -> void:
 	_crear_cama()
 	_crear_refrigerador()
 	_crear_mobiliario_extra()
+	_crear_tablero()
 	_crear_puerta_decorativa()
 	_crear_luces()
 	_crear_marcador_puerta()
@@ -75,6 +80,12 @@ func _process(delta: float) -> void:
 
 
 func _input(evento: InputEvent) -> void:
+	# Con la guía de puntos abierta, E o Esc la cierran.
+	if _guia and evento is InputEventKey and evento.pressed and not evento.echo \
+			and (evento.physical_keycode == KEY_E or evento.physical_keycode == KEY_ESCAPE):
+		_cerrar_guia()
+		get_viewport().set_input_as_handled()
+		return
 	if evento is InputEventKey and evento.pressed and evento.physical_keycode == KEY_ESCAPE:
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -96,6 +107,22 @@ func _usar(consola: String) -> void:
 				_tripulacion.comer()
 			else:
 				_tripulacion.avisar("Las raciones son para el viaje.")
+		"consola_tablero":
+			_abrir_guia()
+
+
+func _abrir_guia() -> void:
+	_guia = TableroPuntos.crear_guia()
+	_capa_guia.add_child(_guia)
+	_jugador.activo = false
+	_mira.visible = false
+
+
+func _cerrar_guia() -> void:
+	_guia.queue_free()
+	_guia = null
+	_jugador.activo = not GameState.durmiendo()
+	_mira.visible = _jugador.activo
 
 
 func _on_sueno_cambiado(dormido: bool, _motivo: String) -> void:
@@ -429,6 +456,17 @@ func _crear_puerta_decorativa() -> void:
 	_interior.add_child(luz_puerta)
 
 
+# --- Tablero de puntos -------------------------------------------------------
+
+func _crear_tablero() -> void:
+	var tablero := TableroPuntos.new()
+	tablero.name = "consola_tablero"  # "consola_": se usa con E (ver jugador.gd)
+	# Pared oeste, entre la puerta de la cabina y el refrigerador, mirando a la sala.
+	tablero.position = Vector3(-3.4, 1.65, -2.3)
+	tablero.rotation_degrees.y = 90
+	_interior.add_child(tablero)
+
+
 # --- Mobiliario extra y detalles --------------------------------------------
 
 func _crear_mobiliario_extra() -> void:
@@ -577,6 +615,10 @@ func _crear_hud() -> void:
 
 	_tripulacion = HudTripulacion.new()
 	add_child(_tripulacion)
+
+	_capa_guia = CanvasLayer.new()
+	_capa_guia.layer = 5
+	add_child(_capa_guia)
 
 
 func _mostrar_mensaje(texto: String) -> void:
