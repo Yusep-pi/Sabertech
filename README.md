@@ -1,6 +1,6 @@
 # Sabertech — Misión Espacial
 
-Juego para el hackathon: diseñar, lanzar y operar una misión espacial. El contexto completo (concepto, fases, reparto, arte) está en [CONTEXTO.md](CONTEXTO.md).
+Juego para el hackathon: diseñar, lanzar y operar una misión espacial. El contexto completo (concepto, fases, reparto, arte) está en [CONTEXTO.md](CONTEXTO.md). La documentación completa del proyecto, de principio a fin (cómo se juega, arquitectura, reglas, 3D, estilo visual, pruebas, historia y pendientes), está en [docs/DOCUMENTACION.md](docs/DOCUMENTACION.md).
 
 Godot 4.6 o más nuevo. Abrir `project.godot` y ejecutar (F5): arranca en la cabina de la nave, en primera persona.
 
