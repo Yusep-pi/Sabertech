@@ -39,6 +39,12 @@ const BANCO := [
 	[Vector3(2.47, 0.75, 0.5), Vector3(0.06, 0.4, 1.3), "oscuro"],  # respaldo
 	[Vector3(1.98, 0.45, 0.5), Vector3(0.03, 0.03, 1.3), "aqua"],  # filo
 ]
+## La antena de la nave vista por el ventanal: dónde nace en el modelo (nave.glb),
+## dónde se ancla en el casco (afuera del ventanal), escala y hacia dónde apunta.
+const BASE_MASTIL := Vector3(0, 0.7, 1.15)
+const ANCLAJE_ANTENA := Vector3(-5.6, 0.9, 1.3)
+const ESCALA_ANTENA := 1.6
+const GIRO_ANTENA := 180.0  # el mástil corre paralelo al ventanal: se ve de perfil
 const COLORES_BANCO := {"casco_gris": Color("#9AA7B8"), "oscuro": Color("#2A3150"), "aqua": Color("#2EC4E6")}
 const LUZ_NORMAL := Color("#DDF4FF")
 const LUZ_ALARMA := Color("#FF3B2E")
@@ -316,10 +322,39 @@ func _armar_exterior() -> void:
 	add_child(sol)
 	add_child(Espacio.estrellas(900, 1500))
 	# La Tierra abajo a la izquierda, a la vista desde el ventanal.
-	# (La nave no se dibuja afuera: el jugador está adentro de ella.)
 	var planeta := Espacio.planeta("tierra", 600)
 	planeta.position = Vector3(-700, -520, 150)
 	add_child(planeta)
+	_armar_antena()
+
+
+## Por el ventanal se ve la antena de la propia nave, saliendo del casco: solo la
+## antena elegida en el diseño (sin el resto de la nave, porque estamos adentro).
+func _armar_antena() -> void:
+	var antena: String = GameState.pieza_elegida("comunicacion").get("id", "antena_alta")
+	var nave := Nave3D.new()
+	nave.mostrar([antena])
+	var casco := nave.find_child("nave_base", true, false) as Node3D
+	if casco:
+		casco.visible = false
+	nave.scale = Vector3.ONE * ESCALA_ANTENA
+	nave.rotation_degrees.y = GIRO_ANTENA
+	# En el modelo el mástil nace en BASE_MASTIL y apunta a +Z: lo llevamos a la punta
+	# del brazo que sale del casco.
+	nave.position = ANCLAJE_ANTENA - nave.basis * BASE_MASTIL
+	add_child(nave)
+	# El brazo que la sostiene, desde el casco (afuera del ventanal) hasta el mástil.
+	var brazo := MeshInstance3D.new()
+	var caja := BoxMesh.new()
+	var desde := Vector3(-2.75, ANCLAJE_ANTENA.y, ANCLAJE_ANTENA.z)
+	caja.size = Vector3(desde.x - ANCLAJE_ANTENA.x + 0.15, 0.14, 0.14)
+	var material := StandardMaterial3D.new()
+	material.resource_name = "casco_gris"  # Estilo le pone la textura retro
+	material.albedo_color = COLORES_BANCO["casco_gris"]
+	caja.material = material
+	brazo.mesh = caja
+	brazo.position = (desde + ANCLAJE_ANTENA) / 2.0
+	add_child(brazo)
 
 
 ## Antes del lanzamiento, por el ventanal se ve el cielo de la plataforma.
