@@ -243,9 +243,22 @@ El objetivo: verse como un juego de Nintendo 64 bien terminado, con luz moderna.
 | Luz | `estilo.gd` | Tonemapping filmic, bloom, sombreado en rincones (SSAO), luz rebotada (SSIL), contraste y saturación |
 | Sombras | `estilo.gd` | Todas las luces proyectan sombra; el sol tiene penumbra suave |
 | Niebla | `estilo.gd` | Niebla volumétrica suave en la cabina y la esclusa, sin teñir el espacio de afuera |
-| Material | `material_retro.gdshader` | Píxel nítido, proyección triplanar, relieve, brillo y metal por material, manchas de tono y desgaste |
+| Modelos | `blender/generar_modelos.py` | Bisel en los cantos, normales ponderadas y el doble de lados en cilindros y esferas |
+| Material | `material_retro.gdshader` | Filtrado suave con mipmaps (como la N64), proyección triplanar, relieve, brillo y metal por material, manchas de tono y desgaste |
+| Profundidad | `estilo.gd` | Desenfoque de lo lejano por escena y reflejos en pisos y metales (SSR) |
+| Carteles | `carteles_nitidos.gd` | Los carteles que flotan sobre todo se dibujan en 2D, siempre nítidos |
 | Contornos | `contornos.gdshader` | Línea fina azul noche en aristas y siluetas |
-| Filtro | `retro.gdshader` | Píxeles más grandes, tramado de color tipo N64, viñeta y grano; la interfaz queda nítida |
+| Filtro | `retro.gdshader` | Tramado de color tipo N64, aberración cromática leve, viñeta y grano, sin agrandar los píxeles (salvo en "Retro fuerte"); la interfaz queda nítida |
+
+### Cómo se dejó de ver "tipo Minecraft"
+
+La versión anterior se veía como bloques por tres motivos, y se resolvieron así:
+
+1. **Cajas con aristas filosas** → bisel y normales ponderadas en Blender: los cantos atrapan la luz y las caras grandes quedan planas.
+2. **Texturas con el píxel duro** (como Minecraft o PlayStation 1) → filtrado bilineal con mipmaps, que es lo que hacía la N64, y texturas de 256 px.
+3. **Pantalla pixelada al doble** → el toque retro pasó al color (bandas y tramado), los contornos y la paleta; los píxeles grandes quedaron como opción en "Retro fuerte".
+
+A eso se sumaron efectos de profundidad modernos: desenfoque de lo lejano, reflejos y una aberración cromática leve.
 
 ### Cómo se evita que las texturas se vean repetidas
 
@@ -265,7 +278,7 @@ Las 13 imágenes salieron de una sola conversación de Gemini para que combinen 
 1. Un **bloque de estilo** al principio (paleta estricta, look N64, sin texto ni sombras) y después un prompt por imagen. Todos están en [arte/PROMPTS_GEMINI.md](../arte/PROMPTS_GEMINI.md).
 2. Las imágenes se bajaron con el botón "Copiar imagen" de Gemini y un script que lee el portapapeles: las descargas directas no funcionaban con la configuración del navegador.
 3. Se revisaron repitiéndolas 2×2 para ver costuras.
-4. Se redujeron a tamaño N64 (128 px las texturas, 512×256 los planetas, 1024×512 el fondo) y se generaron los relieves:
+4. Se redujeron (256 px las texturas, 1024×512 los planetas y el fondo) y se generaron los relieves:
 
 ```bash
 python3 arte/generar_relieves.py

@@ -7,6 +7,10 @@ Low-poly con colores planos (sin texturas todavía). Correr desde la carpeta del
 Además guarda blender/sabertech.blend con todo separado para poder mirarlo y
 retocarlo a mano, y renders de revisión en blender/previews.
 
+Terminación: cada caja y cilindro lleva un bisel chico en los cantos y normales
+ponderadas por área (la técnica estándar del low-poly prolijo): las caras grandes
+quedan planas y los cantos atrapan la luz, en lugar de verse como bloques.
+
 Convención: en Blender el frente de cada modelo mira a +Y y arriba es +Z.
 En Godot eso queda como frente -Z y arriba +Y.
 
@@ -79,14 +83,36 @@ def mat(nombre):
 	return material(nombre, EMISIVOS.get(nombre, 0.0))
 
 
-def _objeto(nombre, malla, pos, rot, color, padre):
+## Bisel máximo de los cantos, en metros, y qué fracción de la medida más chica puede ocupar.
+BISEL = 0.035
+BISEL_FRACCION = 0.18
+
+
+def _objeto(nombre, malla, pos, rot, color, padre, medida_minima=0.0):
 	malla.materials.append(mat(color))
 	obj = bpy.data.objects.new(nombre, malla)
 	obj.location = pos
 	obj.rotation_euler = [math.radians(a) for a in rot]
 	bpy.context.scene.collection.objects.link(obj)
 	obj.parent = padre
+	_terminar(obj, min(BISEL, medida_minima * BISEL_FRACCION))
 	return obj
+
+
+def _terminar(obj, bisel):
+	"""Bisel en los cantos y normales ponderadas: se aplican al exportar."""
+	if bisel > 0.002:
+		mod = obj.modifiers.new("Bisel", "BEVEL")
+		mod.width = bisel
+		mod.segments = 2
+		mod.limit_method = "ANGLE"
+		mod.angle_limit = math.radians(35)
+		mod.use_clamp_overlap = True
+	obj.data.shade_smooth()
+	normales = obj.modifiers.new("Normales", "WEIGHTED_NORMAL")
+	normales.mode = "FACE_AREA"
+	normales.keep_sharp = True
+	normales.weight = 100
 
 
 def _malla(nombre, construir):
@@ -110,19 +136,22 @@ def vacio(nombre, padre=None, pos=(0, 0, 0)):
 def caja(nombre, tam, pos, color, padre, rot=(0, 0, 0)):
 	escala = Matrix.Diagonal((*tam, 1.0))
 	malla = _malla(nombre, lambda bm: bmesh.ops.create_cube(bm, size=1.0, matrix=escala))
-	return _objeto(nombre, malla, pos, rot, color, padre)
+	return _objeto(nombre, malla, pos, rot, color, padre, min(tam))
 
 
+## Los cilindros y esferas llevan el doble de lados que los pedidos: siguen siendo
+## low-poly, pero dejan de verse facetados de cerca.
 def cilindro(nombre, radio_abajo, radio_arriba, alto, pos, color, padre, rot=(0, 0, 0), lados=8):
 	def construir(bm):
-		bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=lados,
+		bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=max(lados * 2, 16),
 			radius1=radio_abajo, radius2=radio_arriba, depth=alto)
-	return _objeto(nombre, _malla(nombre, construir), pos, rot, color, padre)
+	medida = min(alto, max(radio_abajo, radio_arriba))
+	return _objeto(nombre, _malla(nombre, construir), pos, rot, color, padre, medida)
 
 
 def esfera(nombre, radio, pos, color, padre, segmentos=8, anillos=6):
 	def construir(bm):
-		bmesh.ops.create_uvsphere(bm, u_segments=segmentos, v_segments=anillos, radius=radio)
+		bmesh.ops.create_uvsphere(bm, u_segments=max(segmentos * 2, 16), v_segments=max(anillos * 2, 10), radius=radio)
 	return _objeto(nombre, _malla(nombre, construir), pos, (0, 0, 0), color, padre)
 
 
