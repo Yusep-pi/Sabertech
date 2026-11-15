@@ -72,7 +72,7 @@
 		"hambre_inicial": 100,
 		"cordura_inicial": 100,
 		"hambre_por_minuto": 12,
-		"cordura_por_minuto": 3,
+		"cordura_por_minuto": 9,
 		"raciones": 4,
 		"hambre_por_racion": 35,
 		"cordura_por_frio": 8,
