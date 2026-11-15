@@ -57,7 +57,6 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _cfg.is_empty():
 		_cfg = GameState.get_tripulacion().get("alucinaciones", {})
-	_bajar_cordura_de_prueba(delta)
 	intensidad = move_toward(intensidad, objetivo(), delta * 0.25)
 	_distorsion.visible = intensidad > 0.01
 	if _distorsion.visible:
@@ -65,15 +64,6 @@ func _process(delta: float) -> void:
 	_actualizar_eco(delta)
 	_actualizar_mensajes(delta)
 
-
-## Solo para probar (no existe en el juego exportado): mantener K baja la cordura
-## rápido para ver las alucinaciones sin esperar. Se frena en 1 para no perder la misión.
-func _bajar_cordura_de_prueba(delta: float) -> void:
-	if not OS.is_debug_build() or not Input.is_physical_key_pressed(KEY_K):
-		return
-	if not GameState.reloj_corriendo() or GameState.ops["cordura"] <= 1.0:
-		return
-	GameState.cambiar_tripulacion(0.0, -minf(15.0 * delta, GameState.ops["cordura"] - 1.0))
 
 
 ## Cuánto alucina la tripulación ahora (0 a 1), según la cordura.
