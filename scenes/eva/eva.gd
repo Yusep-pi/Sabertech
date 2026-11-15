@@ -88,7 +88,7 @@ func _ready() -> void:
 
 	_crear_hud()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	_mostrar_mensaje("Saliste por la escotilla. Arreglá los %d problemas y volvé antes de quedarte sin oxígeno." % _tareas.size())
+	_mostrar_mensaje(tr("Saliste por la escotilla. Arreglá los %d problemas y volvé antes de quedarte sin oxígeno.") % _tareas.size())
 
 
 func _process(delta: float) -> void:
@@ -149,7 +149,7 @@ func _armar_escotilla() -> void:
 	luz.omni_range = 6.0
 	luz.position = _escotilla + Vector3(_escotilla.x, 0, _escotilla.z).normalized() * 1.0
 	add_child(luz)
-	_marcador_escotilla = _marcador_3d("Escotilla · oxígeno y combustible", _escotilla + Vector3.UP * 2.5, Interfaz.LIMA)
+	_marcador_escotilla = _marcador_3d(tr("Escotilla · oxígeno y combustible"), _escotilla + Vector3.UP * 2.5, Interfaz.LIMA)
 	add_child(_marcador_escotilla)
 
 
@@ -319,7 +319,7 @@ func _armar_lluvia() -> void:
 	_lluvia_particulas.visibility_aabb = AABB(Vector3(-80, -80, -200), Vector3(160, 160, 220))
 	add_child(_lluvia_particulas)
 
-	_lluvia_marcador = _marcador_3d("☄ Micrometeoritos", Vector3.ZERO, Interfaz.ALERTA)
+	_lluvia_marcador = _marcador_3d(tr("☄ Micrometeoritos"), Vector3.ZERO, Interfaz.ALERTA)
 	_lluvia_marcador.font_size = 64
 	_lluvia_marcador.visible = false
 	add_child(_lluvia_marcador)
@@ -413,7 +413,7 @@ func _on_panel_resuelto(tarea: Dictionary) -> void:
 	_cerrar_panel()
 	GameState.cambiar_tripulacion(0.0, _efectos.get("cordura_por_tarea", 0.0))
 	var faltan := tareas_pendientes()
-	_mostrar_mensaje("¡Funciona! " + ("Volvé a la escotilla." if faltan == 0 else "Quedan %d problemas." % faltan))
+	_mostrar_mensaje(tr("¡Funciona! Volvé a la escotilla.") if faltan == 0 else tr("¡Funciona! Quedan %d problemas.") % faltan)
 
 
 func tareas_pendientes() -> int:
@@ -439,7 +439,7 @@ func _actualizar_lluvia(delta: float, en_escotilla: bool) -> void:
 			_lluvia_reloj = randf_range(lluvia["cada_min"], lluvia["cada_max"])
 			_lluvia_particulas.emitting = false
 			_lluvia_marcador.visible = false
-			_mostrar_mensaje("Pasó la lluvia de micrometeoritos.")
+			_mostrar_mensaje(tr("Pasó la lluvia de micrometeoritos."))
 		elif not en_escotilla and expuesto_a_la_lluvia():
 			_traje -= lluvia["dano_por_segundo"] * delta
 			_golpe.color.a = maxf(_golpe.color.a, 0.18)
@@ -475,19 +475,19 @@ func _on_choque(velocidad: float) -> void:
 		_traje -= (velocidad - segura) * _cfg.get("dano_por_choque", 8.0)
 		GameState.cambiar_tripulacion(0.0, -_efectos.get("cordura_por_golpe", 0.0))
 		_golpe.color.a = 0.5
-		_mostrar_mensaje("¡Golpe a %.1f m/s! El traje se dañó. Frená con X antes de llegar." % velocidad)
+		_mostrar_mensaje(tr("¡Golpe a %.1f m/s! El traje se dañó. Frená con X antes de llegar.") % velocidad)
 
 
 func _revisar_final(en_escotilla: bool) -> void:
 	var distancia := _astronauta.global_position.distance_to(_nave.global_position)
 	if _oxigeno <= 0.0:
-		_terminar(false, "Te quedaste sin oxígeno.")
+		_terminar(false, tr("Te quedaste sin oxígeno."))
 	elif _traje <= 0.0:
-		_terminar(false, "El traje no resistió más daño.")
+		_terminar(false, tr("El traje no resistió más daño."))
 	elif distancia > _cfg.get("distancia_maxima", 90.0) and _astronauta.combustible <= 0.0:
-		_terminar(false, "Quedaste a la deriva, sin combustible para volver.")
+		_terminar(false, tr("Quedaste a la deriva, sin combustible para volver."))
 	elif tareas_pendientes() == 0 and en_escotilla:
-		_terminar(true, "Todos los problemas resueltos y de vuelta en la nave.")
+		_terminar(true, tr("Todos los problemas resueltos y de vuelta en la nave."))
 
 
 ## Afuera se hace fuerza (más hambre); la lluvia encima y el aire que se acaba asustan.
@@ -505,9 +505,9 @@ func _afectar_tripulacion(delta: float, en_escotilla: bool) -> void:
 	elif _tiempo >= leve:
 		cordura -= _efectos.get("cordura_por_segundo_aislamiento", 0.0) * delta
 	if _tiempo >= leve and _tiempo - delta < leve:
-		_mostrar_mensaje("Llevás %d minutos afuera. El silencio empieza a pesar: la cordura baja." % roundi(leve / 60.0))
+		_mostrar_mensaje(tr("Llevás %d minutos afuera. El silencio empieza a pesar: la cordura baja.") % roundi(leve / 60.0))
 	elif _tiempo >= fuerte and _tiempo - delta < fuerte:
-		_mostrar_mensaje("Demasiado tiempo solo en el vacío. Volvé a la nave antes de perder la cabeza.")
+		_mostrar_mensaje(tr("Demasiado tiempo solo en el vacío. Volvé a la nave antes de perder la cabeza."))
 	GameState.cambiar_tripulacion(-_efectos.get("hambre_por_minuto", 0.0) * delta / 60.0, cordura)
 
 
@@ -532,20 +532,20 @@ func _terminar(victoria: bool, motivo: String) -> void:
 	centro.add_child(panel)
 	var caja := Interfaz.vbox(14)
 	panel.add_child(caja)
-	caja.add_child(Interfaz.etiqueta("¡Caminata completada!" if victoria else "Caminata fallida", Interfaz.LIMA if victoria else Interfaz.ALERTA, 30))
+	caja.add_child(Interfaz.etiqueta(tr("¡Caminata completada!") if victoria else tr("Caminata fallida"), Interfaz.LIMA if victoria else Interfaz.ALERTA, 30))
 	caja.add_child(Interfaz.parrafo(motivo, Interfaz.BLANCO, 18))
-	caja.add_child(Interfaz.parrafo("Tiempo afuera: %d:%02d · Oxígeno restante: %d s · Traje: %d%% · Problemas resueltos: %d de %d" % [
+	caja.add_child(Interfaz.parrafo(tr("Tiempo afuera: %d:%02d · Oxígeno restante: %d s · Traje: %d%% · Problemas resueltos: %d de %d") % [
 		int(_tiempo) / 60, int(_tiempo) % 60, maxi(0, roundi(_oxigeno)), maxi(0, roundi(_traje)),
 		_tareas.size() - tareas_pendientes(), _tareas.size()], Interfaz.CIAN, 16))
 	var botones := Interfaz.hbox(12)
 	caja.add_child(botones)
 	# Ganando se vuelve a entrar por la escotilla; perdiendo se empieza de nuevo desde la esclusa.
-	var esclusa := Interfaz.boton_principal("Volver a la esclusa" if victoria else "Reintentar desde la esclusa", 20)
+	var esclusa := Interfaz.boton_principal(tr("Volver a la esclusa") if victoria else tr("Reintentar desde la esclusa"), 20)
 	esclusa.pressed.connect(func() -> void:
 		GameState.vuelve_de_caminata = victoria
 		get_tree().change_scene_to_file(ESCENA_ESCLUSA))
 	botones.add_child(esclusa)
-	var repetir := Interfaz.boton("Repetir la caminata", 20)
+	var repetir := Interfaz.boton(tr("Repetir la caminata"), 20)
 	repetir.pressed.connect(func() -> void: get_tree().reload_current_scene())
 	botones.add_child(repetir)
 	_fin = capa
@@ -635,7 +635,7 @@ func _crear_hud() -> void:
 	hud.add_child(_datos_vuelo)
 
 	var controles := Interfaz.etiqueta(
-		"WASD: propulsar · Espacio/Ctrl: subir/bajar · Shift: turbo · X: frenar · Z/C: rotar · E: abrir panel · Esc: soltar el panel o el mouse",
+		tr("WASD: propulsar · Espacio/Ctrl: subir/bajar · Shift: turbo · X: frenar · Z/C: rotar · E: abrir panel · Esc: soltar el panel o el mouse"),
 		Color(Interfaz.CIAN, 0.7), 13)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(24, -26)
@@ -655,39 +655,39 @@ func _crear_hud() -> void:
 func _actualizar_hud(en_escotilla: bool) -> void:
 	var oxigeno_max: float = _cfg.get("oxigeno_segundos", 240.0)
 	var combustible_max: float = _cfg.get("combustible", 100.0)
-	_pintar("oxigeno", "Oxígeno: %d:%02d" % [maxi(0, int(_oxigeno)) / 60, maxi(0, int(_oxigeno)) % 60], _oxigeno / oxigeno_max, _oxigeno < 45.0)
-	_pintar("combustible", "Combustible: %d%%" % roundi(_astronauta.combustible / combustible_max * 100), _astronauta.combustible / combustible_max, _astronauta.combustible < 20.0)
-	_pintar("traje", "Traje: %d%%" % maxi(0, roundi(_traje)), _traje / 100.0, _traje < 35.0)
+	_pintar("oxigeno", tr("Oxígeno: %d:%02d") % [maxi(0, int(_oxigeno)) / 60, maxi(0, int(_oxigeno)) % 60], _oxigeno / oxigeno_max, _oxigeno < 45.0)
+	_pintar("combustible", tr("Combustible: %d%%") % roundi(_astronauta.combustible / combustible_max * 100), _astronauta.combustible / combustible_max, _astronauta.combustible < 20.0)
+	_pintar("traje", tr("Traje: %d%%") % maxi(0, roundi(_traje)), _traje / 100.0, _traje < 35.0)
 
 	var lineas := []
 	for tarea in _tareas:
 		var distancia := _astronauta.global_position.distance_to(tarea["posicion"])
 		lineas.append(("✓ %s" % tarea["titulo"]) if tarea["hecha"] else ("%s · %d m  ◆" % [tarea["titulo"], roundi(distancia)]))
 	if tareas_pendientes() == 0:
-		lineas.append("Volvé a la escotilla · %d m" % roundi(_astronauta.global_position.distance_to(_escotilla)))
+		lineas.append(tr("Volvé a la escotilla · %d m") % roundi(_astronauta.global_position.distance_to(_escotilla)))
 	_lista_tareas.text = "\n".join(lineas)
 
 	var tarea := tarea_al_alcance()
 	if not _tarea_abierta.is_empty():
 		_indicacion.text = ""
 	elif not tarea.is_empty():
-		_indicacion.text = "[E] Abrir el panel · %s" % tarea["titulo"]
+		_indicacion.text = tr("[E] Abrir el panel · %s") % tarea["titulo"]
 	elif en_escotilla:
-		_indicacion.text = "Recargando oxígeno y combustible"
+		_indicacion.text = tr("Recargando oxígeno y combustible")
 	else:
 		_indicacion.text = ""
 
 	match _lluvia_fase:
 		"aviso":
-			_alerta.text = "☄ Lluvia de micrometeoritos en %d s · cubrite detrás de la nave o entrá a la escotilla" % ceili(_lluvia_reloj)
+			_alerta.text = tr("☄ Lluvia de micrometeoritos en %d s · cubrite detrás de la nave o entrá a la escotilla") % ceili(_lluvia_reloj)
 		"activa":
-			var peligro := "¡ESTÁS EXPUESTO!" if not en_escotilla and expuesto_a_la_lluvia() else "A cubierto"
-			_alerta.text = "☄ Lluvia de micrometeoritos · %s · %d s" % [peligro, ceili(_lluvia_reloj)]
+			var peligro := tr("¡ESTÁS EXPUESTO!") if not en_escotilla and expuesto_a_la_lluvia() else tr("A cubierto")
+			_alerta.text = tr("☄ Lluvia de micrometeoritos · %s · %d s") % [peligro, ceili(_lluvia_reloj)]
 		_:
 			_alerta.text = ""
 
 	var distancia_nave := _astronauta.global_position.distance_to(_nave.global_position)
-	_datos_vuelo.text = "Velocidad %.1f m/s\nDistancia a la nave %d m" % [_astronauta.velocity.length(), roundi(distancia_nave)]
+	_datos_vuelo.text = tr("Velocidad %.1f m/s\nDistancia a la nave %d m") % [_astronauta.velocity.length(), roundi(distancia_nave)]
 	_datos_vuelo.modulate = Interfaz.ALERTA if distancia_nave > _cfg.get("distancia_maxima", 90.0) * 0.7 else Color.WHITE
 
 

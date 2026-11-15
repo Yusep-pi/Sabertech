@@ -142,15 +142,15 @@ func _construir_ui() -> void:
 	var caja := Interfaz.vbox(12)
 	panel.add_child(caja)
 
-	caja.add_child(Interfaz.etiqueta("Panel de reparación · " + titulo, Interfaz.AQUA, 22))
-	caja.add_child(Interfaz.parrafo("Ajustá los controles hasta que todos los indicadores queden en la zona verde. Cada perilla mueve más de un indicador. El oxígeno sigue corriendo.", Interfaz.CIAN, 15))
+	caja.add_child(Interfaz.etiqueta(tr("Panel de reparación · %s") % titulo, Interfaz.AQUA, 22))
+	caja.add_child(Interfaz.parrafo(tr("Ajustá los controles hasta que todos los indicadores queden en la zona verde. Cada perilla mueve más de un indicador. El oxígeno sigue corriendo."), Interfaz.CIAN, 15))
 
 	var columnas := Interfaz.hbox(28)
 	caja.add_child(columnas)
 	var izquierda := Interfaz.vbox(10)
 	izquierda.custom_minimum_size.x = 340
 	columnas.add_child(izquierda)
-	izquierda.add_child(Interfaz.etiqueta("Indicadores", Interfaz.BLANCO, 17))
+	izquierda.add_child(Interfaz.etiqueta(tr("Indicadores"), Interfaz.BLANCO, 17))
 	for indicador in _indicadores:
 		izquierda.add_child(Interfaz.etiqueta(indicador["nombre"], Interfaz.CIAN, 15))
 		var medidor := Medidor.new()
@@ -167,7 +167,7 @@ func _construir_ui() -> void:
 	var derecha := Interfaz.vbox(10)
 	derecha.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columnas.add_child(derecha)
-	derecha.add_child(Interfaz.etiqueta("Controles", Interfaz.BLANCO, 17))
+	derecha.add_child(Interfaz.etiqueta(tr("Controles"), Interfaz.BLANCO, 17))
 	for i in _controles.size():
 		var fila := Interfaz.hbox(8)
 		var nombre := Interfaz.etiqueta(_controles[i]["nombre"], Interfaz.CIAN, 15)
@@ -200,7 +200,7 @@ func _construir_ui() -> void:
 
 	_estado = Interfaz.etiqueta("", Interfaz.ALERTA, 18)
 	caja.add_child(_estado)
-	caja.add_child(Interfaz.etiqueta("Esc: soltarte del panel (lo que ajustaste queda así)", Color(Interfaz.CIAN, 0.7), 13))
+	caja.add_child(Interfaz.etiqueta(tr("Esc: soltarte del panel (lo que ajustaste queda así)"), Color(Interfaz.CIAN, 0.7), 13))
 
 
 ## El rango que puede recorrer un indicador con todas las combinaciones posibles.
@@ -229,15 +229,15 @@ func _actualizar() -> void:
 		indicador["medidor"].queue_redraw()
 		var diferencia: float = valor - indicador["centro"]
 		if absf(diferencia) <= _tolerancia:
-			indicador["estado"].text = "En rango ✓"
+			indicador["estado"].text = tr("En rango ✓")
 			indicador["estado"].add_theme_color_override("font_color", Interfaz.LIMA)
 			en_verde += 1
 		else:
-			indicador["estado"].text = "Muy alto" if diferencia > 0 else "Muy bajo"
+			indicador["estado"].text = tr("Muy alto") if diferencia > 0 else tr("Muy bajo")
 			indicador["estado"].add_theme_color_override("font_color", Interfaz.ALERTA)
 	if en_verde == _indicadores.size():
-		_estado.text = "¡Funciona! Mantené así..."
+		_estado.text = tr("¡Funciona! Mantené así...")
 		_estado.add_theme_color_override("font_color", Interfaz.LIMA)
 	else:
-		_estado.text = "%d de %d indicadores en verde" % [en_verde, _indicadores.size()]
+		_estado.text = tr("%d de %d indicadores en verde") % [en_verde, _indicadores.size()]
 		_estado.add_theme_color_override("font_color", Interfaz.ALERTA)

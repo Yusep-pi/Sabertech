@@ -4,6 +4,18 @@ Juego para el hackathon: diseñar, lanzar y operar una misión espacial. El cont
 
 Godot 4.7. Abrir `project.godot` y ejecutar (F5): arranca en la **pantalla de inicio** (`scenes/inicio/`), con la nave en órbita de fondo. *Comenzar misión* lleva a la cabina, en primera persona.
 
+## Idiomas (español / inglés)
+
+En el menú de inicio, las banderas de **Paraguay** (español) y **EE.UU.** (inglés) cambian el idioma de todo el juego; la elección se guarda en `user://ajustes.cfg` (autoload `Idioma`, `scripts/autoload/idioma.gd`).
+
+El español es el idioma fuente: se sigue escribiendo en español. El inglés está en `idiomas/en.po` (`msgid` = texto en español, `msgstr` = inglés). Para que un texto nuevo se traduzca:
+
+- **En el código:** envolverlo en `tr("...")` (en funciones `static`, `TranslationServer.translate("...")`). Con formato, traducir antes: `tr("Hambre: %d%%") % valor`.
+- **En `datos.json`:** nada; `GameState` traduce los textos al cargarlos (salvo ids y comentarios `_...`).
+- Agregar la entrada a `idiomas/en.po` y revisar con `python3 idiomas/revisar_traducciones.py`, que lista lo que falta traducir.
+
+Si falta una traducción, el juego muestra el español: no se rompe nada.
+
 ## Cordura y alucinaciones
 
 La cordura de la tripulación baja con el tiempo y se recupera **durmiendo** en la cama del habitáculo. Afuera también baja: con la lluvia, los golpes, el poco oxígeno y, pasados **3 minutos** de caminata, por la soledad (más rápido desde los **5 minutos**).

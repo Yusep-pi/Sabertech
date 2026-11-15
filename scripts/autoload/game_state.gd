@@ -99,13 +99,38 @@ func cargar_datos(ruta: String = RUTA_DATOS) -> void:
 	if json.parse(FileAccess.get_file_as_string(ruta)) != OK:
 		push_error("GameState: error en %s, línea %d: %s" % [ruta, json.get_error_line(), json.get_error_message()])
 		return
-	datos = json.data
+	datos = _traducir_datos(json.data)
 	_piezas_por_id.clear()
 	for pieza in datos.get("piezas", []):
 		_piezas_por_id[pieza["id"]] = pieza
 	_categorias_por_id.clear()
 	for categoria in datos.get("categorias", []):
 		_categorias_por_id[categoria["id"]] = categoria
+
+
+## Claves de datos.json cuyos valores son ids o referencias, no texto: no se traducen.
+## Además, nunca se traduce un valor con forma de id ("panel_grande", "componente"):
+## así "piezas" (la lista de piezas) sí se traduce, y sus listas de ids en las tareas no.
+const CLAVES_SIN_TRADUCIR := ["id", "categoria", "nave_por_defecto", "tipo",
+		"destino", "romper", "reparar", "evitable_con", "objetivo_id", "requiere", "pieza"]
+static var _forma_de_id := RegEx.create_from_string("^[a-z0-9_]+$")
+
+
+## Traduce los textos de datos.json al idioma actual (ver el autoload Idioma).
+## Las claves que empiezan con "_" son comentarios y quedan como están.
+func _traducir_datos(valor: Variant, clave := "") -> Variant:
+	if clave.begins_with("_") or clave in CLAVES_SIN_TRADUCIR:
+		return valor
+	if valor is Dictionary:
+		var traducido := {}
+		for k in valor:
+			traducido[k] = _traducir_datos(valor[k], str(k))
+		return traducido
+	if valor is Array:
+		return valor.map(func(v: Variant) -> Variant: return _traducir_datos(v, clave))
+	if valor is String:
+		return valor if _forma_de_id.search(valor) else tr(valor)
+	return valor
 
 
 ## Navegación entre fases. "lanzamiento" es la cinemática; las demás pantallas
@@ -309,11 +334,11 @@ func recalcular() -> void:
 	var delta_v := calcular_delta_v(propulsion.get("isp", 0.0), masa_total, masa_seca)
 
 	medidores = {
-		"costo": _medidor("Presupuesto", costo, mision.get("presupuesto", 0.0), "M$", false),
-		"masa": _medidor("Masa", masa_total, capacidad, "kg", false),
-		"energia": _medidor("Energía", consumo, generacion, "W", false),
-		"datos": _medidor("Datos", datos_generados, transmitibles, "u/turno", false),
-		"delta_v": _medidor("Delta-v", delta_v, mision.get("delta_v", 0.0), "m/s", true),
+		"costo": _medidor(tr("Presupuesto"), costo, mision.get("presupuesto", 0.0), tr("M$"), false),
+		"masa": _medidor(tr("Masa"), masa_total, capacidad, "kg", false),
+		"energia": _medidor(tr("Energía"), consumo, generacion, "W", false),
+		"datos": _medidor(tr("Datos"), datos_generados, transmitibles, tr("u/turno"), false),
+		"delta_v": _medidor(tr("Delta-v"), delta_v, mision.get("delta_v", 0.0), "m/s", true),
 	}
 	detalle = {
 		"masa_seca": masa_seca,
@@ -578,13 +603,13 @@ func terminar_turno() -> Dictionary:
 		ops["apagones"] += 1
 		ops["salud"] -= DANO_APAGON
 		ops["bateria"] = 0.0
-		resumen["mensajes"].append("Apagón: no alcanzó la energía ni para los sistemas básicos.")
+		resumen["mensajes"].append(tr("Apagón: no alcanzó la energía ni para los sistemas básicos."))
 	else:
 		ops["bateria"] = minf(capacidad_bateria, energia["disponible"] - energia["consumo"])
 		if not plan["calefaccion"]:
 			ops["turnos_frio"] += 1
 			ops["salud"] -= mision.get("dano_frio", 0.0)
-			resumen["mensajes"].append("Sin calefacción: la electrónica y la tripulación sufrieron el frío.")
+			resumen["mensajes"].append(tr("Sin calefacción: la electrónica y la tripulación sufrieron el frío."))
 			cambiar_tripulacion(0.0, -get_tripulacion().get("cordura_por_frio", 0.0))
 		_generar_datos(resumen)
 		if plan["transmitir"]:
@@ -601,7 +626,7 @@ func terminar_turno() -> Dictionary:
 		ops["terminada"] = true
 		ops["motivo_fin"] = "salud"
 		ops["turno_perdida"] = resumen["turno"]
-		resumen["mensajes"].append("Se perdió el contacto con la nave.")
+		resumen["mensajes"].append(tr("Se perdió el contacto con la nave."))
 	elif ops["turno"] > ops["turnos"]:
 		ops["terminada"] = true
 		ops["motivo_fin"] = "turnos"
@@ -612,7 +637,7 @@ func terminar_turno() -> Dictionary:
 				# Llegó sin delta-v para frenar: pasa de largo.
 				ops["motivo_fin"] = "frenado"
 				ops["turno_perdida"] = resumen["turno"]
-				resumen["mensajes"].append("No alcanzó el delta-v para frenar: la nave pasó de largo.")
+				resumen["mensajes"].append(tr("No alcanzó el delta-v para frenar: la nave pasó de largo."))
 			else:
 				ops["motivo_fin"] = "llegada"
 	turno_terminado.emit(resumen)
@@ -666,14 +691,14 @@ func durmiendo() -> bool:
 ## "" si la tripulación puede irse a dormir ahora, o el motivo por el que no.
 func motivo_no_dormir() -> String:
 	if not reloj_corriendo():
-		return "Ahora no hace falta dormir."
+		return tr("Ahora no hace falta dormir.")
 	var cfg: Dictionary = get_tripulacion().get("dormir", {})
 	if not ops["evento_actual"].is_empty():
-		return "Hay una alerta en la cabina: resolvela antes de dormir."
+		return tr("Hay una alerta en la cabina: resolvela antes de dormir.")
 	if ops["hambre"] <= cfg.get("hambre_minima", 0.0):
-		return "Con tanta hambre no se puede dormir. Comé algo primero."
+		return tr("Con tanta hambre no se puede dormir. Comé algo primero.")
 	if ops["cordura"] > cfg.get("cordura_maxima_para_dormir", 100.0):
-		return "La tripulación no tiene sueño todavía (cordura %d%%)." % roundi(ops["cordura"])
+		return tr("La tripulación no tiene sueño todavía (cordura %d%%).") % roundi(ops["cordura"])
 	return ""
 
 
@@ -842,7 +867,7 @@ func _generar_datos(resumen: Dictionary) -> void:
 	resumen["generados"] = total
 	resumen["perdidos"] = perdidos
 	if perdidos > 0.0:
-		resumen["mensajes"].append("Memoria llena: se perdieron %d datos." % roundi(perdidos))
+		resumen["mensajes"].append(tr("Memoria llena: se perdieron %d datos.") % roundi(perdidos))
 
 
 func _transmitir(resumen: Dictionary) -> void:
@@ -883,7 +908,7 @@ func _ajustar_plan() -> void:
 			plan["instrumentos"][clave] = false
 			apagados.append(get_pieza(clave)["nombre"])
 	if not apagados.is_empty():
-		ops["avisos"].append("No alcanza la energía: se apagó " + ", ".join(apagados) + ".")
+		ops["avisos"].append(tr("No alcanza la energía: se apagó %s.") % ", ".join(apagados))
 
 
 func _esta_activo(clave: String) -> bool:
@@ -929,7 +954,7 @@ func _preparar_evento(id: String) -> Dictionary:
 	if respaldo != "" and tiene_pieza(respaldo):
 		ops["respaldos"].append(objetivo["nombre"])
 		evento["texto"] = evento.get("texto_evitado", "").format({"componente": objetivo["nombre"]})
-		evento["opciones"] = [{"texto": "Continuar", "efectos": {}, "resultado": "El respaldo funcionó."}]
+		evento["opciones"] = [{"texto": tr("Continuar"), "efectos": {}, "resultado": tr("El respaldo funcionó.")}]
 	else:
 		ops["rotas"].append(objetivo["id"])
 	return evento
@@ -943,7 +968,7 @@ func _aplicar_efectos(efectos: Dictionary, objetivo_id: String) -> Array:
 		if cambio < 0.0:
 			cambio *= 1.0 - proteccion
 			if proteccion > 0.0:
-				mensajes.append("El blindaje absorbió parte del daño.")
+				mensajes.append(tr("El blindaje absorbió parte del daño."))
 		ops["salud"] = clampf(ops["salud"] + cambio, 0.0, 100.0)
 	if efectos.has("sin_ciencia_turnos"):
 		ops["sin_ciencia_turnos"] = maxi(ops["sin_ciencia_turnos"], int(efectos["sin_ciencia_turnos"]))
@@ -963,14 +988,14 @@ func _aplicar_efectos(efectos: Dictionary, objetivo_id: String) -> Array:
 		var id: String = objetivo_id if efectos["romper"] == "objetivo" else _instrumento_sano_al_azar()
 		if id != "" and rng.randf() < probabilidad * (1.0 - proteccion):
 			ops["rotas"].append(id)
-			mensajes.append("Quedó fuera de servicio: %s." % get_pieza(id)["nombre"])
+			mensajes.append(tr("Quedó fuera de servicio: %s.") % get_pieza(id)["nombre"])
 	if efectos.has("reparar") and objetivo_id != "":
 		var nombre: String = get_pieza(objetivo_id)["nombre"]
 		if rng.randf() < probabilidad:
 			ops["rotas"].erase(objetivo_id)
-			mensajes.append("¡%s volvió a funcionar!" % nombre)
+			mensajes.append(tr("¡%s volvió a funcionar!") % nombre)
 		else:
-			mensajes.append("%s no respondió al reinicio." % nombre)
+			mensajes.append(tr("%s no respondió al reinicio.") % nombre)
 	return mensajes
 
 
@@ -1122,8 +1147,9 @@ func _frases_informe(ciencia: float, objetivo: float, sobrante: float, presupues
 static func _miles(valor: float) -> String:
 	var texto := str(roundi(valor))
 	var resultado := ""
+	var separador := "," if TranslationServer.get_locale().begins_with("en") else "."
 	while texto.length() > 3:
-		resultado = "." + texto.right(3) + resultado
+		resultado = separador + texto.right(3) + resultado
 		texto = texto.left(texto.length() - 3)
 	return texto + resultado
 

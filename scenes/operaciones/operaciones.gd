@@ -68,7 +68,7 @@ func _construir_ui() -> void:
 	_paso.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_paso.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	abajo.add_child(_paso)
-	_boton_turno = Interfaz.boton_principal("Terminar turno  ⏎", 24)
+	_boton_turno = Interfaz.boton_principal(tr("Terminar turno  ⏎"), 24)
 	_boton_turno.pressed.connect(_on_boton_turno)
 	abajo.add_child(_boton_turno)
 	columna.add_child(abajo)
@@ -79,7 +79,7 @@ func _construir_estado() -> Control:
 	panel.custom_minimum_size.x = 280
 	var caja := Interfaz.vbox(6)
 	panel.add_child(caja)
-	caja.add_child(Interfaz.etiqueta("Estado de la nave", Interfaz.AQUA, 18))
+	caja.add_child(Interfaz.etiqueta(tr("Estado de la nave"), Interfaz.AQUA, 18))
 	for clave in ["salud", "bateria", "memoria"]:
 		var texto := Interfaz.etiqueta("", Interfaz.BLANCO)
 		var barra := Interfaz.barra()
@@ -99,19 +99,19 @@ func _construir_plan() -> Control:
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var caja := Interfaz.vbox(8)
 	panel.add_child(caja)
-	caja.add_child(Interfaz.etiqueta("Plan de energía del turno", Interfaz.AQUA, 18))
+	caja.add_child(Interfaz.etiqueta(tr("Plan de energía del turno"), Interfaz.AQUA, 18))
 	_texto_energia = Interfaz.parrafo("", Interfaz.BLANCO)
 	caja.add_child(_texto_energia)
 	_barra_energia = Interfaz.barra()
 	caja.add_child(_barra_energia)
-	caja.add_child(Interfaz.etiqueta("Sistemas básicos: −%d W (siempre encendidos)" % roundi(GameState.get_nave_base().get("consumo", 0.0)), Interfaz.CIAN))
+	caja.add_child(Interfaz.etiqueta(tr("Sistemas básicos: −%d W (siempre encendidos)") % roundi(GameState.get_nave_base().get("consumo", 0.0)), Interfaz.CIAN))
 
 	_agregar_interruptor(caja, "calefaccion")
 	_agregar_interruptor(caja, "transmitir")
 	for pieza in GameState.piezas_elegidas("instrumento"):
 		_agregar_interruptor(caja, pieza["id"])
 	if GameState.piezas_elegidas("instrumento").is_empty():
-		caja.add_child(Interfaz.parrafo("La nave no lleva instrumentos: no hay ciencia para captar.", Interfaz.ALERTA))
+		caja.add_child(Interfaz.parrafo(tr("La nave no lleva instrumentos: no hay ciencia para captar."), Interfaz.ALERTA))
 
 	caja.add_child(HSeparator.new())
 	_prevision = Interfaz.parrafo("", Interfaz.LIMA)
@@ -128,7 +128,7 @@ func _construir_bitacora() -> Control:
 	panel.custom_minimum_size.x = 320
 	var caja := Interfaz.vbox(6)
 	panel.add_child(caja)
-	caja.add_child(Interfaz.etiqueta("Bitácora", Interfaz.AQUA, 18))
+	caja.add_child(Interfaz.etiqueta(tr("Bitácora"), Interfaz.AQUA, 18))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -157,28 +157,28 @@ func _actualizar() -> void:
 	var energia := GameState.energia_turno()
 	var condicion := GameState.condicion_turno()
 
-	_turno.text = ("Tramo %d / %d" if GameState.tiene_viaje() else "Turno %d / %d") % [mini(ops["turno"], ops["turnos"]), ops["turnos"]]
+	_turno.text = (tr("Tramo %d / %d") if GameState.tiene_viaje() else tr("Turno %d / %d")) % [mini(ops["turno"], ops["turnos"]), ops["turnos"]]
 	_condicion.text = "" if condicion.is_empty() else "%s: %s" % [condicion["nombre"], condicion["descripcion"]]
 	var objetivo: float = mision["objetivo_ciencia"]
-	_ciencia.text = "Ciencia entregada: %d / %d" % [roundi(ops["ciencia"]), roundi(objetivo)]
+	_ciencia.text = tr("Ciencia entregada: %d / %d") % [roundi(ops["ciencia"]), roundi(objetivo)]
 	_barra_ciencia.value = minf(ops["ciencia"] / objetivo, 1.0)
 
 	var base := GameState.get_nave_base()
-	_pintar_estado("salud", "Salud: %d%%" % roundi(ops["salud"]), ops["salud"] / 100.0, ops["salud"] < 40.0)
-	_pintar_estado("bateria", "Batería: %d / %d" % [roundi(ops["bateria"]), roundi(base["bateria"])], ops["bateria"] / base["bateria"], false)
+	_pintar_estado("salud", tr("Salud: %d%%") % roundi(ops["salud"]), ops["salud"] / 100.0, ops["salud"] < 40.0)
+	_pintar_estado("bateria", tr("Batería: %d / %d") % [roundi(ops["bateria"]), roundi(base["bateria"])], ops["bateria"] / base["bateria"], false)
 	var memoria := GameState.datos_almacenados()
-	_pintar_estado("memoria", "Memoria: %d / %d datos" % [roundi(memoria), roundi(base["almacenamiento"])], memoria / base["almacenamiento"], memoria >= base["almacenamiento"] * 0.9)
+	_pintar_estado("memoria", tr("Memoria: %d / %d datos") % [roundi(memoria), roundi(base["almacenamiento"])], memoria / base["almacenamiento"], memoria >= base["almacenamiento"] * 0.9)
 	if GameState.tiene_viaje():
-		_texto_dv.text = ("Delta-v para frenar en la Luna: sobran %d m/s" if ops["dv_restante"] >= 0.0 else "¡Faltan %d m/s de delta-v para frenar en la Luna!") % roundi(absf(ops["dv_restante"]))
+		_texto_dv.text = (tr("Delta-v para frenar en la Luna: sobran %d m/s") if ops["dv_restante"] >= 0.0 else tr("¡Faltan %d m/s de delta-v para frenar en la Luna!")) % roundi(absf(ops["dv_restante"]))
 		_texto_dv.add_theme_color_override("font_color", Interfaz.CIAN if ops["dv_restante"] >= 0.0 else Interfaz.ALERTA)
 	else:
-		_texto_dv.text = "Delta-v de reserva: %d m/s" % roundi(ops["dv_restante"])
+		_texto_dv.text = tr("Delta-v de reserva: %d m/s") % roundi(ops["dv_restante"])
 	var rotas := []
 	for id in ops["rotas"]:
 		rotas.append(GameState.get_pieza(id)["nombre"])
-	_texto_rotas.text = "" if rotas.is_empty() else "Fuera de servicio: " + ", ".join(rotas)
+	_texto_rotas.text = "" if rotas.is_empty() else tr("Fuera de servicio: %s") % ", ".join(rotas)
 
-	_texto_energia.text = "Generación %d W + batería %d = %d W disponibles · usando %d W" % [
+	_texto_energia.text = tr("Generación %d W + batería %d = %d W disponibles · usando %d W") % [
 		roundi(energia["generacion"]), roundi(energia["bateria"]), roundi(energia["disponible"]), roundi(energia["consumo"])]
 	_barra_energia.value = energia["consumo"] / energia["disponible"] if energia["disponible"] > 0.0 else 1.0
 	Interfaz.color_barra(_barra_energia, Interfaz.ALERTA if energia["consumo"] > energia["disponible"] else Interfaz.AQUA)
@@ -194,29 +194,29 @@ func _actualizar() -> void:
 	_avisos.text = "\n".join(ops["avisos"])
 	_actualizar_boton_turno()
 	if ops["terminada"]:
-		_paso.text = "La misión terminó. Mirá cómo te fue →"
+		_paso.text = tr("La misión terminó. Mirá cómo te fue →")
 	elif not ops["evento_actual"].is_empty():
-		_paso.text = "Primero decidí qué hacer con el evento."
+		_paso.text = tr("Primero decidí qué hacer con el evento.")
 	elif GameState.tiene_viaje():
-		_paso.text = "Elegí qué encender: el tramo se cierra solo al avanzar el viaje →"
+		_paso.text = tr("Elegí qué encender: el tramo se cierra solo al avanzar el viaje →")
 	else:
-		_paso.text = "Paso siguiente: elegí qué encender y terminá el turno →"
+		_paso.text = tr("Paso siguiente: elegí qué encender y terminá el turno →")
 
 
 ## En el viaje a la Luna los turnos se cierran solos: el botón muestra cuánto falta.
 func _actualizar_boton_turno() -> void:
 	var ops := GameState.ops
 	if ops["terminada"]:
-		_boton_turno.text = "Ver informe  ⏎"
+		_boton_turno.text = tr("Ver informe  ⏎")
 		_boton_turno.disabled = false
 	elif GameState.tiene_viaje():
 		_boton_turno.disabled = true
 		if ops["evento_actual"].is_empty():
-			_boton_turno.text = "Próximo tramo en %d s" % ceili(GameState.segundos_para_tramo())
+			_boton_turno.text = tr("Próximo tramo en %d s") % ceili(GameState.segundos_para_tramo())
 		else:
-			_boton_turno.text = "Viaje en espera"
+			_boton_turno.text = tr("Viaje en espera")
 	else:
-		_boton_turno.text = "Terminar turno  ⏎"
+		_boton_turno.text = tr("Terminar turno  ⏎")
 
 
 func _pintar_estado(clave: String, texto: String, proporcion: float, alerta: bool) -> void:
@@ -229,20 +229,20 @@ func _texto_interruptor(clave: String) -> String:
 	var consumo := GameState.consumo_de(clave)
 	match clave:
 		"calefaccion":
-			return "Calefacción  ·  −%d W  ·  sin ella la nave se daña" % roundi(consumo)
+			return tr("Calefacción  ·  −%d W  ·  sin ella la nave se daña") % roundi(consumo)
 		"transmitir":
-			var texto := "Transmitir a la Tierra  ·  −%d W  ·  envía hasta %d datos" % [roundi(consumo), roundi(GameState.capacidad_transmision())]
-			return texto + ("  (antena dañada)" if _esta_roto(clave) else "")
+			var texto := tr("Transmitir a la Tierra  ·  −%d W  ·  envía hasta %d datos") % [roundi(consumo), roundi(GameState.capacidad_transmision())]
+			return texto + (tr("  (antena dañada)") if _esta_roto(clave) else "")
 	var pieza := GameState.get_pieza(clave)
 	if _esta_roto(clave):
-		return "%s  ·  fuera de servicio" % pieza["nombre"]
-	return "%s  ·  −%d W  ·  +%d datos (×%.1f ciencia)" % [
+		return tr("%s  ·  fuera de servicio") % pieza["nombre"]
+	return tr("%s  ·  −%d W  ·  +%d datos (×%.1f ciencia)") % [
 		pieza["nombre"], roundi(consumo), roundi(GameState.datos_de_instrumento(clave)), pieza.get("ciencia", 1.0)]
 
 
 func _texto_prevision() -> String:
 	if GameState.ops["terminada"]:
-		return "Operaciones terminadas."
+		return tr("Operaciones terminadas.")
 	var nuevos := 0.0
 	for id in GameState.plan["instrumentos"]:
 		if GameState.plan["instrumentos"][id]:
@@ -250,15 +250,15 @@ func _texto_prevision() -> String:
 	var memoria := GameState.datos_almacenados()
 	var capacidad: float = GameState.get_nave_base()["almacenamiento"]
 	var guardados := minf(memoria + nuevos, capacidad)
-	var texto := "Este turno: +%d datos nuevos" % roundi(nuevos)
+	var texto := tr("Este turno: +%d datos nuevos") % roundi(nuevos)
 	if memoria + nuevos > capacidad:
-		texto += " (se perderán %d por memoria llena)" % roundi(memoria + nuevos - capacidad)
+		texto += tr(" (se perderán %d por memoria llena)") % roundi(memoria + nuevos - capacidad)
 	if GameState.plan["transmitir"]:
-		texto += " · se enviarán %d" % roundi(minf(guardados, GameState.capacidad_transmision()))
+		texto += tr(" · se enviarán %d") % roundi(minf(guardados, GameState.capacidad_transmision()))
 	else:
-		texto += " · no se transmite nada"
+		texto += tr(" · no se transmite nada")
 	if GameState.ops["sin_ciencia_turnos"] > 0:
-		texto += "\nLos instrumentos no captan nada este turno."
+		texto += tr("\nLos instrumentos no captan nada este turno.")
 	return texto
 
 
@@ -267,10 +267,10 @@ func _texto_pronostico() -> String:
 	var ops := GameState.ops
 	if ops["terminada"]:
 		return ""
-	var texto := "Batería al terminar el turno: %d / %d" % [roundi(GameState.bateria_al_terminar()), roundi(GameState.get_nave_base()["bateria"])]
+	var texto := tr("Batería al terminar el turno: %d / %d") % [roundi(GameState.bateria_al_terminar()), roundi(GameState.get_nave_base()["bateria"])]
 	var proxima := GameState.condicion_de_turno(ops["turno"] + 1)
 	if ops["turno"] < ops["turnos"] and not proxima.is_empty():
-		texto += "\nPróximo turno: %s. %s" % [proxima["nombre"], proxima["descripcion"]]
+		texto += tr("\nPróximo turno: %s. %s") % [proxima["nombre"], proxima["descripcion"]]
 	return texto
 
 
@@ -293,7 +293,7 @@ func _esta_roto(clave: String) -> bool:
 func _on_interruptor(activo: bool, clave: String) -> void:
 	if not GameState.cambiar_plan(clave, activo):
 		_interruptores[clave].set_pressed_no_signal(not activo)
-		_avisos.text = "No alcanza la energía para encender eso. Apagá otra cosa primero."
+		_avisos.text = tr("No alcanza la energía para encender eso. Apagá otra cosa primero.")
 
 
 func _unhandled_key_input(evento: InputEvent) -> void:
@@ -325,10 +325,12 @@ func _on_turno_iniciado(_turno_nuevo: int) -> void:
 
 
 func _on_turno_terminado(resumen: Dictionary) -> void:
-	var linea := "T%d" % resumen["turno"]
+	var cifras := [roundi(resumen["generados"]), roundi(resumen["transmitidos"]), roundi(resumen["ciencia"])]
+	var linea: String
 	if resumen["condicion"] != "":
-		linea += " (%s)" % resumen["condicion"]
-	linea += ": +%d datos, enviados %d, ciencia +%d." % [roundi(resumen["generados"]), roundi(resumen["transmitidos"]), roundi(resumen["ciencia"])]
+		linea = tr("T%d (%s): +%d datos, enviados %d, ciencia +%d.") % ([resumen["turno"], resumen["condicion"]] + cifras)
+	else:
+		linea = tr("T%d: +%d datos, enviados %d, ciencia +%d.") % ([resumen["turno"]] + cifras)
 	for mensaje in resumen["mensajes"]:
 		linea += " " + mensaje
 	_bitacora.text = linea + "\n\n" + _bitacora.text
@@ -360,26 +362,26 @@ func _mostrar_evento(evento: Dictionary) -> void:
 	var caja := Interfaz.vbox(14)
 	panel.add_child(caja)
 
-	caja.add_child(Interfaz.etiqueta("¡" + evento["titulo"] + "!", Interfaz.ALERTA, 28))
+	caja.add_child(Interfaz.etiqueta(tr("¡%s!") % evento["titulo"], Interfaz.ALERTA, 28))
 	caja.add_child(Interfaz.parrafo(evento["texto"], Interfaz.BLANCO, 18))
 	for i in evento["opciones"].size():
 		var opcion: Dictionary = evento["opciones"][i]
 		var boton := Interfaz.boton(opcion["texto"], 18)
 		boton.disabled = not GameState.opcion_disponible(opcion)
 		if boton.disabled:
-			boton.text += "  (no alcanza el delta-v)"
+			boton.text += tr("  (no alcanza el delta-v)")
 		boton.pressed.connect(_on_opcion.bind(i, caja))
 		caja.add_child(boton)
 
 
 func _on_opcion(indice: int, caja: VBoxContainer) -> void:
 	var resultado := GameState.resolver_evento(indice)
-	_bitacora.text = "Evento: %s\n\n%s" % [resultado, _bitacora.text]
+	_bitacora.text = tr("Evento: %s\n\n%s") % [resultado, _bitacora.text]
 	for hijo in caja.get_children():
 		if hijo is Button:
 			hijo.queue_free()
 	caja.add_child(Interfaz.parrafo(resultado, Interfaz.LIMA, 18))
-	var continuar := Interfaz.boton("Continuar", 18)
+	var continuar := Interfaz.boton(tr("Continuar"), 18)
 	continuar.pressed.connect(func() -> void:
 		_capa_evento.queue_free()
 		_boton_turno.disabled = false

@@ -14,6 +14,8 @@ var _carpeta := "res://capturas"  # dentro del proyecto (fuera de Git), no en el
 
 
 func _ready() -> void:
+	# Los textos se comprueban en español, sin tocar el idioma guardado del jugador.
+	Idioma.usar("es")
 	DirAccess.make_dir_recursive_absolute(_carpeta)
 	_recorrer.call_deferred()
 

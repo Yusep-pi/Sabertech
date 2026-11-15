@@ -60,7 +60,7 @@ func _ready() -> void:
 	_caja = BoxContainer.new()
 	_caja.add_theme_constant_override("separation", 6)
 	_panel.add_child(_caja)
-	_titulo = Interfaz.etiqueta("Tripulación", Interfaz.AQUA, 16)
+	_titulo = Interfaz.etiqueta(tr("Tripulación"), Interfaz.AQUA, 16)
 	_caja.add_child(_titulo)
 	for clave in ["hambre", "cordura"]:
 		var grupo := Interfaz.vbox(2)
@@ -75,7 +75,7 @@ func _ready() -> void:
 	_raciones = Interfaz.etiqueta("", Interfaz.CIAN, 14)
 	_caja.add_child(_raciones)
 	_grupo_viaje = Interfaz.vbox(2)
-	_titulo_viaje = Interfaz.etiqueta("Viaje a la Luna", Interfaz.AQUA, 14)
+	_titulo_viaje = Interfaz.etiqueta(tr("Viaje a la Luna"), Interfaz.AQUA, 14)
 	_grupo_viaje.add_child(_titulo_viaje)
 	_barra_viaje = Interfaz.barra(Interfaz.CIAN)
 	_barra_viaje.custom_minimum_size.y = 10
@@ -141,11 +141,11 @@ func _input(evento: InputEvent) -> void:
 
 func comer() -> void:
 	if GameState.comer_racion():
-		avisar("Comiste una ración (quedan %d)." % GameState.ops["raciones"])
+		avisar(tr("Comiste una ración (quedan %d).") % GameState.ops["raciones"])
 	elif GameState.ops["raciones"] <= 0:
-		avisar("No quedan raciones en la despensa.")
+		avisar(tr("No quedan raciones en la despensa."))
 	else:
-		avisar("La tripulación no tiene hambre todavía.")
+		avisar(tr("La tripulación no tiene hambre todavía."))
 
 
 ## Mensaje corto abajo al centro, que se desvanece solo.
@@ -169,10 +169,10 @@ func actualizar() -> void:
 	var ops := GameState.ops
 	for clave in _barras:
 		var valor: float = ops[clave]
-		_barras[clave]["texto"].text = "%s: %d%%" % [clave.capitalize(), roundi(valor)]
+		_barras[clave]["texto"].text = (tr("Hambre: %d%%") if clave == "hambre" else tr("Cordura: %d%%")) % roundi(valor)
 		_barras[clave]["barra"].value = valor / 100.0
 		Interfaz.color_barra(_barras[clave]["barra"], Interfaz.ALERTA if valor < UMBRAL else Interfaz.LIMA)
-	_raciones.text = "Raciones: %d" % ops["raciones"] + ("  ·  [F] comer" if permitir_comer else "")
+	_raciones.text = tr("Raciones: %d") % ops["raciones"] + (tr("  ·  [F] comer") if permitir_comer else "")
 	_grupo_viaje.visible = GameState.tiene_viaje()
 	if _grupo_viaje.visible:
 		var viaje: Dictionary = ops["viaje"]
@@ -180,19 +180,19 @@ func actualizar() -> void:
 		var minutos := GameState.minutos_para_llegar()
 		var llegada := "%d:%02d" % [floori(minutos), floori(fmod(minutos * 60.0, 60.0))]
 		if ubicacion != PANEL:
-			_texto_viaje.text = "Luna %d%% · llegada en %s" % [floori(GameState.progreso_viaje() * 100), llegada]
+			_texto_viaje.text = tr("Luna %d%% · llegada en %s") % [floori(GameState.progreso_viaje() * 100), llegada]
 		else:
-			_texto_viaje.text = "%s / %s km · %s m/s\nLlegada en %s" % [
+			_texto_viaje.text = tr("%s / %s km · %s m/s\nLlegada en %s") % [
 				GameState._miles(viaje["recorrido_km"]), GameState._miles(viaje["distancia_km"]), GameState._miles(viaje["velocidad"]), llegada]
 	var evento: Dictionary = ops["evento_actual"]
 	if not en_cabina and not evento.is_empty():
-		_alerta.text = "⚠ %s · volvé a la cabina para decidir%s" % [evento["titulo"], " (el viaje espera)" if GameState.tiene_viaje() else ""]
+		_alerta.text = tr("⚠ %s · volvé a la cabina para decidir%s") % [evento["titulo"], tr(" (el viaje espera)") if GameState.tiene_viaje() else ""]
 	else:
 		_alerta.text = ""
 	if GameState.durmiendo():
 		var aceleracion: float = GameState.get_tripulacion().get("dormir", {}).get("aceleracion", 1.0)
 		var veces := str(roundi(aceleracion)) if is_equal_approx(aceleracion, roundf(aceleracion)) else str(aceleracion)
-		_texto_sueno.text = "Zzz… la tripulación duerme.\nEl viaje avanza ×%s · la cordura se recupera y el hambre aprieta.\n\nCualquier tecla: despertar" % veces
+		_texto_sueno.text = tr("Zzz… la tripulación duerme.\nEl viaje avanza ×%s · la cordura se recupera y el hambre aprieta.\n\nCualquier tecla: despertar") % veces
 
 
 func _ubicar() -> void:
@@ -232,19 +232,19 @@ func _on_sueno_cambiado(dormido: bool, motivo: String) -> void:
 		_aviso.text = ""
 	actualizar()
 	if not dormido and MENSAJES_DESPERTAR.has(motivo):
-		avisar(MENSAJES_DESPERTAR[motivo])
+		avisar(tr(MENSAJES_DESPERTAR[motivo]))
 
 
 func _on_operaciones_terminadas(motivo: String) -> void:
 	actualizar()
 	# Al alunizar no se termina acá: falta bajar a plantar la bandera.
 	if motivo == "llegada":
-		avisar("¡La nave alunizó! Ponete el traje en la esclusa y bajá a plantar la bandera.")
+		avisar(tr("¡La nave alunizó! Ponete el traje en la esclusa y bajá a plantar la bandera."))
 		return
 	if en_cabina:
 		return
 	# Fuera de la cabina no hay consola para el informe: se vuelve a la cabina sola.
-	avisar("La misión terminó. Volviendo a la cabina para el informe…")
+	avisar(tr("La misión terminó. Volviendo a la cabina para el informe…"))
 	await get_tree().create_timer(ESPERA_INFORME).timeout
 	if is_inside_tree():
 		GameState.pantalla_pendiente = "informe"

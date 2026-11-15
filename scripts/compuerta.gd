@@ -91,7 +91,7 @@ func _process(delta: float) -> void:
 		_caja_progreso.visible = false
 		_tiempo = 0.0
 		return
-	_indicacion.text = "[Mantener E] " + _actual["texto"]
+	_indicacion.text = tr("[Mantener E] %s") % tr(_actual["texto"])
 	_indicacion.add_theme_color_override("font_color", Interfaz.BLANCO)
 	if Input.is_physical_key_pressed(KEY_E):
 		_tiempo += delta

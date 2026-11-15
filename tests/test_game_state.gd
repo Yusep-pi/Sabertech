@@ -7,6 +7,8 @@ var _fallos := 0
 
 
 func _initialize() -> void:
+	# Los textos se comprueban en español (el idioma del sistema podría ser otro).
+	TranslationServer.set_locale("es")
 	var gs: Node = load("res://scripts/autoload/game_state.gd").new()
 	gs.cargar_datos()
 	gs.rng.seed = 1234

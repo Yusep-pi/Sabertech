@@ -16,6 +16,7 @@ config/features=PackedStringArray("4.7")
 
 [autoload]
 
+Idioma="*res://scripts/autoload/idioma.gd"
 GameState="*res://scripts/autoload/game_state.gd"
 Estilo="*res://scripts/autoload/estilo.gd"
 Alucinaciones="*res://scripts/autoload/alucinaciones.gd"
@@ -31,3 +32,8 @@ window/stretch/aspect="expand"
 [rendering]
 
 rendering_device/driver.windows="vulkan"
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://idiomas/en.po")
+locale/fallback="es"

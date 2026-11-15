@@ -108,15 +108,15 @@ func _ready() -> void:
 		_poner_alarma(true)
 		_jugador.position = Vector3(0, 0.05, -1.8)
 		_jugador.mirar_hacia(PANTALLA_ESCOTILLA)
-		_mostrar_mensaje("De vuelta adentro. Cerrá la escotilla desde el panel para presurizar.")
+		_mostrar_mensaje(tr("De vuelta adentro. Cerrá la escotilla desde el panel para presurizar."))
 	elif GameState.origen_transicion == "habitaculo":
 		_jugador.position = Vector3(0, 0.05, 2.0)
 		_jugador.mirar_hacia(CENTRO_ESCOTILLA)
-		_mostrar_mensaje("Esclusa. Para salir, primero ponete el traje: está colgado en el armario.")
+		_mostrar_mensaje(tr("Esclusa. Para salir, primero ponete el traje: está colgado en el armario."))
 	else:
 		_jugador.position = Vector3(-0.4, 0.05, 1.9)
 		_jugador.mirar_hacia(CENTRO_ESCOTILLA)
-		_mostrar_mensaje("Esclusa. Para salir, primero ponete el traje: está colgado en el armario.")
+		_mostrar_mensaje(tr("Esclusa. Para salir, primero ponete el traje: está colgado en el armario."))
 	GameState.origen_transicion = ""
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_actualizar_hud()
@@ -147,13 +147,13 @@ func _usar(consola: String) -> void:
 			elif estado == "con_traje":
 				_quitarse_traje()
 			else:
-				_mostrar_mensaje("Con la esclusa sin aire no te podés sacar el traje.")
+				_mostrar_mensaje(tr("Con la esclusa sin aire no te podés sacar el traje."))
 		"consola_escotilla":
 			if estado == "sin_traje":
-				_mostrar_mensaje("¡Sin traje no! Abrir la escotilla vacía la esclusa. Ponete el traje primero.")
+				_mostrar_mensaje(tr("¡Sin traje no! Abrir la escotilla vacía la esclusa. Ponete el traje primero."))
 			elif estado == "con_traje":
 				if en_plataforma():
-					_mostrar_mensaje("La nave todavía está en la plataforma: las caminatas espaciales son en órbita.")
+					_mostrar_mensaje(tr("La nave todavía está en la plataforma: las caminatas espaciales son en órbita."))
 				else:
 					_despresurizar()
 			elif estado == "abierta":
@@ -170,39 +170,39 @@ func _crear_compuerta() -> void:
 	var compuerta := Compuerta.new()
 	compuerta.jugador = _jugador
 	compuerta.agregar(func() -> bool: return _jugador.position.z > 2.2 and absf(_jugador.position.x) < 1.0,
-		"Ir al habitáculo", "habitaculo", "esclusa", _motivo_puerta_cerrada)
+		tr("Ir al habitáculo"), "habitaculo", "esclusa", _motivo_puerta_cerrada)
 	add_child(compuerta)
 
 
 func _motivo_puerta_cerrada() -> String:
 	if presion < PRESION:
-		return "La puerta no abre: del otro lado hay aire y acá no."
+		return tr("La puerta no abre: del otro lado hay aire y acá no.")
 	if estado != "sin_traje":
-		return "Sacate el traje en el armario antes de volver a la nave."
+		return tr("Sacate el traje en el armario antes de volver a la nave.")
 	return ""
 
 
 func _ponerse_traje() -> void:
 	_jugador.activo = false
-	await _fundir(1.0, "Poniéndote el traje...")
+	await _fundir(1.0, tr("Poniéndote el traje..."))
 	_traje.visible = false
 	_visor.visible = true
 	estado = "con_traje"
 	await _fundir(0.0)
 	_jugador.activo = true
-	_mostrar_mensaje("Traje sellado. Ahora usá el panel de la escotilla para despresurizar y abrir.")
+	_mostrar_mensaje(tr("Traje sellado. Ahora usá el panel de la escotilla para despresurizar y abrir."))
 
 
 func _quitarse_traje() -> void:
 	_jugador.activo = false
-	await _fundir(1.0, "Sacándote el traje...")
+	await _fundir(1.0, tr("Sacándote el traje..."))
 	_traje.visible = true
 	_visor.visible = false
 	estado = "sin_traje"
 	_volvio = false
 	await _fundir(0.0)
 	_jugador.activo = true
-	_mostrar_mensaje("Bienvenido de vuelta. Misión afuera terminada.")
+	_mostrar_mensaje(tr("Bienvenido de vuelta. Misión afuera terminada."))
 
 
 ## Alarma, la presión baja, el aire se va por la ventilación y la escotilla se abre.
@@ -218,7 +218,7 @@ func _despresurizar() -> void:
 	abrir.tween_property(_puerta, "position", _cerrada + Vector3(APERTURA, 0, 0), 1.5)
 	await abrir.finished
 	estado = "abierta"
-	_mostrar_mensaje("Escotilla abierta. Salí cuando quieras.")
+	_mostrar_mensaje(tr("Escotilla abierta. Salí cuando quieras."))
 
 
 func _presurizar() -> void:
@@ -231,7 +231,7 @@ func _presurizar() -> void:
 	await tween.finished
 	_poner_alarma(false)
 	estado = "con_traje"
-	_mostrar_mensaje("Esclusa presurizada. Ya te podés sacar el traje en el armario.")
+	_mostrar_mensaje(tr("Esclusa presurizada. Ya te podés sacar el traje en el armario."))
 
 
 func _salir() -> void:
@@ -239,10 +239,10 @@ func _salir() -> void:
 	_jugador.activo = false
 	# Con la nave en la Luna, la escotilla da a la superficie: el final del juego.
 	if GameState.alunizado():
-		await _fundir(1.0, "Bajando a la superficie lunar...")
+		await _fundir(1.0, tr("Bajando a la superficie lunar..."))
 		get_tree().change_scene_to_file(GameState.AMBIENTES["superficie"])
 	else:
-		await _fundir(1.0, "Saliendo al espacio...")
+		await _fundir(1.0, tr("Saliendo al espacio..."))
 		get_tree().change_scene_to_file(ESCENA_CAMINATA)
 
 
@@ -491,7 +491,7 @@ func _crear_hud() -> void:
 	_mensaje.offset_top = 52
 	hud.add_child(_mensaje)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
+	var controles := Interfaz.etiqueta(tr("WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · Esc: soltar el mouse"), Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)
@@ -517,35 +517,35 @@ func _actualizar_hud() -> void:
 
 	match estado:
 		"sin_traje":
-			_objetivo.text = "Objetivo: ponete el traje (armario a la derecha)."
+			_objetivo.text = tr("Objetivo: ponete el traje (armario a la derecha).")
 		"con_traje":
-			_objetivo.text = "Objetivo: sacate el traje en el armario." if _volvio else "Objetivo: despresurizá y abrí la escotilla desde su panel."
+			_objetivo.text = tr("Objetivo: sacate el traje en el armario.") if _volvio else tr("Objetivo: despresurizá y abrí la escotilla desde su panel.")
 		"despresurizando":
-			_objetivo.text = "Despresurizando..."
+			_objetivo.text = tr("Despresurizando...")
 		"abierta":
 			if _volvio:
-				_objetivo.text = "Objetivo: cerrá la escotilla desde el panel."
+				_objetivo.text = tr("Objetivo: cerrá la escotilla desde el panel.")
 			else:
-				_objetivo.text = "Objetivo: bajá a la Luna por la escotilla." if GameState.alunizado() else "Objetivo: salí por la escotilla."
+				_objetivo.text = tr("Objetivo: bajá a la Luna por la escotilla.") if GameState.alunizado() else tr("Objetivo: salí por la escotilla.")
 		"presurizando":
-			_objetivo.text = "Presurizando..."
+			_objetivo.text = tr("Presurizando...")
 
-	_estado_traje.text = "Traje sellado · oxígeno de la nave" if _visor.visible else ""
+	_estado_traje.text = tr("Traje sellado · oxígeno de la nave") if _visor.visible else ""
 	var ciclo := estado in ["despresurizando", "presurizando", "abierta"]
 	_texto_presion.get_parent().visible = ciclo
-	_texto_presion.text = "⚠ Presión de la esclusa: %d kPa" % roundi(presion)
+	_texto_presion.text = tr("⚠ Presión de la esclusa: %d kPa") % roundi(presion)
 	_barra_presion.value = presion
 
-	var texto_panel := "ESCOTILLA\n"
+	var texto_panel := tr("ESCOTILLA") + "\n"
 	match estado:
 		"sin_traje", "con_traje":
-			texto_panel += "Cerrada · %d kPa\n[E] Despresurizar" % roundi(presion)
+			texto_panel = tr("ESCOTILLA\nCerrada · %d kPa\n[E] Despresurizar") % roundi(presion)
 		"despresurizando":
-			texto_panel += "DESPRESURIZANDO\n%d kPa" % roundi(presion)
+			texto_panel = tr("ESCOTILLA\nDESPRESURIZANDO\n%d kPa") % roundi(presion)
 		"abierta":
-			texto_panel += "ABIERTA · vacío\n[E] Cerrar"
+			texto_panel = tr("ESCOTILLA\nABIERTA · vacío\n[E] Cerrar")
 		"presurizando":
-			texto_panel += "PRESURIZANDO\n%d kPa" % roundi(presion)
+			texto_panel = tr("ESCOTILLA\nPRESURIZANDO\n%d kPa") % roundi(presion)
 	_texto_panel.text = texto_panel
 	_texto_panel.modulate = Interfaz.ALERTA if presion < PRESION else Interfaz.CIAN
 
@@ -555,18 +555,18 @@ func _accion(consola: String) -> String:
 	match consola:
 		"consola_armario":
 			if estado == "sin_traje":
-				return "Ponerte el traje"
-			return "Sacarte el traje" if estado == "con_traje" else NOMBRES[consola]
+				return tr("Ponerte el traje")
+			return tr("Sacarte el traje") if estado == "con_traje" else tr(NOMBRES[consola])
 		"consola_escotilla":
 			match estado:
 				"con_traje":
-					return "Despresurizar y abrir"
+					return tr("Despresurizar y abrir")
 				"abierta":
-					return "Cerrar y presurizar"
+					return tr("Cerrar y presurizar")
 				"sin_traje":
-					return NOMBRES[consola]
+					return tr(NOMBRES[consola])
 			return ""
-	return NOMBRES.get(consola, "")
+	return tr(NOMBRES[consola]) if NOMBRES.has(consola) else ""
 
 
 func _mostrar_mensaje(texto: String) -> void:

@@ -46,7 +46,7 @@ func _ready() -> void:
 	luz.emission = Color(Interfaz.AQUA) * 0.8
 	_caja(Vector3(0, ALTO / 2.0 + 0.07, -0.01), Vector3(ANCHO + 0.1, 0.03, 0.05), luz)
 
-	var titulo := _texto("PUNTAJE", Interfaz.AQUA, 80)
+	var titulo := _texto(tr("PUNTAJE"), Interfaz.AQUA, 80)
 	titulo.position = Vector3(0, ALTO / 2.0 - 0.13, 0.02)
 	add_child(titulo)
 
@@ -55,7 +55,7 @@ func _ready() -> void:
 	_en_vivo.line_spacing = 4
 	add_child(_en_vivo)
 
-	var pie := _texto("[E] Cómo sumar más", Interfaz.LIMA, 52)
+	var pie := _texto(tr("[E] Cómo sumar más"), Interfaz.LIMA, 52)
 	pie.position = Vector3(0, -ALTO / 2.0 + 0.11, 0.02)
 	add_child(pie)
 	_actualizar()
@@ -74,15 +74,15 @@ static func _lineas_guia() -> Array:
 	var llegada: float = mision.get("viaje", {}).get("puntos_llegada", 0.0)
 	var ciencia_max := GameState.PUNTOS_CIENCIA * GameState.TOPE_CIENCIA
 	return [
-		"◆ Ciencia: hasta %d. Cumplir el objetivo (%d) da %d; pasarlo sigue sumando hasta el %d%% (%d de ciencia)." % [
+		TranslationServer.translate("◆ Ciencia: hasta %d. Cumplir el objetivo (%d) da %d; pasarlo sigue sumando hasta el %d%% (%d de ciencia).") % [
 			roundi(ciencia_max), roundi(objetivo), roundi(GameState.PUNTOS_CIENCIA), roundi(GameState.TOPE_CIENCIA * 100), roundi(objetivo * GameState.TOPE_CIENCIA)],
-		"   La ciencia solo cuenta cuando se TRANSMITE: no dejes la antena apagada. Más instrumentos dan más datos, si alcanza la energía.",
-		"◆ Llegar a la Luna y frenar: +%d. Guardá delta-v para el final." % roundi(llegada),
-		"◆ Salud de la nave: x%d (hasta %d). Calefacción prendida y blindaje." % [roundi(GameState.PUNTOS_POR_SALUD), roundi(GameState.PUNTOS_POR_SALUD * 100)],
-		"◆ Presupuesto: cada 1%% ahorrado suma 1; cada 1%% de más RESTA %d." % roundi(GameState.MULTA_EXCESO / 100.0),
-		"◆ Si el hambre o la cordura llegan a 0, la misión se pierde.",
-		"◆ Dormir en la cama acelera el viaje, pero da hambre: llevá raciones suficientes.",
-		"Notas: " + "  ·  ".join(GameState.NOTAS.slice(0, 3).map(func(n): return "%s %d+" % [_mayuscula(n[1].trim_prefix("Misión ")), n[0]])),
+		TranslationServer.translate("   La ciencia solo cuenta cuando se TRANSMITE: no dejes la antena apagada. Más instrumentos dan más datos, si alcanza la energía."),
+		TranslationServer.translate("◆ Llegar a la Luna y frenar: +%d. Guardá delta-v para el final.") % roundi(llegada),
+		TranslationServer.translate("◆ Salud de la nave: x%d (hasta %d). Calefacción prendida y blindaje.") % [roundi(GameState.PUNTOS_POR_SALUD), roundi(GameState.PUNTOS_POR_SALUD * 100)],
+		TranslationServer.translate("◆ Presupuesto: cada 1%% ahorrado suma 1; cada 1%% de más RESTA %d.") % roundi(GameState.MULTA_EXCESO / 100.0),
+		TranslationServer.translate("◆ Si el hambre o la cordura llegan a 0, la misión se pierde."),
+		TranslationServer.translate("◆ Dormir en la cama acelera el viaje, pero da hambre: llevá raciones suficientes."),
+		TranslationServer.translate("Notas: %s") % "  ·  ".join(GameState.NOTAS.slice(0, 3).map(func(n): return "%s %d+" % [TranslationServer.translate(_mayuscula(n[1].trim_prefix("Misión "))), n[0]])),
 	]
 
 
@@ -93,25 +93,25 @@ func _actualizar() -> void:
 ## Lo que lleva la partida, renglón por renglón. corto: para la pared.
 static func lineas_en_vivo(corto: bool) -> Array:
 	if GameState.mision.is_empty() or GameState.medidores.is_empty():
-		return ["Todavía no hay nave.", "Diseñala en la cabina."]
+		return [TranslationServer.translate("Todavía no hay nave."), TranslationServer.translate("Diseñala en la cabina.")]
 	var puntos := GameState.desglose_puntaje()
 	var presupuesto := "%+d" % roundi(puntos["presupuesto"])
 	if not GameState.en_orbita():
-		return ["En la plataforma", "Presupuesto %s" % presupuesto, "Despegá para sumar ciencia."]
+		return [TranslationServer.translate("En la plataforma"), TranslationServer.translate("Presupuesto %s") % presupuesto, TranslationServer.translate("Despegá para sumar ciencia.")]
 	var ops := GameState.ops
 	var objetivo: float = GameState.mision.get("objetivo_ciencia", 1.0)
 	var por_llegar: float = GameState.mision.get("viaje", {}).get("puntos_llegada", 0.0)
-	var llegada := "%d" % roundi(puntos["llegada"]) if ops["terminada"] else "0 (+%d al llegar)" % roundi(por_llegar)
+	var llegada := "%d" % roundi(puntos["llegada"]) if ops["terminada"] else TranslationServer.translate("0 (+%d al llegar)") % roundi(por_llegar)
 	var lineas := [
-		"Ciencia %d" % roundi(puntos["ciencia"]) + ("" if corto else "   (%d de %d)" % [roundi(ops["ciencia"]), roundi(objetivo)]),
-		"Llegada " + llegada,
-		"Bandera %d" % roundi(puntos["bandera"]) if ops.get("bandera_plantada", false) else "Bandera 0 (+%d al plantarla)" % roundi(GameState.mision.get("viaje", {}).get("puntos_bandera", 0.0)),
-		"Salud %d · Presupuesto %s" % [roundi(puntos["salud"]), presupuesto],
-		"TOTAL %d" % puntos["total"],
+		TranslationServer.translate("Ciencia %d") % roundi(puntos["ciencia"]) + ("" if corto else TranslationServer.translate("   (%d de %d)") % [roundi(ops["ciencia"]), roundi(objetivo)]),
+		TranslationServer.translate("Llegada %s") % llegada,
+		TranslationServer.translate("Bandera %d") % roundi(puntos["bandera"]) if ops.get("bandera_plantada", false) else TranslationServer.translate("Bandera 0 (+%d al plantarla)") % roundi(GameState.mision.get("viaje", {}).get("puntos_bandera", 0.0)),
+		TranslationServer.translate("Salud %d · Presupuesto %s") % [roundi(puntos["salud"]), presupuesto],
+		TranslationServer.translate("TOTAL %d") % puntos["total"],
 	]
 	if not corto:
 		lineas.append("")
-		lineas.append("Ahora: " + _consejo(objetivo).replace("\n", " "))
+		lineas.append(TranslationServer.translate("Ahora: %s") % _consejo(objetivo).replace("\n", " "))
 	return lineas
 
 
@@ -124,7 +124,7 @@ static func crear_guia() -> Control:
 	centro.add_child(fondo)
 	var caja := Interfaz.vbox(12)
 	fondo.add_child(caja)
-	caja.add_child(Interfaz.etiqueta("Cómo sumar puntos", Interfaz.AQUA, 30))
+	caja.add_child(Interfaz.etiqueta(TranslationServer.translate("Cómo sumar puntos"), Interfaz.AQUA, 30))
 	var columnas := Interfaz.hbox(28)
 	caja.add_child(columnas)
 	var guia := Interfaz.vbox(8)
@@ -136,10 +136,10 @@ static func crear_guia() -> Control:
 	var vivo := Interfaz.vbox(8)
 	vivo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columnas.add_child(vivo)
-	vivo.add_child(Interfaz.etiqueta("Tu partida", Interfaz.LIMA, 22))
+	vivo.add_child(Interfaz.etiqueta(TranslationServer.translate("Tu partida"), Interfaz.LIMA, 22))
 	for linea in lineas_en_vivo(false):
 		vivo.add_child(Interfaz.parrafo(linea, Interfaz.CIAN if not linea.begins_with("TOTAL") else Interfaz.LIMA, 18 if not linea.begins_with("TOTAL") else 26))
-	caja.add_child(Interfaz.etiqueta("E o Esc: volver", Interfaz.CIAN, 14))
+	caja.add_child(Interfaz.etiqueta(TranslationServer.translate("E o Esc: volver"), Interfaz.CIAN, 14))
 	return centro
 
 
@@ -151,14 +151,14 @@ static func _mayuscula(texto: String) -> String:
 static func _consejo(objetivo: float) -> String:
 	var ops := GameState.ops
 	if ops["terminada"]:
-		return "El informe está en la cabina."
+		return TranslationServer.translate("El informe está en la cabina.")
 	if not GameState.plan.get("transmitir", false):
-		return "¡Prendé la transmisión!"
+		return TranslationServer.translate("¡Prendé la transmisión!")
 	if ops["dv_restante"] < 0.0:
-		return "¡Sin delta-v para frenar!"
+		return TranslationServer.translate("¡Sin delta-v para frenar!")
 	if ops["ciencia"] < objetivo * GameState.TOPE_CIENCIA:
-		return "Faltan %d de ciencia\npara el máximo." % roundi(objetivo * GameState.TOPE_CIENCIA - ops["ciencia"])
-	return "Ciencia al máximo:\ncuidá la salud y llegá."
+		return TranslationServer.translate("Faltan %d de ciencia\npara el máximo.") % roundi(objetivo * GameState.TOPE_CIENCIA - ops["ciencia"])
+	return TranslationServer.translate("Ciencia al máximo:\ncuidá la salud y llegá.")
 
 
 func _texto(texto: String, color: Color, tamano: int) -> Label3D:

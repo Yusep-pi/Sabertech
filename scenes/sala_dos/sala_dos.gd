@@ -66,7 +66,7 @@ func _ready() -> void:
 	GameState.origen_transicion = ""
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-	_mostrar_mensaje("Habitáculo de tripulación. Al norte, la cabina; al sur, la esclusa para salir al exterior.")
+	_mostrar_mensaje(tr("Habitáculo de tripulación. Al norte, la cabina; al sur, la esclusa para salir al exterior."))
 
 
 func _process(delta: float) -> void:
@@ -76,7 +76,7 @@ func _process(delta: float) -> void:
 	_marcador_puerta.position.y = ALTURA_CARTEL + flotar
 	_marcador_esclusa.position.y = ALTURA_CARTEL + flotar
 	var consola := _jugador.consola_mirada() if _jugador.activo else ""
-	_indicacion.text = "[E] " + NOMBRES_CONSOLA[consola] if NOMBRES_CONSOLA.has(consola) else ""
+	_indicacion.text = "[E] " + tr(NOMBRES_CONSOLA[consola]) if NOMBRES_CONSOLA.has(consola) else ""
 
 
 func _input(evento: InputEvent) -> void:
@@ -106,7 +106,7 @@ func _usar(consola: String) -> void:
 			if GameState.reloj_corriendo():
 				_tripulacion.comer()
 			else:
-				_tripulacion.avisar("Las raciones son para el viaje.")
+				_tripulacion.avisar(tr("Las raciones son para el viaje."))
 		"consola_tablero":
 			_abrir_guia()
 
@@ -136,9 +136,9 @@ func _crear_compuerta() -> void:
 	_compuerta = Compuerta.new()
 	_compuerta.jugador = _jugador
 	_compuerta.agregar(func() -> bool: return _jugador.position.z < -2.0 and absf(_jugador.position.x) < 1.2,
-		"Volver a la cabina", "cabina", "habitaculo")
+		tr("Volver a la cabina"), "cabina", "habitaculo")
 	_compuerta.agregar(func() -> bool: return _jugador.position.z > 2.0 and absf(_jugador.position.x) < 1.2,
-		"Ir a la esclusa", "esclusa", "habitaculo")
+		tr("Ir a la esclusa"), "esclusa", "habitaculo")
 	add_child(_compuerta)
 
 
@@ -455,7 +455,7 @@ func _crear_puerta_decorativa() -> void:
 	var rotulo := Label3D.new()
 	rotulo.position = Vector3(-0.5, 1.9, 0.043)
 	rotulo.rotation_degrees = Vector3(0, 180, 0)
-	rotulo.text = "MÓDULO 03\nESCLUSA"
+	rotulo.text = tr("MÓDULO 03\nESCLUSA")
 	rotulo.font_size = 16
 	rotulo.modulate = Interfaz.CIAN
 	rotulo.pixel_size = 0.002
@@ -538,12 +538,12 @@ func _crear_marcador_puerta() -> void:
 	_marcador_puerta.outline_size = 10
 	_marcador_puerta.outline_modulate = Interfaz.FONDO
 	_marcador_puerta.modulate = Interfaz.CIAN
-	_marcador_puerta.text = "CABINA"
+	_marcador_puerta.text = tr("CABINA")
 	_interior.add_child(_marcador_puerta)
 
 	_marcador_esclusa = _marcador_puerta.duplicate()
 	_marcador_esclusa.position = Vector3(0, ALTURA_CARTEL, 3.3)
-	_marcador_esclusa.text = "ESCLUSA · SALIDA AL EXTERIOR"
+	_marcador_esclusa.text = tr("ESCLUSA · SALIDA AL EXTERIOR")
 	_interior.add_child(_marcador_esclusa)
 
 
@@ -623,7 +623,7 @@ func _crear_hud() -> void:
 	_indicacion.offset_top = 30
 	hud.add_child(_indicacion)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E: usar · Mantener E: puertas · F: comer · Esc: soltar mouse", Color(Interfaz.CIAN, 0.7), 14)
+	var controles := Interfaz.etiqueta(tr("WASD: caminar · Mouse: mirar · E: usar · Mantener E: puertas · F: comer · Esc: soltar mouse"), Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)

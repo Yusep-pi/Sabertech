@@ -56,7 +56,7 @@ func _construir_barra_mision() -> Control:
 	_texto_mision = Interfaz.etiqueta(mision.get("objetivo", ""), Interfaz.CIAN)
 	_texto_mision.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fila.add_child(_texto_mision)
-	var cambiar := Interfaz.boton("Cambiar misión", 16)
+	var cambiar := Interfaz.boton(tr("Cambiar misión"), 16)
 	cambiar.pressed.connect(GameState.ir_a.bind("briefing"))
 	fila.add_child(cambiar)
 	return fila
@@ -74,7 +74,7 @@ func _construir_lista_piezas() -> Control:
 	for categoria in GameState.get_categorias():
 		var titulo: String = categoria["nombre"]
 		if categoria.get("multiple", false):
-			titulo += "  (varias)"
+			titulo += tr("  (varias)")
 		lista.add_child(Interfaz.etiqueta(titulo, Interfaz.AQUA, 18))
 		for pieza in GameState.get_piezas(categoria["id"]):
 			var boton: BaseButton
@@ -131,7 +131,7 @@ func _construir_pie() -> Control:
 	_aviso.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fila.add_child(_aviso)
 
-	_boton_lanzar = Interfaz.boton_principal("LANZAR", 22)
+	_boton_lanzar = Interfaz.boton_principal(tr("LANZAR"), 22)
 	_boton_lanzar.pressed.connect(_on_lanzar)
 	fila.add_child(_boton_lanzar)
 	return fila
@@ -147,7 +147,7 @@ func _on_seleccion_cambiada(ids: Array) -> void:
 	var nombres := []
 	for pieza in GameState.piezas_elegidas():
 		nombres.append(pieza["nombre"])
-	_texto_seleccion.text = "A bordo: " + (", ".join(nombres) if not nombres.is_empty() else "nada todavía")
+	_texto_seleccion.text = tr("A bordo: %s") % (", ".join(nombres) if not nombres.is_empty() else tr("nada todavía"))
 
 
 func _on_medidores_cambiados(medidores: Dictionary) -> void:
@@ -169,7 +169,7 @@ func _on_medidores_cambiados(medidores: Dictionary) -> void:
 		ui["valores"].add_theme_color_override("font_color", Interfaz.CIAN if m["ok"] else Interfaz.ALERTA)
 
 	var detalle := GameState.detalle
-	_texto_fiabilidad.text = "Fiabilidad del lanzamiento: %d%%\nFiabilidad de la nave: %d%%" % [
+	_texto_fiabilidad.text = tr("Fiabilidad del lanzamiento: %d%%\nFiabilidad de la nave: %d%%") % [
 		roundi(detalle.get("fiabilidad_lanzamiento", 0.0) * 100),
 		roundi(detalle.get("fiabilidad_nave", 0.0) * 100),
 	]
@@ -180,13 +180,13 @@ func _actualizar_aviso() -> void:
 	var faltan := GameState.categorias_faltantes()
 	_boton_lanzar.disabled = not GameState.puede_lanzar()
 	if not faltan.is_empty():
-		_aviso.text = "Falta elegir: " + ", ".join(faltan)
+		_aviso.text = tr("Falta elegir: %s") % ", ".join(faltan)
 		return
 	var en_rojo := []
 	for m in GameState.medidores.values():
 		if not m["ok"]:
 			en_rojo.append(m["nombre"])
-	_aviso.text = "" if en_rojo.is_empty() else "Podés lanzar, pero hay problemas con: " + ", ".join(en_rojo)
+	_aviso.text = "" if en_rojo.is_empty() else tr("Podés lanzar, pero hay problemas con: %s") % ", ".join(en_rojo)
 
 
 func _on_lanzar() -> void:
@@ -197,7 +197,7 @@ func _on_lanzar() -> void:
 # --- Utilidades -------------------------------------------------------------
 
 func _texto_pieza(pieza: Dictionary) -> String:
-	var partes := [pieza["nombre"], "%d M$" % roundi(pieza.get("costo", 0.0))]
+	var partes := [pieza["nombre"], tr("%d M$") % roundi(pieza.get("costo", 0.0))]
 	if pieza.get("masa", 0.0) > 0.0:
 		partes.append("%d kg" % roundi(pieza["masa"]))
 	if pieza.get("potencia", 0.0) > 0.0:
@@ -205,11 +205,11 @@ func _texto_pieza(pieza: Dictionary) -> String:
 	if pieza.get("consumo", 0.0) > 0.0:
 		partes.append("−%d W" % roundi(pieza["consumo"]))
 	if pieza.has("capacidad"):
-		partes.append("carga %d kg" % roundi(pieza["capacidad"]))
+		partes.append(tr("carga %d kg") % roundi(pieza["capacidad"]))
 	if pieza.has("isp"):
 		partes.append("Isp %d s" % roundi(pieza["isp"]))
 	if pieza.has("tasa"):
-		partes.append("%d u/turno" % roundi(pieza["tasa"]))
+		partes.append(tr("%d u/turno") % roundi(pieza["tasa"]))
 	if pieza.has("datos"):
-		partes.append("%d datos" % roundi(pieza["datos"]))
+		partes.append(tr("%d datos") % roundi(pieza["datos"]))
 	return "  ·  ".join(partes)

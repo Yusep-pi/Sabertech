@@ -12,6 +12,7 @@ var _menu: Control
 var _ayuda: Control
 var _boton_graficos: Button
 var _fundido: ColorRect
+var _capa: CanvasLayer
 
 
 func _ready() -> void:
@@ -78,10 +79,11 @@ func comenzar() -> void:
 
 # --- Interfaz ---------------------------------------------------------------
 
-func _crear_interfaz() -> void:
+func _crear_interfaz(fundir := true) -> void:
 	var capa := CanvasLayer.new()
 	capa.layer = 2
 	add_child(capa)
+	_capa = capa
 
 	var margen := MarginContainer.new()
 	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -98,11 +100,11 @@ func _crear_interfaz() -> void:
 	titulo.add_theme_constant_override("outline_size", 10)
 	titulo.add_theme_color_override("font_outline_color", Interfaz.FONDO)
 	_menu.add_child(titulo)
-	var subtitulo := Interfaz.etiqueta("Misión tripulada a la Luna", Interfaz.CIAN, 26)
+	var subtitulo := Interfaz.etiqueta(tr("Misión tripulada a la Luna"), Interfaz.CIAN, 26)
 	subtitulo.add_theme_constant_override("outline_size", 6)
 	subtitulo.add_theme_color_override("font_outline_color", Interfaz.FONDO)
 	_menu.add_child(subtitulo)
-	var bajada := Interfaz.parrafo("Diseñá la nave, lanzala, cuidá a la tripulación durante el viaje y plantá la bandera en la Luna.", Interfaz.BLANCO, 17)
+	var bajada := Interfaz.parrafo(tr("Diseñá la nave, lanzala, cuidá a la tripulación durante el viaje y plantá la bandera en la Luna."), Interfaz.BLANCO, 17)
 	bajada.custom_minimum_size.x = 460
 	_menu.add_child(bajada)
 
@@ -110,26 +112,28 @@ func _crear_interfaz() -> void:
 	espacio.custom_minimum_size.y = 18
 	_menu.add_child(espacio)
 
-	var comenzar_boton := Interfaz.boton_principal("Comenzar misión  ⏎", 24)
+	var comenzar_boton := Interfaz.boton_principal(tr("Comenzar misión") + "  ⏎", 24)
 	comenzar_boton.custom_minimum_size.x = 340
 	comenzar_boton.pressed.connect(comenzar)
 	_menu.add_child(comenzar_boton)
-	var ayuda := _boton_menu("Cómo se juega")
+	var ayuda := _boton_menu(tr("Cómo se juega"))
 	ayuda.pressed.connect(_mostrar_ayuda.bind(true))
 	_boton_graficos = _boton_menu("")
 	_boton_graficos.pressed.connect(func() -> void:
 		Estilo.cambiar_modo((Estilo.modo + 1) % Estilo.MODOS.size())
 		_actualizar_boton_graficos())
 	_actualizar_boton_graficos()
-	var salir := _boton_menu("Salir")
+	var salir := _boton_menu(tr("Salir"))
 	salir.pressed.connect(func() -> void: get_tree().quit())
 
-	var pie := Interfaz.etiqueta("Equipo Sabertech · Hackathon 2026", Color(Interfaz.CIAN, 0.7), 14)
+	var pie := Interfaz.etiqueta(tr("Equipo Sabertech · Hackathon 2026"), Color(Interfaz.CIAN, 0.7), 14)
 	pie.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	pie.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	pie.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	pie.position += Vector2(-24, -20)
 	capa.add_child(pie)
+
+	capa.add_child(_crear_banderas())
 
 	_ayuda = _crear_ayuda()
 	_ayuda.visible = false
@@ -140,7 +144,10 @@ func _crear_interfaz() -> void:
 	_fundido.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_fundido.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	capa.add_child(_fundido)
-	create_tween().tween_property(_fundido, "color:a", 0.0, 1.0)
+	if fundir:
+		create_tween().tween_property(_fundido, "color:a", 0.0, 1.0)
+	else:
+		_fundido.color.a = 0.0
 
 
 func _boton_menu(texto: String) -> Button:
@@ -152,7 +159,7 @@ func _boton_menu(texto: String) -> Button:
 
 
 func _actualizar_boton_graficos() -> void:
-	_boton_graficos.text = "Gráficos: %s" % Estilo.MODOS[Estilo.modo]["nombre"]
+	_boton_graficos.text = tr("Gráficos: %s") % tr(Estilo.MODOS[Estilo.modo]["nombre"])
 
 
 func _mostrar_ayuda(visible_ayuda: bool) -> void:
@@ -168,21 +175,69 @@ func _crear_ayuda() -> Control:
 	centro.add_child(panel)
 	var caja := Interfaz.vbox(12)
 	panel.add_child(caja)
-	caja.add_child(Interfaz.etiqueta("Cómo se juega", Interfaz.AQUA, 30))
+	caja.add_child(Interfaz.etiqueta(tr("Cómo se juega"), Interfaz.AQUA, 30))
 	var pasos := [
-		"1. En la cabina, usá la computadora de misión: diseñá la nave con el presupuesto disponible y lanzala.",
-		"2. Durante el viaje a la Luna, repartí la energía en cada tramo, transmití la ciencia y respondé a los imprevistos.",
-		"3. Cuidá a la tripulación: comé con F, dormí en la cama del habitáculo para recuperar la cordura. Con poca cordura aparecen alucinaciones.",
-		"4. Si algo se rompe afuera, salí por la esclusa con el traje. Pero no te quedes mucho: la soledad pesa.",
-		"5. Al llegar, la nave aluniza: salí por la esclusa y plantá la bandera.",
+		tr("1. En la cabina, usá la computadora de misión: diseñá la nave con el presupuesto disponible y lanzala."),
+		tr("2. Durante el viaje a la Luna, repartí la energía en cada tramo, transmití la ciencia y respondé a los imprevistos."),
+		tr("3. Cuidá a la tripulación: comé con F, dormí en la cama del habitáculo para recuperar la cordura. Con poca cordura aparecen alucinaciones."),
+		tr("4. Si algo se rompe afuera, salí por la esclusa con el traje. Pero no te quedes mucho: la soledad pesa."),
+		tr("5. Al llegar, la nave aluniza: salí por la esclusa y plantá la bandera."),
 	]
 	for paso in pasos:
 		caja.add_child(Interfaz.parrafo(paso, Interfaz.BLANCO, 17))
 	caja.add_child(HSeparator.new())
 	caja.add_child(Interfaz.parrafo(
-		"WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · F: comer · F2: gráficos · Esc: soltar el mouse",
+		tr("WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · F: comer · F2: gráficos · Esc: soltar el mouse"),
 		Interfaz.CIAN, 15))
-	var volver := Interfaz.boton_principal("Volver", 20)
+	var volver := Interfaz.boton_principal(tr("Volver"), 20)
 	volver.pressed.connect(_mostrar_ayuda.bind(false))
 	caja.add_child(volver)
 	return centro
+
+
+# --- Idioma -----------------------------------------------------------------
+
+const BANDERAS := {"es": "res://assets/banderas/paraguay.svg", "en": "res://assets/banderas/eeuu.svg"}
+
+
+## Banderas arriba a la derecha: la del idioma activo, entera y con borde; la otra, apagada.
+func _crear_banderas() -> Control:
+	var fila := Interfaz.hbox(10)
+	fila.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	fila.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	fila.position += Vector2(-28, 24)
+	for codigo in Idioma.IDIOMAS:
+		var activa: bool = codigo == Idioma.actual
+		var marco := PanelContainer.new()
+		var estilo := StyleBoxFlat.new()
+		estilo.bg_color = Color.TRANSPARENT
+		estilo.set_border_width_all(3 if activa else 0)
+		estilo.border_color = Interfaz.AQUA
+		estilo.set_content_margin_all(3)
+		estilo.set_corner_radius_all(4)
+		marco.add_theme_stylebox_override("panel", estilo)
+		var boton := TextureButton.new()
+		boton.texture_normal = load(BANDERAS[codigo])
+		boton.ignore_texture_size = true
+		boton.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+		boton.custom_minimum_size = Vector2(57, 30)
+		boton.tooltip_text = Idioma.NOMBRES[codigo]
+		boton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		boton.modulate.a = 1.0 if activa else 0.45
+		boton.pressed.connect(_elegir_idioma.bind(codigo))
+		boton.mouse_entered.connect(func() -> void: boton.modulate.a = 1.0)
+		boton.mouse_exited.connect(func() -> void: boton.modulate.a = 1.0 if codigo == Idioma.actual else 0.45)
+		marco.add_child(boton)
+		fila.add_child(marco)
+	return fila
+
+
+func _elegir_idioma(codigo: String) -> void:
+	if codigo == Idioma.actual:
+		return
+	Idioma.cambiar(codigo)
+	# Se rearma el menú para que todos los textos cambien al instante.
+	var ayuda_abierta := _ayuda.visible
+	_capa.queue_free()
+	_crear_interfaz(false)
+	_mostrar_ayuda(ayuda_abierta)

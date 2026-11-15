@@ -90,7 +90,7 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 func cambiar_modo(nuevo: int) -> void:
 	modo = nuevo
 	_aplicar_modo()
-	_aviso.text = "Gráficos: " + MODOS[modo]["nombre"] + "  (F2 para cambiar)"
+	_aviso.text = tr("Gráficos: %s  (F2 para cambiar)") % tr(MODOS[modo]["nombre"])
 	_aviso.modulate.a = 1.0
 	var tween := create_tween()
 	tween.tween_interval(1.5)

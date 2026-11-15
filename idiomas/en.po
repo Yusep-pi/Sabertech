@@ -1,0 +1,1485 @@
+# Traducción al inglés (EE.UU.) de Sabertech.
+# msgid = texto original en español (en el código y en data/datos.json).
+# Para ver qué falta traducir: python3 idiomas/revisar_traducciones.py
+msgid ""
+msgstr ""
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+msgid "Presupuesto"
+msgstr "Budget"
+
+msgid "M$"
+msgstr "$M"
+
+msgid "Masa"
+msgstr "Mass"
+
+msgid "Energía"
+msgstr "Power"
+
+msgid "Datos"
+msgstr "Data"
+
+msgid "u/turno"
+msgstr "u/turn"
+
+msgid "Delta-v"
+msgstr "Delta-v"
+
+msgid "Apagón: no alcanzó la energía ni para los sistemas básicos."
+msgstr "Blackout: not enough power even for basic systems."
+
+msgid "Sin calefacción: la electrónica y la tripulación sufrieron el frío."
+msgstr "No heating: the electronics and the crew suffered from the cold."
+
+msgid "Se perdió el contacto con la nave."
+msgstr "Contact with the spacecraft was lost."
+
+msgid "No alcanzó el delta-v para frenar: la nave pasó de largo."
+msgstr "Not enough delta-v to brake: the spacecraft flew right past."
+
+msgid "Ahora no hace falta dormir."
+msgstr "No need to sleep right now."
+
+msgid "Hay una alerta en la cabina: resolvela antes de dormir."
+msgstr "There's an alert in the cockpit: resolve it before sleeping."
+
+msgid "Con tanta hambre no se puede dormir. Comé algo primero."
+msgstr "Too hungry to sleep. Eat something first."
+
+msgid "La tripulación no tiene sueño todavía (cordura %d%%)."
+msgstr "The crew isn't sleepy yet (sanity %d%%)."
+
+msgid "Memoria llena: se perdieron %d datos."
+msgstr "Memory full: %d data units lost."
+
+msgid "No alcanza la energía: se apagó %s."
+msgstr "Not enough power: shut down %s."
+
+msgid "Continuar"
+msgstr "Continue"
+
+msgid "El respaldo funcionó."
+msgstr "The backup worked."
+
+msgid "El blindaje absorbió parte del daño."
+msgstr "The shielding absorbed part of the damage."
+
+msgid "Quedó fuera de servicio: %s."
+msgstr "Out of service: %s."
+
+msgid "¡%s volvió a funcionar!"
+msgstr "%s is working again!"
+
+msgid "%s no respondió al reinicio."
+msgstr "%s did not respond to the reboot."
+
+msgid "Misión legendaria"
+msgstr "Legendary mission"
+
+msgid "Misión exitosa"
+msgstr "Successful mission"
+
+msgid "Éxito parcial"
+msgstr "Partial success"
+
+msgid "Misión con problemas"
+msgstr "Troubled mission"
+
+msgid "Misión perdida"
+msgstr "Mission lost"
+
+msgid "No pudo frenar"
+msgstr "Couldn't brake"
+
+msgid "Tripulación perdida"
+msgstr "Crew lost"
+
+msgid "Contacto perdido"
+msgstr "Contact lost"
+
+msgid "PUNTAJE"
+msgstr "SCORE"
+
+msgid "[E] Cómo sumar más"
+msgstr "[E] How to score more"
+
+msgid "◆ Ciencia: hasta %d. Cumplir el objetivo (%d) da %d; pasarlo sigue sumando hasta el %d%% (%d de ciencia)."
+msgstr "◆ Science: up to %d. Meeting the goal (%d) gives %d; going past it keeps adding up to %d%% (%d science)."
+
+msgid "   La ciencia solo cuenta cuando se TRANSMITE: no dejes la antena apagada. Más instrumentos dan más datos, si alcanza la energía."
+msgstr "   Science only counts once it's TRANSMITTED: don't leave the antenna off. More instruments give more data, if there's enough power."
+
+msgid "◆ Llegar a la Luna y frenar: +%d. Guardá delta-v para el final."
+msgstr "◆ Reach the Moon and brake: +%d. Save delta-v for the end."
+
+msgid "◆ Salud de la nave: x%d (hasta %d). Calefacción prendida y blindaje."
+msgstr "◆ Spacecraft health: x%d (up to %d). Keep the heating on and add shielding."
+
+msgid "◆ Presupuesto: cada 1%% ahorrado suma 1; cada 1%% de más RESTA %d."
+msgstr "◆ Budget: each 1%% saved adds 1; each 1%% over SUBTRACTS %d."
+
+msgid "◆ Si el hambre o la cordura llegan a 0, la misión se pierde."
+msgstr "◆ If hunger or sanity reaches 0, the mission is lost."
+
+msgid "◆ Dormir en la cama acelera el viaje, pero da hambre: llevá raciones suficientes."
+msgstr "◆ Sleeping in the bed speeds up the trip, but makes you hungry: bring enough rations."
+
+msgid "Notas: %s"
+msgstr "Ratings: %s"
+
+msgid "Legendaria"
+msgstr "Legendary"
+
+msgid "Exitosa"
+msgstr "Successful"
+
+msgid "Todavía no hay nave."
+msgstr "No spacecraft yet."
+
+msgid "Diseñala en la cabina."
+msgstr "Design it in the cockpit."
+
+msgid "En la plataforma"
+msgstr "On the launch pad"
+
+msgid "Presupuesto %s"
+msgstr "Budget %s"
+
+msgid "Despegá para sumar ciencia."
+msgstr "Lift off to earn science."
+
+msgid "0 (+%d al llegar)"
+msgstr "0 (+%d on arrival)"
+
+msgid "Ciencia %d"
+msgstr "Science %d"
+
+msgid "   (%d de %d)"
+msgstr "   (%d of %d)"
+
+msgid "Llegada %s"
+msgstr "Arrival %s"
+
+msgid "Bandera %d"
+msgstr "Flag %d"
+
+msgid "Bandera 0 (+%d al plantarla)"
+msgstr "Flag 0 (+%d when planted)"
+
+msgid "Salud %d · Presupuesto %s"
+msgstr "Health %d · Budget %s"
+
+msgid "TOTAL %d"
+msgstr "TOTAL %d"
+
+msgid "Ahora: %s"
+msgstr "Now: %s"
+
+msgid "Cómo sumar puntos"
+msgstr "How to score points"
+
+msgid "Tu partida"
+msgstr "Your game"
+
+msgid "E o Esc: volver"
+msgstr "E or Esc: back"
+
+msgid "El informe está en la cabina."
+msgstr "The report is in the cockpit."
+
+msgid "¡Prendé la transmisión!"
+msgstr "Turn on transmission!"
+
+msgid "¡Sin delta-v para frenar!"
+msgstr "No delta-v left to brake!"
+
+msgid "Faltan %d de ciencia\npara el máximo."
+msgstr "%d science short\nof the maximum."
+
+msgid "Ciencia al máximo:\ncuidá la salud y llegá."
+msgstr "Science maxed out:\nprotect health and arrive."
+
+msgid "Informe de misión · %s"
+msgstr "Mission report · %s"
+
+msgid "%d puntos"
+msgstr "%d points"
+
+msgid "Qué pasó"
+msgstr "What happened"
+
+msgid "Rediseñar la nave"
+msgstr "Redesign the spacecraft"
+
+msgid "Empezar de cero"
+msgstr "Start over"
+
+msgid "Números"
+msgstr "Numbers"
+
+msgid "Ciencia"
+msgstr "Science"
+
+msgid "Presupuesto usado"
+msgstr "Budget used"
+
+msgid "%d / %d M$"
+msgstr "$%dM / $%dM"
+
+msgid "Salud final"
+msgstr "Final health"
+
+msgid "Hambre / cordura final"
+msgstr "Final hunger / sanity"
+
+msgid "Datos captados"
+msgstr "Data collected"
+
+msgid "Datos enviados"
+msgstr "Data sent"
+
+msgid "Datos perdidos"
+msgstr "Data lost"
+
+msgid "Delta-v de reserva"
+msgstr "Reserve delta-v"
+
+msgid "%s km en %d h"
+msgstr "%s km in %d h"
+
+msgid " · %d min durmiendo"
+msgstr " · %d min asleep"
+
+msgid "Viaje a la Luna"
+msgstr "Trip to the Moon"
+
+msgid "A bordo"
+msgstr "On board"
+
+msgid "SABERTECH · Director de misión"
+msgstr "SABERTECH · Mission Director"
+
+msgid "Tu misión. Después vas a diseñar la nave, lanzarla y llevar a la tripulación hasta la Luna."
+msgstr "Your mission. Next you'll design the spacecraft, launch it, and take the crew all the way to the Moon."
+
+msgid "Distancia"
+msgstr "Distance"
+
+msgid "%d M$"
+msgstr "$%dM"
+
+msgid "Delta-v para frenar"
+msgstr "Delta-v to brake"
+
+msgid "Luz solar"
+msgstr "Sunlight"
+
+msgid "Señal de radio"
+msgstr "Radio signal"
+
+msgid "Capacidad del cohete"
+msgstr "Rocket capacity"
+
+msgid "%d%% de la normal"
+msgstr "%d%% of normal"
+
+msgid "Ciencia objetivo"
+msgstr "Science goal"
+
+msgid "Objetivo: %s"
+msgstr "Goal: %s"
+
+msgid "Aceptar la misión"
+msgstr "Accept the mission"
+
+msgid "Tripulación"
+msgstr "Crew"
+
+msgid "Comiste una ración (quedan %d)."
+msgstr "You ate a ration (%d left)."
+
+msgid "No quedan raciones en la despensa."
+msgstr "No rations left in the food supply."
+
+msgid "La tripulación no tiene hambre todavía."
+msgstr "The crew isn't hungry yet."
+
+msgid "Hambre: %d%%"
+msgstr "Hunger: %d%%"
+
+msgid "Cordura: %d%%"
+msgstr "Sanity: %d%%"
+
+msgid "Raciones: %d"
+msgstr "Rations: %d"
+
+msgid "  ·  [F] comer"
+msgstr "  ·  [F] eat"
+
+msgid "Luna %d%% · llegada en %s"
+msgstr "Moon %d%% · arrival in %s"
+
+msgid "%s / %s km · %s m/s\nLlegada en %s"
+msgstr "%s / %s km · %s m/s\nArrival in %s"
+
+msgid "⚠ %s · volvé a la cabina para decidir%s"
+msgstr "⚠ %s · return to the cockpit to decide%s"
+
+msgid " (el viaje espera)"
+msgstr " (the trip is on hold)"
+
+msgid "Zzz… la tripulación duerme.\nEl viaje avanza ×%s · la cordura se recupera y el hambre aprieta.\n\nCualquier tecla: despertar"
+msgstr "Zzz… the crew is asleep.\nThe trip runs ×%s · sanity recovers and hunger builds.\n\nAny key: wake up"
+
+msgid "La tripulación se despertó descansada."
+msgstr "The crew woke up rested."
+
+msgid "El hambre despertó a la tripulación. Comé algo."
+msgstr "Hunger woke the crew. Eat something."
+
+msgid "¡Alarma! Algo pasa en la nave: volvé a la cabina para decidir."
+msgstr "Alarm! Something is wrong with the ship: return to the cockpit to decide."
+
+msgid "¡La nave alunizó! Ponete el traje en la esclusa y bajá a plantar la bandera."
+msgstr "The spacecraft has landed on the Moon! Suit up in the airlock and go down to plant the flag."
+
+msgid "La misión terminó. Volviendo a la cabina para el informe…"
+msgstr "The mission is over. Returning to the cockpit for the report…"
+
+msgid "  (varias)"
+msgstr "  (multiple)"
+
+msgid "Cambiar misión"
+msgstr "Change mission"
+
+msgid "LANZAR"
+msgstr "LAUNCH"
+
+msgid "A bordo: %s"
+msgstr "On board: %s"
+
+msgid "nada todavía"
+msgstr "nothing yet"
+
+msgid "Fiabilidad del lanzamiento: %d%%\nFiabilidad de la nave: %d%%"
+msgstr "Launch reliability: %d%%\nSpacecraft reliability: %d%%"
+
+msgid "Falta elegir: %s"
+msgstr "Still to choose: %s"
+
+msgid "Podés lanzar, pero hay problemas con: %s"
+msgstr "You can launch, but there are problems with: %s"
+
+msgid "carga %d kg"
+msgstr "payload %d kg"
+
+msgid "%d u/turno"
+msgstr "%d u/turn"
+
+msgid "%d datos"
+msgstr "%d data"
+
+msgid "Espacio: saltar"
+msgstr "Space: skip"
+
+msgid "Ignición"
+msgstr "Ignition"
+
+msgid "El cohete no logra levantar la nave..."
+msgstr "The rocket can't lift the spacecraft..."
+
+msgid "Apagado de emergencia"
+msgstr "Emergency shutdown"
+
+msgid "¡Despegue!"
+msgstr "Liftoff!"
+
+msgid "Se perdió la señal del cohete"
+msgstr "Rocket signal lost"
+
+msgid "la órbita"
+msgstr "orbit"
+
+msgid "Rumbo a %s"
+msgstr "On course: %s"
+
+msgid "¡Rumbo a la Luna!"
+msgstr "Bound for the Moon!"
+
+msgid "¡Nave en órbita!"
+msgstr "Spacecraft in orbit!"
+
+msgid "Misión fallida"
+msgstr "Mission failed"
+
+msgid "El cohete hizo su trabajo y la nave llegó a destino con %d m/s de delta-v de sobra para maniobrar."
+msgstr "The rocket did its job and the spacecraft reached its destination with %d m/s of delta-v to spare for maneuvering."
+
+msgid "El cohete hizo su trabajo: la nave va rumbo a la Luna con %d m/s de delta-v de sobra para frenar al llegar."
+msgstr "The rocket did its job: the spacecraft is bound for the Moon with %d m/s of delta-v to spare for braking on arrival."
+
+msgid "El cohete hizo su trabajo y la nave va rumbo a la Luna... pero le faltan %d m/s de delta-v para frenar al llegar."
+msgstr "The rocket did its job and the spacecraft is bound for the Moon... but it's %d m/s of delta-v short of braking on arrival."
+
+msgid "Ir a la cabina"
+msgstr "Go to the cockpit"
+
+msgid "Ver informe"
+msgstr "View report"
+
+msgid "Gráficos: %s  (F2 para cambiar)"
+msgstr "Graphics: %s  (F2 to change)"
+
+msgid "Retro"
+msgstr "Retro"
+
+msgid "Retro fuerte"
+msgstr "Strong retro"
+
+msgid "Moderno"
+msgstr "Modern"
+
+msgid "Terminar turno  ⏎"
+msgstr "End turn  ⏎"
+
+msgid "Estado de la nave"
+msgstr "Spacecraft status"
+
+msgid "Plan de energía del turno"
+msgstr "Turn power plan"
+
+msgid "Sistemas básicos: −%d W (siempre encendidos)"
+msgstr "Core systems: −%d W (always on)"
+
+msgid "La nave no lleva instrumentos: no hay ciencia para captar."
+msgstr "The spacecraft carries no instruments: there's no science to collect."
+
+msgid "Bitácora"
+msgstr "Log"
+
+msgid "Tramo %d / %d"
+msgstr "Leg %d / %d"
+
+msgid "Turno %d / %d"
+msgstr "Turn %d / %d"
+
+msgid "Ciencia entregada: %d / %d"
+msgstr "Science delivered: %d / %d"
+
+msgid "Salud: %d%%"
+msgstr "Health: %d%%"
+
+msgid "Batería: %d / %d"
+msgstr "Battery: %d / %d"
+
+msgid "Memoria: %d / %d datos"
+msgstr "Memory: %d / %d data"
+
+msgid "Delta-v para frenar en la Luna: sobran %d m/s"
+msgstr "Delta-v to brake at the Moon: %d m/s to spare"
+
+msgid "¡Faltan %d m/s de delta-v para frenar en la Luna!"
+msgstr "%d m/s of delta-v short of braking at the Moon!"
+
+msgid "Delta-v de reserva: %d m/s"
+msgstr "Delta-v reserve: %d m/s"
+
+msgid "Fuera de servicio: %s"
+msgstr "Out of service: %s"
+
+msgid "Generación %d W + batería %d = %d W disponibles · usando %d W"
+msgstr "Generation %d W + battery %d = %d W available · using %d W"
+
+msgid "La misión terminó. Mirá cómo te fue →"
+msgstr "The mission is over. See how you did →"
+
+msgid "Primero decidí qué hacer con el evento."
+msgstr "First decide what to do about the event."
+
+msgid "Elegí qué encender: el tramo se cierra solo al avanzar el viaje →"
+msgstr "Choose what to power on: the leg closes by itself as the trip advances →"
+
+msgid "Paso siguiente: elegí qué encender y terminá el turno →"
+msgstr "Next step: choose what to power on and end the turn →"
+
+msgid "Ver informe  ⏎"
+msgstr "View report  ⏎"
+
+msgid "Próximo tramo en %d s"
+msgstr "Next leg in %d s"
+
+msgid "Viaje en espera"
+msgstr "Trip on hold"
+
+msgid "Calefacción  ·  −%d W  ·  sin ella la nave se daña"
+msgstr "Heating  ·  −%d W  ·  without it the spacecraft takes damage"
+
+msgid "Transmitir a la Tierra  ·  −%d W  ·  envía hasta %d datos"
+msgstr "Transmit to Earth  ·  −%d W  ·  sends up to %d data"
+
+msgid "  (antena dañada)"
+msgstr "  (antenna damaged)"
+
+msgid "%s  ·  fuera de servicio"
+msgstr "%s  ·  out of service"
+
+msgid "%s  ·  −%d W  ·  +%d datos (×%.1f ciencia)"
+msgstr "%s  ·  −%d W  ·  +%d data (×%.1f science)"
+
+msgid "Operaciones terminadas."
+msgstr "Operations complete."
+
+msgid "Este turno: +%d datos nuevos"
+msgstr "This turn: +%d new data"
+
+msgid " (se perderán %d por memoria llena)"
+msgstr " (%d will be lost to full memory)"
+
+msgid " · se enviarán %d"
+msgstr " · %d will be sent"
+
+msgid " · no se transmite nada"
+msgstr " · nothing is transmitted"
+
+msgid "\nLos instrumentos no captan nada este turno."
+msgstr "\nThe instruments pick up nothing this turn."
+
+msgid "Batería al terminar el turno: %d / %d"
+msgstr "Battery at end of turn: %d / %d"
+
+msgid "\nPróximo turno: %s. %s"
+msgstr "\nNext turn: %s. %s"
+
+msgid "No alcanza la energía para encender eso. Apagá otra cosa primero."
+msgstr "Not enough power to turn that on. Switch something else off first."
+
+msgid "T%d (%s): +%d datos, enviados %d, ciencia +%d."
+msgstr "T%d (%s): +%d data, %d sent, science +%d."
+
+msgid "T%d: +%d datos, enviados %d, ciencia +%d."
+msgstr "T%d: +%d data, %d sent, science +%d."
+
+msgid "¡%s!"
+msgstr "%s!"
+
+msgid "  (no alcanza el delta-v)"
+msgstr "  (not enough delta-v)"
+
+msgid "Evento: %s\n\n%s"
+msgstr "Event: %s\n\n%s"
+
+msgid "Computadora de misión"
+msgstr "Mission computer"
+
+msgid "Consola de energía"
+msgstr "Power console"
+
+msgid "Consola de comunicaciones"
+msgstr "Comms console"
+
+msgid "Consola de ciencia"
+msgstr "Science console"
+
+msgid "¡Llegaste a la Luna y la nave alunizó! Andá a la esclusa (por el habitáculo), ponete el traje y bajá a plantar la bandera."
+msgstr "You reached the Moon and the spacecraft has landed! Go to the airlock (through the crew quarters), suit up and go down to plant the flag."
+
+msgid "Llegaste a la Luna sin delta-v para frenar: la nave pasó de largo. El informe está en cualquier consola."
+msgstr "You reached the Moon with no delta-v to brake: the spacecraft flew right past. The report is on any console."
+
+msgid "La tripulación no aguantó el hambre. La misión terminó: el informe está en cualquier consola."
+msgstr "The crew couldn't endure the hunger. The mission is over: the report is on any console."
+
+msgid "La tripulación perdió la cordura. La misión terminó: el informe está en cualquier consola."
+msgstr "The crew lost their sanity. The mission is over: the report is on any console."
+
+msgid "Rumbo a la Luna. Mirá por la ventana: la Tierra queda atrás. Usá cualquier consola para operar."
+msgstr "Bound for the Moon. Look out the window: Earth is falling behind. Use any console to operate."
+
+msgid "La nave llegó a destino. Mirá por la ventana y usá cualquier consola para operar."
+msgstr "The spacecraft has reached its destination. Look out the window and use any console to operate."
+
+msgid "Bienvenido a bordo. La computadora de misión está al frente."
+msgstr "Welcome aboard. The mission computer is up front."
+
+msgid "Esc: volver a la cabina"
+msgstr "Esc: back to the cockpit"
+
+msgid "Faltan %d tramos para la Luna. Volvé a cualquier consola para ajustar la energía."
+msgstr "%d legs left to the Moon. Return to any console to adjust power."
+
+msgid "Quedan %d turnos. Volvé a cualquier consola para seguir operando."
+msgstr "%d turns left. Return to any console to keep operating."
+
+msgid "Sin datos: la nave todavía está en la plataforma. Usá la computadora de misión."
+msgstr "No data: the spacecraft is still on the launch pad. Use the mission computer."
+
+msgid "La nave sigue en la plataforma: el resto de la nave se recorre una vez en el espacio."
+msgstr "The spacecraft is still on the launch pad: the rest of the ship can be explored once in space."
+
+msgid "Ir al habitáculo"
+msgstr "Go to the crew quarters"
+
+msgid "HABITÁCULO"
+msgstr "CREW QUARTERS"
+
+msgid "Ver la misión"
+msgstr "View the mission"
+
+msgid "¡Alerta!"
+msgstr "Alert!"
+
+msgid "Tramo %d de %d"
+msgstr "Leg %d of %d"
+
+msgid "Turno %d de %d"
+msgstr "Turn %d of %d"
+
+msgid "Diseñar y lanzar"
+msgstr "Design and launch"
+
+msgid "SABERTECH\nMisión: viaje a la Luna\n[E] Ver el briefing"
+msgstr "SABERTECH\nMission: trip to the Moon\n[E] View the briefing"
+
+msgid "ENERGÍA\nEn espera"
+msgstr "POWER\nStandby"
+
+msgid "COMUNICACIONES\nEn espera"
+msgstr "COMMS\nStandby"
+
+msgid "CIENCIA\nEn espera"
+msgstr "SCIENCE\nStandby"
+
+msgid "MISIÓN: %s\nPresupuesto %d / %d M$\n%s\n[E] Diseñar y lanzar"
+msgstr "MISSION: %s\nBudget $%dM / $%dM\n%s\n[E] Design and launch"
+
+msgid "Lista para lanzar"
+msgstr "Ready for launch"
+
+msgid "Faltan piezas"
+msgstr "Parts missing"
+
+msgid "ENERGÍA\n%s\nGenera %d W · necesita %d W"
+msgstr "POWER\n%s\nGenerates %d W · needs %d W"
+
+msgid "Sin fuente"
+msgstr "No power source"
+
+msgid "COMUNICACIONES\n%s\nEnvía %d datos por turno"
+msgstr "COMMS\n%s\nSends %d data per turn"
+
+msgid "Sin antena"
+msgstr "No antenna"
+
+msgid "CIENCIA\n%s\nObjetivo: %d puntos"
+msgstr "SCIENCE\n%s\nGoal: %d points"
+
+msgid "Sin instrumentos"
+msgstr "No instruments"
+
+msgid "TRAMO %d / %d\nCiencia %d / %d\nSalud %d%%"
+msgstr "LEG %d / %d\nScience %d / %d\nHealth %d%%"
+
+msgid "TURNO %d / %d\nCiencia %d / %d\nSalud %d%%"
+msgstr "TURN %d / %d\nScience %d / %d\nHealth %d%%"
+
+msgid "\n¡ALERTA: %s!"
+msgstr "\nALERT: %s!"
+
+msgid "\nMisión terminada · [E] Informe"
+msgstr "\nMission complete · [E] Report"
+
+msgid "ROTO"
+msgstr "BROKEN"
+
+msgid "ENERGÍA\nGenera %d W\nBatería %d / %d\nUsando %d W"
+msgstr "POWER\nGenerates %d W\nBattery %d / %d\nUsing %d W"
+
+msgid "COMUNICACIONES\nMemoria %d / %d\nEnvío %d por turno\nTransmitir: %s"
+msgstr "COMMS\nMemory %d / %d\nSending %d per turn\nTransmit: %s"
+
+msgid "SÍ"
+msgstr "YES"
+
+msgid "NO"
+msgstr "NO"
+
+msgid "CIENCIA\n%s"
+msgstr "SCIENCE\n%s"
+
+msgid "WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · F: comer · Esc: soltar el mouse"
+msgstr "WASD: walk · Mouse: look · E or click: use · Hold E: doors · F: eat · Esc: release mouse"
+
+msgid "Objetivo: revisá la misión en la computadora de misión."
+msgstr "Objective: review the mission on the mission computer."
+
+msgid "Objetivo: diseñá la nave y lanzala desde la computadora de misión."
+msgstr "Objective: design the spacecraft and launch it from the mission computer."
+
+msgid "Misión terminada: el informe está en cualquier consola."
+msgstr "Mission complete: the report is on any console."
+
+msgid "Objetivo: llegá a la Luna con la tripulación entera (tramo %d de %d)."
+msgstr "Objective: reach the Moon with the whole crew (leg %d of %d)."
+
+msgid "Objetivo: operá la nave (turno %d de %d). Cualquier consola sirve."
+msgstr "Objective: operate the spacecraft (turn %d of %d). Any console will do."
+
+msgid "Saliste por la escotilla. Arreglá los %d problemas y volvé antes de quedarte sin oxígeno."
+msgstr "You're out the hatch. Fix the %d problems and get back before you run out of oxygen."
+
+msgid "Escotilla · oxígeno y combustible"
+msgstr "Hatch · oxygen and propellant"
+
+msgid "☄ Micrometeoritos"
+msgstr "☄ Micrometeoroids"
+
+msgid "¡Funciona! Volvé a la escotilla."
+msgstr "It works! Head back to the hatch."
+
+msgid "¡Funciona! Quedan %d problemas."
+msgstr "It works! %d problems left."
+
+msgid "Pasó la lluvia de micrometeoritos."
+msgstr "The micrometeoroid shower has passed."
+
+msgid "¡Golpe a %.1f m/s! El traje se dañó. Frená con X antes de llegar."
+msgstr "Impact at %.1f m/s! Your spacesuit was damaged. Brake with X before you arrive."
+
+msgid "Te quedaste sin oxígeno."
+msgstr "You ran out of oxygen."
+
+msgid "El traje no resistió más daño."
+msgstr "Your spacesuit couldn't take any more damage."
+
+msgid "Quedaste a la deriva, sin combustible para volver."
+msgstr "You're adrift, with no propellant to get back."
+
+msgid "Todos los problemas resueltos y de vuelta en la nave."
+msgstr "All problems fixed and back aboard the spacecraft."
+
+msgid "Llevás %d minutos afuera. El silencio empieza a pesar: la cordura baja."
+msgstr "You've been outside for %d minutes. The silence is starting to weigh on you: sanity is dropping."
+
+msgid "Demasiado tiempo solo en el vacío. Volvé a la nave antes de perder la cabeza."
+msgstr "Too long alone in the void. Get back to the ship before you lose your mind."
+
+msgid "¡Caminata completada!"
+msgstr "Spacewalk complete!"
+
+msgid "Caminata fallida"
+msgstr "Spacewalk failed"
+
+msgid "Tiempo afuera: %d:%02d · Oxígeno restante: %d s · Traje: %d%% · Problemas resueltos: %d de %d"
+msgstr "Time outside: %d:%02d · Oxygen left: %d s · Suit: %d%% · Problems fixed: %d of %d"
+
+msgid "Volver a la esclusa"
+msgstr "Back to the airlock"
+
+msgid "Reintentar desde la esclusa"
+msgstr "Retry from the airlock"
+
+msgid "Repetir la caminata"
+msgstr "Repeat the spacewalk"
+
+msgid "WASD: propulsar · Espacio/Ctrl: subir/bajar · Shift: turbo · X: frenar · Z/C: rotar · E: abrir panel · Esc: soltar el panel o el mouse"
+msgstr "WASD: thrust · Space/Ctrl: up/down · Shift: boost · X: brake · Z/C: roll · E: open panel · Esc: leave the panel or release the mouse"
+
+msgid "Oxígeno: %d:%02d"
+msgstr "Oxygen: %d:%02d"
+
+msgid "Combustible: %d%%"
+msgstr "Propellant: %d%%"
+
+msgid "Traje: %d%%"
+msgstr "Suit: %d%%"
+
+msgid "Volvé a la escotilla · %d m"
+msgstr "Return to the hatch · %d m"
+
+msgid "[E] Abrir el panel · %s"
+msgstr "[E] Open the panel · %s"
+
+msgid "Recargando oxígeno y combustible"
+msgstr "Recharging oxygen and propellant"
+
+msgid "☄ Lluvia de micrometeoritos en %d s · cubrite detrás de la nave o entrá a la escotilla"
+msgstr "☄ Micrometeoroid shower in %d s · take cover behind the ship or get into the hatch"
+
+msgid "¡ESTÁS EXPUESTO!"
+msgstr "YOU'RE EXPOSED!"
+
+msgid "A cubierto"
+msgstr "Under cover"
+
+msgid "☄ Lluvia de micrometeoritos · %s · %d s"
+msgstr "☄ Micrometeoroid shower · %s · %d s"
+
+msgid "Velocidad %.1f m/s\nDistancia a la nave %d m"
+msgstr "Speed %.1f m/s\nDistance to ship %d m"
+
+msgid "Armario del traje"
+msgstr "Suit locker"
+
+msgid "Panel de la escotilla"
+msgstr "Hatch panel"
+
+msgid "De vuelta adentro. Cerrá la escotilla desde el panel para presurizar."
+msgstr "Back inside. Close the hatch from the panel to pressurize."
+
+msgid "Esclusa. Para salir, primero ponete el traje: está colgado en el armario."
+msgstr "Airlock. To go out, first put on the spacesuit: it's hanging in the suit locker."
+
+msgid "Con la esclusa sin aire no te podés sacar el traje."
+msgstr "You can't take off the spacesuit while the airlock has no air."
+
+msgid "¡Sin traje no! Abrir la escotilla vacía la esclusa. Ponete el traje primero."
+msgstr "Not without a spacesuit! Opening the hatch empties the airlock. Put on the spacesuit first."
+
+msgid "La nave todavía está en la plataforma: las caminatas espaciales son en órbita."
+msgstr "The spacecraft is still on the launch pad: spacewalks happen in orbit."
+
+msgid "La puerta no abre: del otro lado hay aire y acá no."
+msgstr "The door won't open: there's air on the other side and none in here."
+
+msgid "Sacate el traje en el armario antes de volver a la nave."
+msgstr "Take off the spacesuit at the suit locker before going back into the ship."
+
+msgid "Poniéndote el traje..."
+msgstr "Putting on the spacesuit..."
+
+msgid "Traje sellado. Ahora usá el panel de la escotilla para despresurizar y abrir."
+msgstr "Spacesuit sealed. Now use the hatch panel to depressurize and open it."
+
+msgid "Sacándote el traje..."
+msgstr "Taking off the spacesuit..."
+
+msgid "Bienvenido de vuelta. Misión afuera terminada."
+msgstr "Welcome back. Spacewalk complete."
+
+msgid "Escotilla abierta. Salí cuando quieras."
+msgstr "Hatch open. Go out whenever you're ready."
+
+msgid "Esclusa presurizada. Ya te podés sacar el traje en el armario."
+msgstr "Airlock pressurized. You can now take off the spacesuit at the suit locker."
+
+msgid "Bajando a la superficie lunar..."
+msgstr "Descending to the lunar surface..."
+
+msgid "Saliendo al espacio..."
+msgstr "Heading out into space..."
+
+msgid "WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · Esc: soltar el mouse"
+msgstr "WASD: walk · Mouse: look · E or click: use · Hold E: doors · Esc: release the mouse"
+
+msgid "Objetivo: ponete el traje (armario a la derecha)."
+msgstr "Objective: put on the spacesuit (suit locker on the right)."
+
+msgid "Objetivo: sacate el traje en el armario."
+msgstr "Objective: take off the spacesuit at the suit locker."
+
+msgid "Objetivo: despresurizá y abrí la escotilla desde su panel."
+msgstr "Objective: depressurize and open the hatch from its panel."
+
+msgid "Despresurizando..."
+msgstr "Depressurizing..."
+
+msgid "Objetivo: cerrá la escotilla desde el panel."
+msgstr "Objective: close the hatch from the panel."
+
+msgid "Objetivo: bajá a la Luna por la escotilla."
+msgstr "Objective: go down to the Moon through the hatch."
+
+msgid "Objetivo: salí por la escotilla."
+msgstr "Objective: go out through the hatch."
+
+msgid "Presurizando..."
+msgstr "Pressurizing..."
+
+msgid "Traje sellado · oxígeno de la nave"
+msgstr "Spacesuit sealed · ship oxygen"
+
+msgid "⚠ Presión de la esclusa: %d kPa"
+msgstr "⚠ Airlock pressure: %d kPa"
+
+msgid "ESCOTILLA"
+msgstr "HATCH"
+
+msgid "ESCOTILLA\nCerrada · %d kPa\n[E] Despresurizar"
+msgstr "HATCH\nClosed · %d kPa\n[E] Depressurize"
+
+msgid "ESCOTILLA\nDESPRESURIZANDO\n%d kPa"
+msgstr "HATCH\nDEPRESSURIZING\n%d kPa"
+
+msgid "ESCOTILLA\nABIERTA · vacío\n[E] Cerrar"
+msgstr "HATCH\nOPEN · vacuum\n[E] Close"
+
+msgid "ESCOTILLA\nPRESURIZANDO\n%d kPa"
+msgstr "HATCH\nPRESSURIZING\n%d kPa"
+
+msgid "Ponerte el traje"
+msgstr "Put on the spacesuit"
+
+msgid "Sacarte el traje"
+msgstr "Take off the spacesuit"
+
+msgid "Despresurizar y abrir"
+msgstr "Depressurize and open"
+
+msgid "Cerrar y presurizar"
+msgstr "Close and pressurize"
+
+msgid "Panel de reparación · %s"
+msgstr "Repair panel · %s"
+
+msgid "Ajustá los controles hasta que todos los indicadores queden en la zona verde. Cada perilla mueve más de un indicador. El oxígeno sigue corriendo."
+msgstr "Adjust the controls until every gauge sits in the green zone. Each knob moves more than one gauge. Your oxygen is still running down."
+
+msgid "Indicadores"
+msgstr "Gauges"
+
+msgid "Controles"
+msgstr "Controls"
+
+msgid "Esc: soltarte del panel (lo que ajustaste queda así)"
+msgstr "Esc: let go of the panel (your adjustments stay as they are)"
+
+msgid "En rango ✓"
+msgstr "In range ✓"
+
+msgid "Muy alto"
+msgstr "Too high"
+
+msgid "Muy bajo"
+msgstr "Too low"
+
+msgid "¡Funciona! Mantené así..."
+msgstr "It works! Hold it there..."
+
+msgid "%d de %d indicadores en verde"
+msgstr "%d of %d gauges in the green"
+
+msgid "Un pequeño paso… Llevá la bandera hasta el lugar marcado y plantala."
+msgstr "One small step… Carry the flag to the marked spot and plant it."
+
+msgid "[Mantener E] Plantar la bandera"
+msgstr "[Hold E] Plant the flag"
+
+msgid "Plantá la bandera acá"
+msgstr "Plant the flag here"
+
+msgid "¡Misión cumplida!"
+msgstr "Mission accomplished!"
+
+msgid "La bandera del Paraguay ya flamea en la Luna."
+msgstr "The flag of Paraguay now flies on the Moon."
+
+msgid "Volver al inicio"
+msgstr "Back to main menu"
+
+msgid "Objetivo: plantá la bandera en el lugar marcado."
+msgstr "Objective: plant the flag at the marked spot."
+
+msgid "WASD: caminar · Espacio: saltar · Mouse: mirar · Mantener E: plantar · Esc: soltar el mouse"
+msgstr "WASD: walk · Space: jump · Mouse: look · Hold E: plant · Esc: release the mouse"
+
+msgid "Dormir"
+msgstr "Sleep"
+
+msgid "Comer una ración"
+msgstr "Eat a ration"
+
+msgid "Habitáculo de tripulación. Al norte, la cabina; al sur, la esclusa para salir al exterior."
+msgstr "Crew quarters. To the north, the cockpit; to the south, the airlock to go outside."
+
+msgid "Las raciones son para el viaje."
+msgstr "The rations are for the trip."
+
+msgid "Volver a la cabina"
+msgstr "Back to the cockpit"
+
+msgid "Ir a la esclusa"
+msgstr "Go to the airlock"
+
+msgid "MÓDULO 03\nESCLUSA"
+msgstr "MODULE 03\nAIRLOCK"
+
+msgid "CABINA"
+msgstr "COCKPIT"
+
+msgid "ESCLUSA · SALIDA AL EXTERIOR"
+msgstr "AIRLOCK · EXIT TO OUTSIDE"
+
+msgid "WASD: caminar · Mouse: mirar · E: usar · Mantener E: puertas · F: comer · Esc: soltar mouse"
+msgstr "WASD: walk · Mouse: look · E: use · Hold E: doors · F: eat · Esc: release mouse"
+
+msgid "[Mantener E] %s"
+msgstr "[Hold E] %s"
+
+msgid "Destrabar el panel solar"
+msgstr "Unjam the solar panel"
+
+msgid "Motor del eje X"
+msgstr "X-axis motor"
+
+msgid "Motor del eje Y"
+msgstr "Y-axis motor"
+
+msgid "Tensión del mecanismo"
+msgstr "Mechanism tension"
+
+msgid "Freno del eje"
+msgstr "Axis brake"
+
+msgid "Realinear la antena"
+msgstr "Realign the antenna"
+
+msgid "Azimut"
+msgstr "Azimuth"
+
+msgid "Elevación"
+msgstr "Elevation"
+
+msgid "Señal"
+msgstr "Signal"
+
+msgid "Ruido"
+msgstr "Noise"
+
+msgid "Sellar una fuga en el motor"
+msgstr "Seal an engine leak"
+
+msgid "Válvula A"
+msgstr "Valve A"
+
+msgid "Válvula B"
+msgstr "Valve B"
+
+msgid "Válvula C"
+msgstr "Valve C"
+
+msgid "Presión"
+msgstr "Pressure"
+
+msgid "Temperatura"
+msgstr "Temperature"
+
+msgid "Recalibrar un instrumento"
+msgstr "Recalibrate an instrument"
+
+msgid "Foco"
+msgstr "Focus"
+
+msgid "Ganancia"
+msgstr "Gain"
+
+msgid "Nitidez"
+msgstr "Sharpness"
+
+msgid "Brillo"
+msgstr "Brightness"
+
+msgid "Filtro"
+msgstr "Filter"
+
+msgid "Viaje tripulado a la Luna"
+msgstr "Crewed mission to the Moon"
+
+msgid "Un viaje tripulado de 384.400 km hasta la Luna. La velocidad depende de la nave: cuanto más delta-v sobre, antes se llega. Hay que mantener a la tripulación entera y hacer ciencia por el camino."
+msgstr "A 384,400 km crewed journey to the Moon. Speed depends on the spacecraft: the more spare delta-v, the sooner you arrive. Keep the crew in one piece and do science along the way."
+
+msgid "Llegar a la Luna con la tripulación a salvo y entregar ciencia durante el viaje."
+msgstr "Reach the Moon with the crew safe and deliver science during the journey."
+
+msgid "Cinturones de Van Allen"
+msgstr "Van Allen belts"
+
+msgid "La nave cruza la zona de radiación que rodea la Tierra: los instrumentos captan mucho ruido."
+msgstr "The spacecraft crosses the radiation zone surrounding Earth: the instruments pick up a lot of noise."
+
+msgid "Rotación térmica"
+msgstr "Thermal roll"
+
+msgid "Como en las Apollo, la nave gira despacio para repartir el calor del Sol: los paneles rinden la mitad."
+msgstr "As on the Apollo missions, the spacecraft rotates slowly to spread the Sun's heat: the panels produce half as much power."
+
+msgid "Control de Misión: ¿quién más está a bordo con ustedes?"
+msgstr "Mission Control: who else is on board with you?"
+
+msgid "Alguien golpeó la escotilla desde afuera."
+msgstr "Someone knocked on the hatch from outside."
+
+msgid "⚠ FALLA EN EL CASCO… (no hay ninguna falla)"
+msgstr "⚠ HULL BREACH… (there is no breach)"
+
+msgid "Control de Misión: los escuchamos dos veces."
+msgstr "Mission Control: we're hearing you twice."
+
+msgid "Se escuchan pasos en el habitáculo."
+msgstr "There are footsteps in the crew quarters."
+
+msgid "La Tierra dejó de responder… ¿o no?"
+msgstr "Earth stopped responding… or did it?"
+
+msgid "Hay alguien sentado en la cama."
+msgstr "Someone is sitting on the bed."
+
+msgid "Estructura y computadora"
+msgstr "Structure and computer"
+
+msgid "El chasis, la computadora de a bordo, la batería y la memoria. Viene con toda nave."
+msgstr "The frame, onboard computer, battery and memory. Comes with every spacecraft."
+
+msgid "Cohete"
+msgstr "Rocket"
+
+msgid "Comunicación"
+msgstr "Communications"
+
+msgid "Propulsión"
+msgstr "Propulsion"
+
+msgid "Víveres"
+msgstr "Provisions"
+
+msgid "Instrumentos"
+msgstr "Instruments"
+
+msgid "Extras"
+msgstr "Extras"
+
+msgid "Tormenta solar"
+msgstr "Solar storm"
+
+msgid "El Sol lanzó una ráfaga de partículas que llega en minutos. La electrónica encendida es la más vulnerable."
+msgstr "The Sun released a burst of particles that will arrive in minutes. Powered-on electronics are the most vulnerable."
+
+msgid "Apagar los instrumentos y esperar"
+msgstr "Shut down the instruments and wait"
+
+msgid "La nave esperó a resguardo. Se perdió un turno de ciencia, pero no hubo daños."
+msgstr "The spacecraft waited it out safely. A turn of science was lost, but there was no damage."
+
+msgid "Seguir trabajando"
+msgstr "Keep working"
+
+msgid "La tormenta golpeó de lleno a la nave."
+msgstr "The storm hit the spacecraft head-on."
+
+msgid "Falla de componente"
+msgstr "Component failure"
+
+msgid "Un componente dejó de responder: {componente}."
+msgstr "A component stopped responding: {componente}."
+
+msgid "Falló {componente}, pero el sistema de respaldo tomó el control y no se perdió nada."
+msgstr "{componente} failed, but the backup system took over and nothing was lost."
+
+msgid "Reiniciarlo (se pierde este turno de ciencia)"
+msgstr "Reboot it (loses this turn's science)"
+
+msgid "Se intentó un reinicio completo."
+msgstr "A full reboot was attempted."
+
+msgid "Seguir sin ese componente"
+msgstr "Continue without that component"
+
+msgid "La misión sigue con un componente menos."
+msgstr "The mission continues with one less component."
+
+msgid "Oportunidad científica"
+msgstr "Science opportunity"
+
+msgid "Un cometa pasa cerca. Si la nave maniobra para apuntarle, este turno los instrumentos captan el triple de datos."
+msgstr "A comet is passing nearby. If the spacecraft maneuvers to point at it, the instruments collect triple the data this turn."
+
+msgid "Maniobrar (gasta 100 m/s de delta-v)"
+msgstr "Maneuver (uses 100 m/s of delta-v)"
+
+msgid "La nave giró a tiempo y los instrumentos apuntan al cometa."
+msgstr "The spacecraft turned in time and the instruments are pointed at the comet."
+
+msgid "Seguir con el plan"
+msgstr "Stick to the plan"
+
+msgid "El cometa pasó de largo."
+msgstr "The comet went by."
+
+msgid "La trayectoria se desvía"
+msgstr "Trajectory drifting"
+
+msgid "Pequeñas fuerzas fueron sacando a la nave del rumbo a la Luna. Hay que encender el motor para corregir, y ese delta-v después falta para frenar."
+msgstr "Small forces have been pushing the spacecraft off its course to the Moon. You need to fire the engine to correct, and that delta-v won't be available later for braking."
+
+msgid "Corregir (gasta 150 m/s de delta-v)"
+msgstr "Correct course (uses 150 m/s of delta-v)"
+
+msgid "Rumbo corregido."
+msgstr "Course corrected."
+
+msgid "Seguir así"
+msgstr "Stay the course"
+
+msgid "Desde una trayectoria peor, los instrumentos captarán menos datos el resto del viaje."
+msgstr "From a worse trajectory, the instruments will collect less data for the rest of the trip."
+
+msgid "Impacto de micrometeorito"
+msgstr "Micrometeoroid impact"
+
+msgid "Un grano de polvo a 20 km/s golpeó la nave. Hay que decidir qué hacer con la energía de reserva."
+msgstr "A dust grain traveling at 20 km/s hit the spacecraft. You must decide what to do with the reserve power."
+
+msgid "Usar la batería para reparar"
+msgstr "Use the battery for repairs"
+
+msgid "Las reparaciones contuvieron el daño, pero vaciaron buena parte de la batería."
+msgstr "The repairs contained the damage, but drained a good part of the battery."
+
+msgid "Ignorarlo y seguir"
+msgstr "Ignore it and continue"
+
+msgid "El daño quedó sin reparar."
+msgstr "The damage was left unrepaired."
+
+msgid "La nave pesaba {masa} kg y el cohete solo podía llevar {capacidad} kg hasta su destino. No llegó a despegar."
+msgstr "The spacecraft weighed {masa} kg and the rocket could only carry {capacidad} kg to its destination. It never lifted off."
+
+msgid "El cohete falló durante el ascenso. Tenía {fiabilidad}% de fiabilidad: era poco probable, pero podía pasar."
+msgstr "The rocket failed during ascent. It had {fiabilidad}% reliability: unlikely, but it could happen."
+
+msgid "La nave llegó, pero tenía {dv} m/s de delta-v y necesitaba {requerido} para quedar en órbita. Se perdió en el espacio."
+msgstr "The spacecraft arrived, but it had {dv} m/s of delta-v and needed {requerido} to enter orbit. It was lost in space."
+
+msgid "La nave se quedó sin salud en el turno {turno} y se perdió el contacto."
+msgstr "The spacecraft ran out of health on turn {turno} and contact was lost."
+
+msgid "Entregaste {ciencia} de {objetivo} puntos de ciencia ({pct}% del objetivo)."
+msgstr "You delivered {ciencia} of {objetivo} science points ({pct}% of the goal)."
+
+msgid "Tu antena solo pudo transmitir el {pct}% de los datos que captaron los instrumentos."
+msgstr "Your antenna could only transmit {pct}% of the data the instruments collected."
+
+msgid "La antena envió a la Tierra casi todo lo que captaron los instrumentos."
+msgstr "The antenna sent almost everything the instruments collected back to Earth."
+
+msgid "Se perdieron {datos} unidades de datos porque la memoria se llenó antes de transmitirlas."
+msgstr "{datos} units of data were lost because the memory filled up before they could be transmitted."
+
+msgid "En {n} turnos no alcanzó la energía ni para los sistemas básicos."
+msgstr "For {n} turns there wasn't enough power even for basic systems."
+
+msgid "En un turno no alcanzó la energía ni para los sistemas básicos."
+msgstr "For one turn there wasn't enough power even for basic systems."
+
+msgid "La nave pasó {n} turnos sin calefacción: se dañó la electrónica y la tripulación perdió cordura."
+msgstr "The spacecraft went {n} turns without heating: the electronics were damaged and the crew lost sanity."
+
+msgid "La nave pasó un turno sin calefacción: se dañó la electrónica y la tripulación perdió cordura."
+msgstr "The spacecraft went one turn without heating: the electronics were damaged and the crew lost sanity."
+
+msgid "Los sistemas redundantes salvaron la misión cuando falló {componente}."
+msgstr "The redundant systems saved the mission when {componente} failed."
+
+msgid "Te pasaste del presupuesto por {monto} M$ y eso resta puntos."
+msgstr "You went over budget by ${monto}M, and that costs you points."
+
+msgid "Te sobraron {monto} M$ del presupuesto ({pct}%)."
+msgstr "You had ${monto}M of budget left over ({pct}%)."
+
+msgid "La nave terminó con solo {salud}% de salud."
+msgstr "The spacecraft ended with only {salud}% health."
+
+msgid "La tripulación se quedó sin fuerzas por el hambre y la misión se abandonó."
+msgstr "The crew was too weak from hunger and the mission was abandoned."
+
+msgid "La tripulación perdió la cordura y ya no pudo seguir operando la nave."
+msgstr "The crew lost their sanity and could no longer operate the spacecraft."
+
+msgid "La tripulación terminó al límite: solo le quedaba {cordura}% de cordura."
+msgstr "The crew ended at their limit: only {cordura}% sanity left."
+
+msgid "La nave llegó a la Luna con {dv} m/s de delta-v y necesitaba {requerido} para frenar: pasó de largo y se perdió en el espacio."
+msgstr "The spacecraft reached the Moon with {dv} m/s of delta-v and needed {requerido} to brake: it flew past and was lost in space."
+
+msgid "La nave recorrió {km} km en {horas} horas a {velocidad} m/s de media y llegó a la Luna."
+msgstr "The spacecraft traveled {km} km in {horas} hours at an average of {velocidad} m/s and reached the Moon."
+
+msgid "La tripulación quedó a {faltan} km de la Luna ({pct}% del viaje)."
+msgstr "The crew ended up {faltan} km from the Moon ({pct}% of the journey)."
+
+msgid "La tripulación bajó a la superficie y plantó la bandera del Paraguay en la Luna."
+msgstr "The crew went down to the surface and planted the flag of Paraguay on the Moon."
+
+msgid "La nave alunizó, pero nadie bajó a plantar la bandera."
+msgstr "The spacecraft landed on the Moon, but nobody went out to plant the flag."
+
+msgid "Sobraron {n} raciones en la despensa."
+msgstr "{n} rations were left over in the food supply."
+
+msgid "Sobró una ración en la despensa."
+msgstr "One ration was left over in the food supply."
+
+msgid "Cohete chico"
+msgstr "Small rocket"
+
+msgid "Barato y con muchos vuelos exitosos, pero lleva poca carga."
+msgstr "Cheap, with many successful flights, but carries little payload."
+
+msgid "Cohete mediano"
+msgstr "Medium rocket"
+
+msgid "El caballo de batalla: buena capacidad y el más confiable."
+msgstr "The workhorse: good capacity and the most reliable."
+
+msgid "Cohete pesado"
+msgstr "Heavy rocket"
+
+msgid "Enorme capacidad, pero es caro y todavía tiene pocos vuelos."
+msgstr "Huge capacity, but expensive and still has few flights."
+
+msgid "Panel solar chico"
+msgstr "Small solar panel"
+
+msgid "Liviano y barato. Rinde menos cuanto más lejos del Sol y nada a la sombra."
+msgstr "Light and cheap. Produces less the farther from the Sun, and nothing in shadow."
+
+msgid "Panel solar grande"
+msgstr "Large solar panel"
+
+msgid "Mucha energía mientras le dé el Sol, pero nada a la sombra. Pesa más que el chico."
+msgstr "Lots of power while in sunlight, but nothing in shadow. Heavier than the small one."
+
+msgid "RTG nuclear"
+msgstr "Nuclear RTG"
+
+msgid "Genera lo mismo en cualquier lugar, de día o de noche. Caro."
+msgstr "Produces the same power anywhere, day or night. Expensive."
+
+msgid "Antena de baja ganancia"
+msgstr "Low-gain antenna"
+
+msgid "Simple y liviana, pero transmite pocos datos."
+msgstr "Simple and light, but transmits little data."
+
+msgid "Antena de ganancia media"
+msgstr "Medium-gain antenna"
+
+msgid "Un equilibrio entre datos, masa y consumo."
+msgstr "A balance between data, mass and power draw."
+
+msgid "Antena de alta ganancia"
+msgstr "High-gain antenna"
+
+msgid "Un plato grande que envía muchos datos lejos, pero pesa y consume."
+msgstr "A large dish that sends lots of data far away, but it's heavy and power-hungry."
+
+msgid "Motor químico"
+msgstr "Chemical engine"
+
+msgid "Simple y probado. Necesita mucho combustible para cambiar de velocidad."
+msgstr "Simple and proven. Needs a lot of propellant to change velocity."
+
+msgid "Motor eficiente"
+msgstr "High-efficiency engine"
+
+msgid "Saca más velocidad de cada kilo de combustible. Más caro y delicado."
+msgstr "Gets more velocity out of every kilogram of propellant. More expensive and delicate."
+
+msgid "Motor iónico"
+msgstr "Ion engine"
+
+msgid "Muy poco combustible para muchísimo delta-v, pero mientras empuja consume mucha electricidad."
+msgstr "Very little propellant for a huge amount of delta-v, but it draws a lot of electricity while thrusting."
+
+msgid "Despensa chica"
+msgstr "Small food supply"
+
+msgid "Dos raciones. Liviana y barata, pero la tripulación va a pasar hambre en un viaje largo."
+msgstr "Two rations. Light and cheap, but the crew will go hungry on a long trip."
+
+msgid "Despensa mediana"
+msgstr "Medium food supply"
+
+msgid "Cuatro raciones: alcanzan para un viaje normal si se reparten bien."
+msgstr "Four rations: enough for a normal trip if rationed well."
+
+msgid "Despensa grande"
+msgstr "Large food supply"
+
+msgid "Seis raciones. Sobra comida, pero pesa: menos delta-v y un viaje más lento."
+msgstr "Six rations. More than enough food, but heavy: less delta-v and a slower trip."
+
+msgid "Cámara"
+msgstr "Camera"
+
+msgid "Fotos de la superficie. Liviana y barata."
+msgstr "Photos of the surface. Light and cheap."
+
+msgid "Espectrómetro"
+msgstr "Spectrometer"
+
+msgid "Descubre de qué están hechas las cosas. Pocos datos, pero muy valiosos."
+msgstr "Finds out what things are made of. Little data, but very valuable."
+
+msgid "Radar"
+msgstr "Radar"
+
+msgid "Ve bajo la superficie lunar. Pesado, gasta mucha energía y genera muchos datos."
+msgstr "Sees beneath the lunar surface. Heavy, uses a lot of power and generates lots of data."
+
+msgid "Sistemas redundantes"
+msgstr "Redundant systems"
+
+msgid "Copias de respaldo de los sistemas críticos: si algo falla, el respaldo toma el control."
+msgstr "Backups of critical systems: if something fails, the backup takes over."
+
+msgid "Blindaje contra radiación"
+msgstr "Radiation shielding"
+
+msgid "Protege la electrónica de tormentas solares e impactos: reduce el daño a la mitad."
+msgstr "Protects the electronics from solar storms and impacts: cuts damage in half."
+
+msgid "Misión tripulada a la Luna"
+msgstr "Crewed Mission to the Moon"
+
+msgid "Diseñá la nave, lanzala, cuidá a la tripulación durante el viaje y plantá la bandera en la Luna."
+msgstr "Design the spacecraft, launch it, look after the crew during the journey, and plant the flag on the Moon."
+
+msgid "Comenzar misión"
+msgstr "Start mission"
+
+msgid "Cómo se juega"
+msgstr "How to play"
+
+msgid "Salir"
+msgstr "Quit"
+
+msgid "Equipo Sabertech · Hackathon 2026"
+msgstr "Team Sabertech · Hackathon 2026"
+
+msgid "Gráficos: %s"
+msgstr "Graphics: %s"
+
+msgid "1. En la cabina, usá la computadora de misión: diseñá la nave con el presupuesto disponible y lanzala."
+msgstr "1. In the cockpit, use the mission computer: design the spacecraft within the available budget and launch it."
+
+msgid "2. Durante el viaje a la Luna, repartí la energía en cada tramo, transmití la ciencia y respondé a los imprevistos."
+msgstr "2. On the way to the Moon, allocate power on each leg, transmit your science data, and deal with the unexpected."
+
+msgid "3. Cuidá a la tripulación: comé con F, dormí en la cama del habitáculo para recuperar la cordura. Con poca cordura aparecen alucinaciones."
+msgstr "3. Look after the crew: press F to eat, and sleep in the bunk in the crew quarters to restore sanity. When sanity runs low, hallucinations appear."
+
+msgid "4. Si algo se rompe afuera, salí por la esclusa con el traje. Pero no te quedes mucho: la soledad pesa."
+msgstr "4. If something breaks outside, suit up and go out through the airlock. But don't stay out too long: the isolation takes its toll."
+
+msgid "5. Al llegar, la nave aluniza: salí por la esclusa y plantá la bandera."
+msgstr "5. When you arrive, the spacecraft lands on the Moon: go out through the airlock and plant the flag."
+
+msgid "WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · F: comer · F2: gráficos · Esc: soltar el mouse"
+msgstr "WASD: walk · Mouse: look · E or click: use · Hold E: doors · F: eat · F2: graphics · Esc: release the mouse"
+
+msgid "Volver"
+msgstr "Back"

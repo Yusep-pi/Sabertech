@@ -94,7 +94,7 @@ func _ready() -> void:
 
 	_crear_hud()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	_mostrar_mensaje("Un pequeño paso… Llevá la bandera hasta el lugar marcado y plantala.")
+	_mostrar_mensaje(tr("Un pequeño paso… Llevá la bandera hasta el lugar marcado y plantala."))
 
 
 func _process(delta: float) -> void:
@@ -102,7 +102,7 @@ func _process(delta: float) -> void:
 		_animar_final(delta)
 		return
 	var cerca := hay_lugar_cerca()
-	_indicacion.text = "[Mantener E] Plantar la bandera" if cerca else ""
+	_indicacion.text = tr("[Mantener E] Plantar la bandera") if cerca else ""
 	if cerca and _jugador.activo and Input.is_physical_key_pressed(KEY_E):
 		_progreso_plantar += delta
 	else:
@@ -300,7 +300,7 @@ func _armar_lugar_bandera() -> void:
 	luz.position.y = 0.6
 	_marca.add_child(luz)
 	var cartel := Label3D.new()
-	cartel.text = "Plantá la bandera acá"
+	cartel.text = tr("Plantá la bandera acá")
 	cartel.position = LUGAR_BANDERA + Vector3(0, suelo + 2.2, 0)
 	cartel.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	cartel.no_depth_test = true
@@ -576,13 +576,13 @@ func _empezar_final() -> void:
 		_capa_final.add_child(banda)
 		create_tween().tween_property(banda, "offset_bottom" if arriba else "offset_top", 70.0 if arriba else -70.0, 1.0)
 
-	var titulo := Interfaz.etiqueta("¡Misión cumplida!", Interfaz.LIMA, 52)
+	var titulo := Interfaz.etiqueta(tr("¡Misión cumplida!"), Interfaz.LIMA, 52)
 	titulo.position = Vector2(64, 95)
 	titulo.add_theme_constant_override("outline_size", 12)
 	titulo.add_theme_color_override("font_outline_color", Interfaz.FONDO)
 	titulo.modulate.a = 0.0
 	_capa_final.add_child(titulo)
-	var subtitulo := Interfaz.etiqueta("La bandera del Paraguay ya flamea en la Luna.", Interfaz.BLANCO, 24)
+	var subtitulo := Interfaz.etiqueta(tr("La bandera del Paraguay ya flamea en la Luna."), Interfaz.BLANCO, 24)
 	subtitulo.position = Vector2(64, 165)
 	subtitulo.add_theme_constant_override("outline_size", 8)
 	subtitulo.add_theme_color_override("font_outline_color", Interfaz.FONDO)
@@ -773,10 +773,10 @@ func _mostrar_botones_finales() -> void:
 	botones.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	botones.offset_bottom = -95
 	_capa_final.add_child(botones)
-	var informe := Interfaz.boton_principal("Ver informe", 22)
+	var informe := Interfaz.boton_principal(tr("Ver informe"), 22)
 	informe.pressed.connect(_ver_informe)
 	botones.add_child(informe)
-	var inicio := Interfaz.boton("Volver al inicio", 22)
+	var inicio := Interfaz.boton(tr("Volver al inicio"), 22)
 	inicio.pressed.connect(func() -> void:
 		GameState.reiniciar()
 		get_tree().change_scene_to_file(GameState.ESCENA_INICIO))
@@ -798,7 +798,7 @@ func _crear_hud() -> void:
 	add_child(hud)
 	hud.add_child(Interfaz.visor_casco())
 
-	_objetivo = Interfaz.etiqueta("Objetivo: plantá la bandera en el lugar marcado.", Interfaz.CIAN, 18)
+	_objetivo = Interfaz.etiqueta(tr("Objetivo: plantá la bandera en el lugar marcado."), Interfaz.CIAN, 18)
 	_objetivo.position = Vector2(16, 12)
 	hud.add_child(_objetivo)
 
@@ -831,7 +831,7 @@ func _crear_hud() -> void:
 	_mensaje.offset_top = 52
 	hud.add_child(_mensaje)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Espacio: saltar · Mouse: mirar · Mantener E: plantar · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
+	var controles := Interfaz.etiqueta(tr("WASD: caminar · Espacio: saltar · Mouse: mirar · Mantener E: plantar · Esc: soltar el mouse"), Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)

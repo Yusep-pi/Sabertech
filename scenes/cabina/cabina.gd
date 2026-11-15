@@ -102,11 +102,11 @@ func _ready() -> void:
 		pass
 	elif GameState.en_orbita():
 		if GameState.tiene_viaje():
-			_mostrar_mensaje("Rumbo a la Luna. Mirá por la ventana: la Tierra queda atrás. Usá cualquier consola para operar.")
+			_mostrar_mensaje(tr("Rumbo a la Luna. Mirá por la ventana: la Tierra queda atrás. Usá cualquier consola para operar."))
 		else:
-			_mostrar_mensaje("La nave llegó a destino. Mirá por la ventana y usá cualquier consola para operar.")
+			_mostrar_mensaje(tr("La nave llegó a destino. Mirá por la ventana y usá cualquier consola para operar."))
 	else:
-		_mostrar_mensaje("Bienvenido a bordo. La computadora de misión está al frente.")
+		_mostrar_mensaje(tr("Bienvenido a bordo. La computadora de misión está al frente."))
 
 
 func _process(delta: float) -> void:
@@ -142,7 +142,7 @@ func abrir_pantalla(pantalla: String) -> void:
 	cerrar_pantalla()
 	_pantalla_abierta = load(GameState.ESCENAS[pantalla]).instantiate()
 	_capa_pantalla.add_child(_pantalla_abierta)
-	var volver := Interfaz.etiqueta("Esc: volver a la cabina", Interfaz.CIAN, 14)
+	var volver := Interfaz.etiqueta(tr("Esc: volver a la cabina"), Interfaz.CIAN, 14)
 	volver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	volver.position += Vector2(16, -28)
 	_pantalla_abierta.add_child(volver)
@@ -159,9 +159,9 @@ func cerrar_pantalla() -> void:
 		if GameState.en_orbita() and not GameState.ops["terminada"]:
 			var quedan: int = GameState.ops["turnos"] - GameState.ops["turno"] + 1
 			if GameState.tiene_viaje():
-				_mostrar_mensaje("Faltan %d tramos para la Luna. Volvé a cualquier consola para ajustar la energía." % quedan)
+				_mostrar_mensaje(tr("Faltan %d tramos para la Luna. Volvé a cualquier consola para ajustar la energía.") % quedan)
 			else:
-				_mostrar_mensaje("Quedan %d turnos. Volvé a cualquier consola para seguir operando." % quedan)
+				_mostrar_mensaje(tr("Quedan %d turnos. Volvé a cualquier consola para seguir operando.") % quedan)
 	_jugador.activo = true
 	_mira.visible = true
 	_tripulacion.ubicacion = HudTripulacion.PANEL
@@ -172,7 +172,7 @@ func _usar_consola(consola: String) -> void:
 	if GameState.en_orbita():
 		abrir_pantalla("informe" if GameState.ops["terminada"] else "operaciones")
 	elif consola != "consola_principal":
-		_mostrar_mensaje("Sin datos: la nave todavía está en la plataforma. Usá la computadora de misión.")
+		_mostrar_mensaje(tr("Sin datos: la nave todavía está en la plataforma. Usá la computadora de misión."))
 	else:
 		abrir_pantalla("briefing" if GameState.mision.is_empty() else "diseno")
 
@@ -182,7 +182,7 @@ func _usar_consola(consola: String) -> void:
 ## se recorre recién en el espacio.
 func _motivo_puerta_cerrada() -> String:
 	if not GameState.en_orbita():
-		return "La nave sigue en la plataforma: el resto de la nave se recorre una vez en el espacio."
+		return tr("La nave sigue en la plataforma: el resto de la nave se recorre una vez en el espacio.")
 	return ""
 
 
@@ -191,10 +191,10 @@ func _crear_compuerta() -> void:
 	_compuerta.jugador = _jugador
 	_compuerta.agregar(func() -> bool:
 		return _jugador.position.z > 2.4 and absf(_jugador.position.x) < 1.2,
-		"Ir al habitáculo", "habitaculo", "cabina", _motivo_puerta_cerrada)
+		tr("Ir al habitáculo"), "habitaculo", "cabina", _motivo_puerta_cerrada)
 	add_child(_compuerta)
 	var cartel := Label3D.new()
-	cartel.text = "HABITÁCULO"
+	cartel.text = tr("HABITÁCULO")
 	cartel.position = PUERTA_TRASERA + Vector3(0, 1.45, -0.12)
 	cartel.rotation_degrees.y = 180
 	cartel.pixel_size = 0.0025
@@ -398,18 +398,18 @@ func _crear_marcador() -> void:
 
 ## Qué dice el marcador y de qué color, según lo que toca hacer.
 func _actualizar_marcador() -> void:
-	var texto := "Ver la misión"
+	var texto := tr("Ver la misión")
 	var color := Interfaz.LIMA
 	if GameState.en_orbita():
 		if GameState.ops["terminada"]:
-			texto = "Ver informe"
+			texto = tr("Ver informe")
 		elif not GameState.ops["evento_actual"].is_empty():
-			texto = "¡Alerta!"
+			texto = tr("¡Alerta!")
 			color = Interfaz.ALERTA
 		else:
-			texto = ("Tramo %d de %d" if GameState.tiene_viaje() else "Turno %d de %d") % [GameState.ops["turno"], GameState.ops["turnos"]]
+			texto = (tr("Tramo %d de %d") if GameState.tiene_viaje() else tr("Turno %d de %d")) % [GameState.ops["turno"], GameState.ops["turnos"]]
 	elif not GameState.mision.is_empty():
-		texto = "Diseñar y lanzar"
+		texto = tr("Diseñar y lanzar")
 	_marcador.text = "[E] %s\n▼" % texto
 	_marcador.modulate = color
 
@@ -427,25 +427,25 @@ func _textos_en_plataforma() -> Dictionary:
 	var mision := GameState.mision
 	if mision.is_empty():
 		return {
-			"consola_principal": "SABERTECH\nMisión: viaje a la Luna\n[E] Ver el briefing",
-			"consola_energia": "ENERGÍA\nEn espera",
-			"consola_comunicaciones": "COMUNICACIONES\nEn espera",
-			"consola_ciencia": "CIENCIA\nEn espera",
+			"consola_principal": tr("SABERTECH\nMisión: viaje a la Luna\n[E] Ver el briefing"),
+			"consola_energia": tr("ENERGÍA\nEn espera"),
+			"consola_comunicaciones": tr("COMUNICACIONES\nEn espera"),
+			"consola_ciencia": tr("CIENCIA\nEn espera"),
 		}
 	var m := GameState.medidores
 	var instrumentos := []
 	for pieza in GameState.piezas_elegidas("instrumento"):
 		instrumentos.append(pieza["nombre"])
 	return {
-		"consola_principal": "MISIÓN: %s\nPresupuesto %d / %d M$\n%s\n[E] Diseñar y lanzar" % [
+		"consola_principal": tr("MISIÓN: %s\nPresupuesto %d / %d M$\n%s\n[E] Diseñar y lanzar") % [
 			mision["nombre"], roundi(m["costo"]["valor"]), roundi(m["costo"]["limite"]),
-			"Lista para lanzar" if GameState.puede_lanzar() else "Faltan piezas"],
-		"consola_energia": "ENERGÍA\n%s\nGenera %d W · necesita %d W" % [
-			GameState.pieza_elegida("energia").get("nombre", "Sin fuente"), roundi(m["energia"]["limite"]), roundi(m["energia"]["valor"])],
-		"consola_comunicaciones": "COMUNICACIONES\n%s\nEnvía %d datos por turno" % [
-			GameState.pieza_elegida("comunicacion").get("nombre", "Sin antena"), roundi(m["datos"]["limite"])],
-		"consola_ciencia": "CIENCIA\n%s\nObjetivo: %d puntos" % [
-			", ".join(instrumentos) if not instrumentos.is_empty() else "Sin instrumentos", roundi(mision["objetivo_ciencia"])],
+			tr("Lista para lanzar") if GameState.puede_lanzar() else tr("Faltan piezas")],
+		"consola_energia": tr("ENERGÍA\n%s\nGenera %d W · necesita %d W") % [
+			GameState.pieza_elegida("energia").get("nombre", tr("Sin fuente")), roundi(m["energia"]["limite"]), roundi(m["energia"]["valor"])],
+		"consola_comunicaciones": tr("COMUNICACIONES\n%s\nEnvía %d datos por turno") % [
+			GameState.pieza_elegida("comunicacion").get("nombre", tr("Sin antena")), roundi(m["datos"]["limite"])],
+		"consola_ciencia": tr("CIENCIA\n%s\nObjetivo: %d puntos") % [
+			", ".join(instrumentos) if not instrumentos.is_empty() else tr("Sin instrumentos"), roundi(mision["objetivo_ciencia"])],
 	}
 
 
@@ -453,25 +453,25 @@ func _textos_en_orbita() -> Dictionary:
 	var ops := GameState.ops
 	var energia := GameState.energia_turno()
 	var base := GameState.get_nave_base()
-	var formato := ("TRAMO" if GameState.tiene_viaje() else "TURNO") + " %d / %d\nCiencia %d / %d\nSalud %d%%"
+	var formato := tr("TRAMO %d / %d\nCiencia %d / %d\nSalud %d%%") if GameState.tiene_viaje() else tr("TURNO %d / %d\nCiencia %d / %d\nSalud %d%%")
 	var principal := formato % [
 		mini(ops["turno"], ops["turnos"]), ops["turnos"], roundi(ops["ciencia"]), roundi(GameState.mision["objetivo_ciencia"]), roundi(ops["salud"])]
 	if not ops["evento_actual"].is_empty():
-		principal += "\n¡ALERTA: %s!" % ops["evento_actual"]["titulo"]
+		principal += tr("\n¡ALERTA: %s!") % ops["evento_actual"]["titulo"]
 	elif ops["terminada"]:
-		principal += "\nMisión terminada · [E] Informe"
+		principal += tr("\nMisión terminada · [E] Informe")
 	var instrumentos := []
 	for pieza in GameState.piezas_elegidas("instrumento"):
-		var estado := "ROTO" if GameState.esta_rota(pieza["id"]) else ("ON" if GameState.plan["instrumentos"].get(pieza["id"], false) else "OFF")
+		var estado := tr("ROTO") if GameState.esta_rota(pieza["id"]) else ("ON" if GameState.plan["instrumentos"].get(pieza["id"], false) else "OFF")
 		instrumentos.append("%s: %s" % [pieza["nombre"], estado])
 	return {
 		"consola_principal": principal,
-		"consola_energia": "ENERGÍA\nGenera %d W\nBatería %d / %d\nUsando %d W" % [
+		"consola_energia": tr("ENERGÍA\nGenera %d W\nBatería %d / %d\nUsando %d W") % [
 			roundi(energia["generacion"]), roundi(ops["bateria"]), roundi(base["bateria"]), roundi(energia["consumo"])],
-		"consola_comunicaciones": "COMUNICACIONES\nMemoria %d / %d\nEnvío %d por turno\nTransmitir: %s" % [
+		"consola_comunicaciones": tr("COMUNICACIONES\nMemoria %d / %d\nEnvío %d por turno\nTransmitir: %s") % [
 			roundi(GameState.datos_almacenados()), roundi(base["almacenamiento"]), roundi(GameState.capacidad_transmision()),
-			"SÍ" if GameState.plan["transmitir"] else "NO"],
-		"consola_ciencia": "CIENCIA\n" + ("\n".join(instrumentos) if not instrumentos.is_empty() else "Sin instrumentos"),
+			tr("SÍ") if GameState.plan["transmitir"] else tr("NO")],
+		"consola_ciencia": tr("CIENCIA\n%s") % ("\n".join(instrumentos) if not instrumentos.is_empty() else tr("Sin instrumentos")),
 	}
 
 
@@ -508,7 +508,7 @@ func _crear_hud() -> void:
 	_mensaje.offset_top = 60
 	hud.add_child(_mensaje)
 
-	var controles := Interfaz.etiqueta("WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · F: comer · Esc: soltar el mouse", Color(Interfaz.CIAN, 0.7), 14)
+	var controles := Interfaz.etiqueta(tr("WASD: caminar · Mouse: mirar · E o clic: usar · Mantener E: puertas · F: comer · Esc: soltar el mouse"), Color(Interfaz.CIAN, 0.7), 14)
 	controles.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	controles.position += Vector2(16, -28)
 	hud.add_child(controles)
@@ -525,22 +525,22 @@ func _crear_hud() -> void:
 
 func _actualizar_hud() -> void:
 	var consola := _jugador.consola_mirada() if _jugador.activo else ""
-	_indicacion.text = "[E] " + NOMBRES_CONSOLA[consola] if consola != "" else ""
+	_indicacion.text = "[E] " + tr(NOMBRES_CONSOLA[consola]) if consola != "" else ""
 	if GameState.mision.is_empty():
-		_objetivo.text = "Objetivo: revisá la misión en la computadora de misión."
+		_objetivo.text = tr("Objetivo: revisá la misión en la computadora de misión.")
 	elif not GameState.en_orbita():
-		_objetivo.text = "Objetivo: diseñá la nave y lanzala desde la computadora de misión."
+		_objetivo.text = tr("Objetivo: diseñá la nave y lanzala desde la computadora de misión.")
 	elif GameState.ops["terminada"]:
-		_objetivo.text = "Misión terminada: el informe está en cualquier consola."
+		_objetivo.text = tr("Misión terminada: el informe está en cualquier consola.")
 	elif GameState.tiene_viaje():
-		_objetivo.text = "Objetivo: llegá a la Luna con la tripulación entera (tramo %d de %d)." % [GameState.ops["turno"], GameState.ops["turnos"]]
+		_objetivo.text = tr("Objetivo: llegá a la Luna con la tripulación entera (tramo %d de %d).") % [GameState.ops["turno"], GameState.ops["turnos"]]
 	else:
-		_objetivo.text = "Objetivo: operá la nave (turno %d de %d). Cualquier consola sirve." % [GameState.ops["turno"], GameState.ops["turnos"]]
+		_objetivo.text = tr("Objetivo: operá la nave (turno %d de %d). Cualquier consola sirve.") % [GameState.ops["turno"], GameState.ops["turnos"]]
 
 
 func _on_operaciones_terminadas(motivo: String) -> void:
 	if MENSAJES_FIN.has(motivo):
-		_mostrar_mensaje(MENSAJES_FIN[motivo])
+		_mostrar_mensaje(tr(MENSAJES_FIN[motivo]))
 
 
 func _mostrar_mensaje(texto: String) -> void:

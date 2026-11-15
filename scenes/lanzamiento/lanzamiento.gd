@@ -241,7 +241,7 @@ func _armar_camara_y_hud() -> void:
 	_subtitulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_subtitulo.offset_top = -55
 	hud.add_child(_subtitulo)
-	var saltar := Interfaz.etiqueta("Espacio: saltar", Color(Interfaz.CIAN, 0.6), 14)
+	var saltar := Interfaz.etiqueta(tr("Espacio: saltar"), Color(Interfaz.CIAN, 0.6), 14)
 	saltar.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	saltar.position += Vector2(-130, 24)
 	hud.add_child(saltar)
@@ -264,7 +264,7 @@ func _secuencia() -> void:
 	# 2. Primer plano de los motores: ignición.
 	_plano(Vector3(12, 1.2, 14), func() -> Vector3: return Vector3(0, 1.5, 0), 50, 0.05)
 	_mover_camara(Vector3(10, 1.0, 12), 3.0)
-	_subtitulo.text = "Ignición"
+	_subtitulo.text = tr("Ignición")
 	if not await _esperar(0.6):
 		return
 	_encender_motores()
@@ -274,19 +274,19 @@ func _secuencia() -> void:
 	# 3. Contrapicado desde la base: el cohete se despega (o no) de la plataforma.
 	_plano(Vector3(26, 2.0, 55), func() -> Vector3: return _vehiculo.position + Vector3(0, alto * 0.6, 0), 40, 0.1)
 	if motivo == "masa":
-		_subtitulo.text = "El cohete no logra levantar la nave..."
+		_subtitulo.text = tr("El cohete no logra levantar la nave...")
 		_temblor = 0.12
 		_sacudida = 0.6
 		if not await _esperar(2.8):
 			return
 		_apagar_motores()
 		_temblor = 0.0
-		_subtitulo.text = "Apagado de emergencia"
+		_subtitulo.text = tr("Apagado de emergencia")
 		if not await _esperar(2.0):
 			return
 		_terminar()
 		return
-	_subtitulo.text = "¡Despegue!"
+	_subtitulo.text = tr("¡Despegue!")
 	_estela.emitting = true
 	_aceleracion = 2.5
 	_sacudida = 0.5
@@ -301,7 +301,7 @@ func _secuencia() -> void:
 		if not await _esperar(1.8):
 			return
 		_explotar()
-		_subtitulo.text = "Se perdió la señal del cohete"
+		_subtitulo.text = tr("Se perdió la señal del cohete")
 		if not await _esperar(3.0):
 			return
 		_terminar()
@@ -313,7 +313,9 @@ func _secuencia() -> void:
 	var lejos := func() -> Vector3: return _vehiculo.position + Vector3(0, alto * 0.5, 0)
 	_plano(Vector3(-40, 2, -50), lejos, 32, 0.3)
 	_aceleracion = 14.0
-	_subtitulo.text = "Rumbo a " + GameState.mision.get("nombre", "la órbita").to_lower()
+	# En inglés el nombre conserva sus mayúsculas (Moon, Earth).
+	var rumbo: String = GameState.mision.get("nombre", tr("la órbita"))
+	_subtitulo.text = tr("Rumbo a %s") % (rumbo if Idioma.es_ingles() else rumbo.to_lower())
 	if not await _esperar(3.5):
 		return
 	_terminar()
@@ -417,17 +419,17 @@ func _mostrar_resultado(motivo: String) -> void:
 	var caja := Interfaz.vbox(16)
 	panel.add_child(caja)
 	var exito := motivo == ""
-	var titulo := ("¡Rumbo a la Luna!" if GameState.mision.has("viaje") else "¡Nave en órbita!") if exito else "Misión fallida"
+	var titulo := (tr("¡Rumbo a la Luna!") if GameState.mision.has("viaje") else tr("¡Nave en órbita!")) if exito else tr("Misión fallida")
 	caja.add_child(Interfaz.etiqueta(titulo, Interfaz.LIMA if exito else Interfaz.ALERTA, 30))
 
-	var texto := "El cohete hizo su trabajo y la nave llegó a destino con %d m/s de delta-v de sobra para maniobrar." % roundi(
+	var texto := tr("El cohete hizo su trabajo y la nave llegó a destino con %d m/s de delta-v de sobra para maniobrar.") % roundi(
 		GameState.medidores["delta_v"]["valor"] - GameState.medidores["delta_v"]["limite"])
 	if exito and GameState.mision.has("viaje"):
 		var sobra: float = GameState.medidores["delta_v"]["valor"] - GameState.medidores["delta_v"]["limite"]
 		if sobra >= 0.0:
-			texto = "El cohete hizo su trabajo: la nave va rumbo a la Luna con %d m/s de delta-v de sobra para frenar al llegar." % roundi(sobra)
+			texto = tr("El cohete hizo su trabajo: la nave va rumbo a la Luna con %d m/s de delta-v de sobra para frenar al llegar.") % roundi(sobra)
 		else:
-			texto = "El cohete hizo su trabajo y la nave va rumbo a la Luna... pero le faltan %d m/s de delta-v para frenar al llegar." % roundi(-sobra)
+			texto = tr("El cohete hizo su trabajo y la nave va rumbo a la Luna... pero le faltan %d m/s de delta-v para frenar al llegar.") % roundi(-sobra)
 	if not exito:
 		texto = GameState.texto_fallo_lanzamiento()
 	caja.add_child(Interfaz.parrafo(texto, Interfaz.BLANCO, 18))
@@ -435,16 +437,16 @@ func _mostrar_resultado(motivo: String) -> void:
 	var botones := Interfaz.hbox(12)
 	caja.add_child(botones)
 	if exito:
-		var seguir := Interfaz.boton_principal("Ir a la cabina", 20)
+		var seguir := Interfaz.boton_principal(tr("Ir a la cabina"), 20)
 		seguir.pressed.connect(func() -> void:
 			GameState.iniciar_operaciones()
 			GameState.ir_a("operaciones"))
 		botones.add_child(seguir)
 	else:
-		var informe := Interfaz.boton("Ver informe", 20)
+		var informe := Interfaz.boton(tr("Ver informe"), 20)
 		informe.pressed.connect(GameState.ir_a.bind("informe"))
 		botones.add_child(informe)
-		var redisenar := Interfaz.boton("Rediseñar la nave", 20)
+		var redisenar := Interfaz.boton(tr("Rediseñar la nave"), 20)
 		redisenar.pressed.connect(GameState.ir_a.bind("diseno"))
 		botones.add_child(redisenar)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
