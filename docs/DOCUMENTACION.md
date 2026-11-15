@@ -68,6 +68,12 @@ Desde la cabina se camina por toda la nave. Las puertas se cruzan **manteniendo 
 
 La misión sigue corriendo mientras se recorre la nave: el hambre y la cordura bajan y el viaje a la Luna avanza.
 
+**Cordura y alucinaciones.** La cordura se recupera durmiendo en la cama del habitáculo. Afuera baja con la lluvia, los golpes y el poco oxígeno, y pasados 3 minutos por la soledad (más rápido desde los 5). Por debajo de 60, la tripulación alucina: la pantalla ondula y se ve doble, aparece el "eco" de un astronauta de reojo y llegan mensajes falsos de Control de Misión.
+
+**El final.** Al llegar a la Luna la nave aluniza y la esclusa da a la superficie lunar (`scenes/superficie/`): con gravedad lunar se camina hasta el lugar marcado y se planta la bandera manteniendo E. Una cinemática con tres planos cierra el juego: el astronauta (articulado: torso, piernas con rodilla y brazos que se acomodan solos hasta el mástil) llega con la bandera del Paraguay, la clava en dos golpes, la tela (un shader, `scenes/superficie/bandera.gdshader`) se despliega y se mece, y él la saluda con la Tierra de fondo. Termina con "¡Misión cumplida!" y se puede ver el informe o volver al inicio.
+
+El juego arranca en la pantalla de inicio (`scenes/inicio/`).
+
 ## 3. Cronología
 
 Todo el trabajo se hizo el sábado 14 de noviembre de 2026.
@@ -145,6 +151,7 @@ Tres principios guían todo:
 |---|---|
 | `GameState` | Misión, piezas elegidas, medidores, lanzamiento, operaciones e informe. Ver [Datos y reglas](#5-datos-y-reglas). |
 | `Estilo` | Mejora cada escena al cargarse: entorno, luces, materiales, contornos y filtro retro. Ver [Estilo visual](#8-estilo-visual). |
+| `Alucinaciones` | Con poca cordura: distorsión de pantalla, el "eco" de un astronauta de reojo y mensajes falsos. Ver [Recorrer la nave a pie](#recorrer-la-nave-a-pie). |
 
 ## 5. Datos y reglas
 
@@ -295,6 +302,7 @@ Cada imagen en `assets/texturas/` con el nombre de un material **se aplica sola*
 | `tests/recorrido_esclusa.tscn` | Traje, despresurización, salida a la caminata y vuelta | `godot --path . res://tests/recorrido_esclusa.tscn` |
 | `tests/recorrido_niveles.tscn` | Recorrer la nave a pie, ida y vuelta: puertas, reglas de la esclusa y ubicación al entrar a cada ambiente | `godot --path . res://tests/recorrido_niveles.tscn` |
 | `tests/recorrido_eva.tscn` | Propulsor, freno, mouse, los cuatro puzzles (y 200 paneles al azar por tipo), lluvia, victoria y falta de oxígeno | `godot --path . res://tests/recorrido_eva.tscn` |
+| `tests/recorrido_final.tscn` | Pantalla de inicio, alucinaciones, soledad afuera, alunizaje, salto con gravedad lunar y plantar la bandera | `godot --path . res://tests/recorrido_final.tscn` |
 
 Las capturas quedan en la carpeta `capturas/` del proyecto, que Git ignora. Con `-- --sin-filtro` al final se capturan sin el filtro retro.
 
@@ -336,7 +344,10 @@ Las capturas quedan en la carpeta `capturas/` del proyecto, que Git ignora. Con 
 ### Funciona hoy (en `main`)
 
 - Partida completa de punta a punta en 3D, con las cinco fases.
+- Pantalla de inicio con la nave en órbita.
 - La nave se recorre a pie: cabina, habitáculo, esclusa y exterior, ida y vuelta.
+- Cordura con alucinaciones; se recupera durmiendo y baja con el tiempo afuera.
+- Final: alunizaje, superficie lunar y bandera.
 - Estilo visual con texturas, relieve, contornos, sombras y filtro retro.
 - Pruebas automáticas de todo lo anterior.
 

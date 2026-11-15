@@ -14,9 +14,12 @@ const RADIO_MIRADA := 0.25
 ## Desactivado mientras hay una pantalla abierta.
 var activo := true
 var camara: Camera3D
+## En la Luna: gravedad baja (1,62 m/s²) y salto con Espacio (velocidad inicial, 0 = sin salto).
+var gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var salto := 0.0
+var velocidad := VELOCIDAD
 
 var _mirada: ShapeCast3D
-var _gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 
 func _ready() -> void:
@@ -56,7 +59,9 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
-		velocity.y -= _gravedad * delta
+		velocity.y -= gravedad * delta
+	elif activo and salto > 0.0 and Input.is_physical_key_pressed(KEY_SPACE):
+		velocity.y = salto
 	var entrada := Vector2.ZERO
 	if activo:
 		entrada.x = _tecla(KEY_D, KEY_RIGHT) - _tecla(KEY_A, KEY_LEFT)
@@ -64,8 +69,8 @@ func _physics_process(delta: float) -> void:
 	# La velocidad va en coordenadas del mundo, y la cabina puede estar girada: hay que usar la base global.
 	var direccion := (global_transform.basis * Vector3(entrada.x, 0, entrada.y)).normalized()
 	direccion.y = 0.0
-	velocity.x = direccion.x * VELOCIDAD
-	velocity.z = direccion.z * VELOCIDAD
+	velocity.x = direccion.x * velocidad
+	velocity.z = direccion.z * velocidad
 	move_and_slide()
 
 

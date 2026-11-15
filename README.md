@@ -2,7 +2,17 @@
 
 Juego para el hackathon: diseñar, lanzar y operar una misión espacial. El contexto completo (concepto, fases, reparto, arte) está en [CONTEXTO.md](CONTEXTO.md). La documentación completa del proyecto, de principio a fin (cómo se juega, arquitectura, reglas, 3D, estilo visual, pruebas, historia y pendientes), está en [docs/DOCUMENTACION.md](docs/DOCUMENTACION.md).
 
-Godot 4.6 o más nuevo. Abrir `project.godot` y ejecutar (F5): arranca en la cabina de la nave, en primera persona.
+Godot 4.7. Abrir `project.godot` y ejecutar (F5): arranca en la **pantalla de inicio** (`scenes/inicio/`), con la nave en órbita de fondo. *Comenzar misión* lleva a la cabina, en primera persona.
+
+## Cordura y alucinaciones
+
+La cordura de la tripulación baja con el tiempo y se recupera **durmiendo** en la cama del habitáculo. Afuera también baja: con la lluvia, los golpes, el poco oxígeno y, pasados **3 minutos** de caminata, por la soledad (más rápido desde los **5 minutos**).
+
+Con la cordura por debajo de 60, la tripulación **alucina** (autoload `Alucinaciones`, `scripts/autoload/alucinaciones.gd`): la pantalla ondula y se ve doble, aparece de reojo el "eco" de un astronauta que se desvanece si se lo mira, y llegan mensajes falsos de Control de Misión. Cuanto más baja la cordura, más fuerte. Los valores están en `tripulacion.alucinaciones` y `tripulacion.zonas.eva` de `datos.json`.
+
+## Final: la bandera en la Luna
+
+Al llegar, la nave aluniza. La esclusa ya no da al espacio sino a la **superficie lunar** (`scenes/superficie/`): terreno con cráteres, la nave posada sobre sus patas, la Tierra en el cielo y la gravedad de la Luna (Espacio salta). Se camina hasta el lugar marcado y se **planta la bandera manteniendo E**. Ahí empieza la cinemática, con cortes de cámara: el astronauta llega caminando con la **bandera del Paraguay**, la clava en dos golpes (polvo y sacudida), la tela se despliega y se mece hasta quedarse quieta (en la Luna no hay viento; por eso lleva travesaño, como las de las Apollo), retrocede y la saluda con la Tierra de fondo. Desde ahí se ve el informe o se vuelve al inicio. Plantar la bandera suma `puntos_bandera` y una frase en el informe.
 
 **Controles:** WASD o flechas para caminar, mouse para mirar, E o clic para usar la consola que se mira, Esc para cerrar una pantalla o soltar el mouse. En la cinemática, Espacio la salta.
 
@@ -13,7 +23,8 @@ Desde la cabina se puede caminar por toda la nave. Las puertas se cruzan **mante
 **Cabina** ⇄ puerta trasera ⇄ **Habitáculo** ⇄ puerta sur (Módulo 03) ⇄ **Esclusa** ⇄ escotilla ⇄ **Exterior**
 
 - **Habitáculo** (`scenes/sala_dos/`, hecho por Luis): cama, refrigerador, casilleros y una ventana sobre la cama.
-- **Reglas de la esclusa:** a la nave solo se vuelve con la esclusa presurizada y sin el traje puesto, y la escotilla se abre solo en órbita (en la plataforma, por el ventanal se ve el cielo).
+- **Antes del despegue** la puerta de la cabina está cerrada: el resto de la nave se recorre una vez en el espacio.
+- **Reglas de la esclusa:** a la nave solo se vuelve con la esclusa presurizada y sin el traje puesto, y la escotilla se abre solo en órbita.
 - Cada ambiente ubica al jugador frente a la puerta por la que entró. La misión sigue corriendo mientras se recorre la nave: el hambre y la cordura bajan y el viaje a la Luna avanza.
 - `tests/recorrido_niveles.tscn` recorre toda la cadena, ida y vuelta.
 

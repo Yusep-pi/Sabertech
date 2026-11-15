@@ -105,6 +105,7 @@ static func lineas_en_vivo(corto: bool) -> Array:
 	var lineas := [
 		"Ciencia %d" % roundi(puntos["ciencia"]) + ("" if corto else "   (%d de %d)" % [roundi(ops["ciencia"]), roundi(objetivo)]),
 		"Llegada " + llegada,
+		"Bandera %d" % roundi(puntos["bandera"]) if ops.get("bandera_plantada", false) else "Bandera 0 (+%d al plantarla)" % roundi(GameState.mision.get("viaje", {}).get("puntos_bandera", 0.0)),
 		"Salud %d · Presupuesto %s" % [roundi(puntos["salud"]), presupuesto],
 		"TOTAL %d" % puntos["total"],
 	]

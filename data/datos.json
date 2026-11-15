@@ -57,7 +57,8 @@
 				"velocidad_maxima": 1800,
 				"factor_dv": 0.25,
 				"segundos_por_hora": 12.5,
-				"puntos_llegada": 200
+				"puntos_llegada": 200,
+				"puntos_bandera": 150
 			},
 			"condiciones": {
 				"2": { "nombre": "Cinturones de Van Allen", "descripcion": "La nave cruza la zona de radiación que rodea la Tierra: los instrumentos captan mucho ruido.", "multiplicador_instrumentos": { "camara": 0.4, "espectrometro": 0.4, "radar": 0.6 } },
@@ -83,6 +84,24 @@
 			"cordura_maxima_para_dormir": 85,
 			"hambre_minima": 20
 		},
+		"_alucinaciones": "con la cordura por debajo de cordura_desde la tripulacion alucina: la pantalla se distorsiona, aparece un eco (silueta de astronauta) desde eco_desde de intensidad y mensajes falsos desde mensajes_desde. La intensidad va de 0 a 1 segun cuanto baja la cordura",
+		"alucinaciones": {
+			"cordura_desde": 60,
+			"eco_desde": 0.25,
+			"eco_opacidad": 0.35,
+			"eco_cada_segundos": [12, 28],
+			"mensajes_desde": 0.4,
+			"mensajes_cada_segundos": [15, 35],
+			"mensajes": [
+				"Control de Misión: ¿quién más está a bordo con ustedes?",
+				"Alguien golpeó la escotilla desde afuera.",
+				"⚠ FALLA EN EL CASCO… (no hay ninguna falla)",
+				"Control de Misión: los escuchamos dos veces.",
+				"Se escuchan pasos en el habitáculo.",
+				"La Tierra dejó de responder… ¿o no?",
+				"Hay alguien sentado en la cama."
+			]
+		},
 		"_zonas": "efectos de las zonas de la nave sobre la tripulacion. eva: hambre extra por minuto afuera (esfuerzo), cordura por segundo expuesto a la lluvia o con poco oxigeno, por golpe fuerte, por problema resuelto y al terminar la caminata",
 		"zonas": {
 			"eva": {
@@ -93,7 +112,12 @@
 				"cordura_por_golpe": 4,
 				"cordura_por_tarea": 6,
 				"cordura_por_exito": 10,
-				"cordura_por_fracaso": 15
+				"cordura_por_fracaso": 15,
+			"_aislamiento": "afuera, pasado cierto tiempo, la soledad baja la cordura: desde segundos_aislamiento a un ritmo y desde segundos_aislamiento_fuerte a otro mas rapido",
+			"segundos_aislamiento": 180,
+			"segundos_aislamiento_fuerte": 300,
+			"cordura_por_segundo_aislamiento": 0.15,
+			"cordura_por_segundo_aislamiento_fuerte": 0.45
 			}
 		}
 	},
@@ -367,6 +391,8 @@
 		"fallo_frenado": "La nave llegó a la Luna con {dv} m/s de delta-v y necesitaba {requerido} para frenar: pasó de largo y se perdió en el espacio.",
 		"llegada_luna": "La nave recorrió {km} km en {horas} horas a {velocidad} m/s de media y llegó a la Luna.",
 		"viaje_incompleto": "La tripulación quedó a {faltan} km de la Luna ({pct}% del viaje).",
+		"bandera_plantada": "La tripulación bajó a la superficie y plantó la bandera del Paraguay en la Luna.",
+		"bandera_pendiente": "La nave alunizó, pero nadie bajó a plantar la bandera.",
 		"raciones_sobrantes": "Sobraron {n} raciones en la despensa.",
 		"raciones_sobrantes_uno": "Sobró una ración en la despensa."
 	}
