@@ -54,6 +54,8 @@ var estado := "sin_traje"
 var presion := PRESION
 ## Si se entró desde la caminata: cambian los objetivos (cerrar, presurizar, sacarse el traje).
 var _volvio := false
+## Se abrió la esclusa sola desde el editor, sin pasar por la nave: para probar, se puede salir.
+var _prueba_suelta := false
 
 var _jugador: Jugador
 var _puerta: Node3D
@@ -76,6 +78,7 @@ var _fundido: ColorRect
 
 
 func _ready() -> void:
+	_prueba_suelta = GameState.mision.is_empty() and GameState.origen_transicion == "" and not GameState.vuelve_de_caminata
 	_armar_exterior()
 	var modelo := MODELO.instantiate()
 	add_child(modelo)
@@ -159,7 +162,7 @@ func _usar(consola: String) -> void:
 
 ## Hay una misión en curso y la nave sigue en la plataforma (en la prueba suelta, sin misión, se puede salir).
 func en_plataforma() -> bool:
-	return not GameState.mision.is_empty() and not GameState.en_orbita()
+	return not GameState.en_orbita() and not _prueba_suelta
 
 
 ## La puerta interior lleva al habitáculo, con la esclusa presurizada y sin el traje puesto.
@@ -234,8 +237,13 @@ func _presurizar() -> void:
 func _salir() -> void:
 	estado = "saliendo"
 	_jugador.activo = false
-	await _fundir(1.0, "Saliendo al espacio...")
-	get_tree().change_scene_to_file(ESCENA_CAMINATA)
+	# Con la nave en la Luna, la escotilla da a la superficie: el final del juego.
+	if GameState.alunizado():
+		await _fundir(1.0, "Bajando a la superficie lunar...")
+		get_tree().change_scene_to_file(GameState.AMBIENTES["superficie"])
+	else:
+		await _fundir(1.0, "Saliendo al espacio...")
+		get_tree().change_scene_to_file(ESCENA_CAMINATA)
 
 
 func _poner_alarma(encendida: bool) -> void:
@@ -515,7 +523,10 @@ func _actualizar_hud() -> void:
 		"despresurizando":
 			_objetivo.text = "Despresurizando..."
 		"abierta":
-			_objetivo.text = "Objetivo: cerrá la escotilla desde el panel." if _volvio else "Objetivo: salí por la escotilla."
+			if _volvio:
+				_objetivo.text = "Objetivo: cerrá la escotilla desde el panel."
+			else:
+				_objetivo.text = "Objetivo: bajá a la Luna por la escotilla." if GameState.alunizado() else "Objetivo: salí por la escotilla."
 		"presurizando":
 			_objetivo.text = "Presurizando..."
 

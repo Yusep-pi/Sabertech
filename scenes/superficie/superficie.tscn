@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/superficie/superficie.gd" id="1_superficie"]
+
+[node name="Superficie" type="Node3D"]
+script = ExtResource("1_superficie")

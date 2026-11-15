@@ -39,7 +39,9 @@ const AMBIENTES := {
 	"habitaculo": "res://scenes/sala_dos/sala_dos.tscn",
 	"esclusa": "res://scenes/esclusa/esclusa.tscn",
 	"exterior": "res://scenes/eva/eva.tscn",
+	"superficie": "res://scenes/superficie/superficie.tscn",
 }
+const ESCENA_INICIO := "res://scenes/inicio/inicio.tscn"
 ## Daño por turno cuando la energía no alcanza ni para los sistemas básicos.
 const DANO_APAGON := 15.0
 ## Fracción de la tasa que queda si la antena se rompe (antena de emergencia).
@@ -122,6 +124,17 @@ func ir_a(pantalla: String) -> void:
 	# Al llegar a la órbita no se abre nada: primero se mira por la ventana.
 	pantalla_pendiente = "" if pantalla == "operaciones" else pantalla
 	get_tree().change_scene_to_file(ESCENA_CABINA)
+
+
+## La nave llegó a la Luna y alunizó: la esclusa da a la superficie lunar.
+func alunizado() -> bool:
+	return en_orbita() and ops.get("motivo_fin", "") == "llegada"
+
+
+## El final del juego: la bandera quedó plantada en la Luna.
+func plantar_bandera() -> void:
+	if alunizado():
+		ops["bandera_plantada"] = true
 
 
 ## La nave está en órbita si el lanzamiento salió bien y empezaron las operaciones.
@@ -1001,10 +1014,11 @@ func desglose_puntaje() -> Dictionary:
 	var puntos := {
 		"ciencia": minf(ops.get("ciencia", 0.0) / mision.get("objetivo_ciencia", 1.0), TOPE_CIENCIA) * PUNTOS_CIENCIA,
 		"llegada": float(mision.get("viaje", {}).get("puntos_llegada", 0.0)) if ops.get("motivo_fin", "") == "llegada" else 0.0,
+		"bandera": float(mision.get("viaje", {}).get("puntos_bandera", 0.0)) if ops.get("bandera_plantada", false) else 0.0,
 		"salud": ops.get("salud", 0.0) * PUNTOS_POR_SALUD,
 		"presupuesto": fraccion * PUNTOS_AHORRO if fraccion >= 0.0 else maxf(fraccion * MULTA_EXCESO, -MULTA_MAXIMA),
 	}
-	puntos["total"] = maxi(roundi(puntos["ciencia"] + puntos["llegada"] + puntos["salud"] + puntos["presupuesto"]), 0)
+	puntos["total"] = maxi(roundi(puntos["ciencia"] + puntos["llegada"] + puntos["bandera"] + puntos["salud"] + puntos["presupuesto"]), 0)
 	return puntos
 
 
@@ -1066,6 +1080,7 @@ func _frases_informe(ciencia: float, objetivo: float, sobrante: float, presupues
 				frases.append(_frase("fallo_frenado", {"dv": roundi(maxf(0.0, requerido + ops["dv_restante"])), "requerido": roundi(requerido)}))
 			elif ops.get("motivo_fin", "") == "llegada":
 				frases.append(_frase("llegada_luna", {"km": _miles(viaje["distancia_km"]), "horas": roundi(viaje["horas_totales"]), "velocidad": _miles(viaje["velocidad"])}))
+				frases.append(_frase("bandera_plantada" if ops.get("bandera_plantada", false) else "bandera_pendiente", {}))
 			else:
 				frases.append(_frase("viaje_incompleto", {"faltan": _miles(viaje["distancia_km"] - viaje["recorrido_km"]), "pct": roundi(progreso_viaje() * 100)}))
 		match ops.get("motivo_fin", ""):

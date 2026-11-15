@@ -11,13 +11,14 @@ config_version=5
 [application]
 
 config/name="Sabertech - Misión Espacial"
-run/main_scene="res://scenes/cabina/cabina.tscn"
+run/main_scene="res://scenes/inicio/inicio.tscn"
 config/features=PackedStringArray("4.7")
 
 [autoload]
 
 GameState="*res://scripts/autoload/game_state.gd"
 Estilo="*res://scripts/autoload/estilo.gd"
+Alucinaciones="*res://scripts/autoload/alucinaciones.gd"
 
 [display]
 

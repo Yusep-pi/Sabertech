@@ -491,12 +491,23 @@ func _revisar_final(en_escotilla: bool) -> void:
 
 
 ## Afuera se hace fuerza (más hambre); la lluvia encima y el aire que se acaba asustan.
+## Y pasado un rato, la soledad: desde los 3 minutos la cordura baja, y desde los 5, rápido.
 func _afectar_tripulacion(delta: float, en_escotilla: bool) -> void:
 	var cordura := 0.0
 	if _lluvia_fase == "activa" and not en_escotilla and expuesto_a_la_lluvia():
 		cordura -= _efectos.get("cordura_por_segundo_lluvia", 0.0) * delta
 	if _oxigeno < _efectos.get("segundos_sin_aire", 0.0):
 		cordura -= _efectos.get("cordura_por_segundo_sin_aire", 0.0) * delta
+	var leve: float = _efectos.get("segundos_aislamiento", INF)
+	var fuerte: float = _efectos.get("segundos_aislamiento_fuerte", INF)
+	if _tiempo >= fuerte:
+		cordura -= _efectos.get("cordura_por_segundo_aislamiento_fuerte", 0.0) * delta
+	elif _tiempo >= leve:
+		cordura -= _efectos.get("cordura_por_segundo_aislamiento", 0.0) * delta
+	if _tiempo >= leve and _tiempo - delta < leve:
+		_mostrar_mensaje("Llevás %d minutos afuera. El silencio empieza a pesar: la cordura baja." % roundi(leve / 60.0))
+	elif _tiempo >= fuerte and _tiempo - delta < fuerte:
+		_mostrar_mensaje("Demasiado tiempo solo en el vacío. Volvé a la nave antes de perder la cabeza.")
 	GameState.cambiar_tripulacion(-_efectos.get("hambre_por_minuto", 0.0) * delta / 60.0, cordura)
 
 

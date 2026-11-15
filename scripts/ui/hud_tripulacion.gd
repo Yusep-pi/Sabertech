@@ -235,8 +235,12 @@ func _on_sueno_cambiado(dormido: bool, motivo: String) -> void:
 		avisar(MENSAJES_DESPERTAR[motivo])
 
 
-func _on_operaciones_terminadas(_motivo: String) -> void:
+func _on_operaciones_terminadas(motivo: String) -> void:
 	actualizar()
+	# Al alunizar no se termina acá: falta bajar a plantar la bandera.
+	if motivo == "llegada":
+		avisar("¡La nave alunizó! Ponete el traje en la esclusa y bajá a plantar la bandera.")
+		return
 	if en_cabina:
 		return
 	# Fuera de la cabina no hay consola para el informe: se vuelve a la cabina sola.

@@ -37,7 +37,7 @@ const TIERRA_FIN := Vector3(260, -60, 900)
 const LUNA_INICIO := Vector3(40, 30, -1400)
 const LUNA_FIN := Vector3(-60, -105, -320)
 const MENSAJES_FIN := {
-	"llegada": "¡Llegaste a la Luna! El informe está en cualquier consola.",
+	"llegada": "¡Llegaste a la Luna y la nave alunizó! Andá a la esclusa (por el habitáculo), ponete el traje y bajá a plantar la bandera.",
 	"frenado": "Llegaste a la Luna sin delta-v para frenar: la nave pasó de largo. El informe está en cualquier consola.",
 	"hambre": "La tripulación no aguantó el hambre. La misión terminó: el informe está en cualquier consola.",
 	"cordura": "La tripulación perdió la cordura. La misión terminó: el informe está en cualquier consola.",
@@ -178,12 +178,20 @@ func _usar_consola(consola: String) -> void:
 
 
 ## La puerta trasera lleva al habitáculo, y de ahí a la esclusa y al exterior.
+## Antes del despegue la tripulación va sentada en la cabina: el resto de la nave
+## se recorre recién en el espacio.
+func _motivo_puerta_cerrada() -> String:
+	if not GameState.en_orbita():
+		return "La nave sigue en la plataforma: el resto de la nave se recorre una vez en el espacio."
+	return ""
+
+
 func _crear_compuerta() -> void:
 	_compuerta = Compuerta.new()
 	_compuerta.jugador = _jugador
 	_compuerta.agregar(func() -> bool:
 		return _jugador.position.z > 2.4 and absf(_jugador.position.x) < 1.2,
-		"Ir al habitáculo", "habitaculo", "cabina")
+		"Ir al habitáculo", "habitaculo", "cabina", _motivo_puerta_cerrada)
 	add_child(_compuerta)
 	var cartel := Label3D.new()
 	cartel.text = "HABITÁCULO"
