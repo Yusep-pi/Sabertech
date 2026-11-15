@@ -9,11 +9,11 @@ uniform sampler2D pantalla : hint_screen_texture, filter_nearest;
 uniform sampler2D profundidad : hint_depth_texture, filter_nearest;
 uniform sampler2D normales : hint_normal_roughness_texture, filter_nearest;
 uniform vec3 color_linea : source_color = vec3(0.02, 0.03, 0.09);
-uniform float intensidad = 0.95;
+uniform float intensidad = 0.7;
 uniform float umbral_profundidad = 0.06;  // salto relativo de distancia que cuenta como silueta
 uniform float umbral_normal = 0.5;  // cambio de orientación que cuenta como arista
 uniform float distancia_desvanecer = 220.0;  // más lejos que esto, las líneas se apagan
-uniform float grosor = 2.0;  // en píxeles: con el filtro retro, menos de 2 se pierde
+uniform float grosor = 1.5;  // en píxeles
 
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 1.0, 1.0);

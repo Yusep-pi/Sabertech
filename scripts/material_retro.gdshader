@@ -1,15 +1,15 @@
 // Material de los modelos con textura: N64 con terminación moderna.
 // - Proyección triplanar (los modelos no tienen coordenadas de mapeado), con
-//   píxel nítido. La textura crece con el objeto: la nave agrandada de la caminata
-//   tiene píxeles más grandes, como en N64.
+//   filtrado bilineal y mipmaps como en la N64 (que suavizaba las texturas en vez
+//   de mostrar el píxel duro). La textura crece con el objeto.
 // - Relieve con el mapa _normal generado por arte/generar_relieves.py.
 // - Variación suave de tono y desgaste que no repite: rompe el patrón de mosaico.
 // Lo aplica el autoload Estilo a cada material que tenga textura.
 shader_type spatial;
 render_mode blend_mix, cull_back, diffuse_burley, specular_schlick_ggx;
 
-uniform sampler2D textura : source_color, filter_nearest, repeat_enable;
-uniform sampler2D relieve : hint_normal, filter_nearest, repeat_enable;
+uniform sampler2D textura : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D relieve : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool con_relieve = false;
 uniform float repeticiones = 0.5;  // repeticiones por metro
 uniform float fuerza_relieve = 1.0;

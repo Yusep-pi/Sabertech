@@ -7,15 +7,20 @@ extends Node
 ##   los haces de luz que entran por las ventanas.
 ## - Si en assets/texturas/ hay un archivo con el nombre de un material de los
 ##   modelos (casco.png, pared.png...), le pone el material retro
-##   (scripts/material_retro.gdshader): píxel nítido, proyección triplanar, relieve
-##   con <nombre>_normal.png y variación de tono para que no se note el mosaico.
+##   (scripts/material_retro.gdshader): filtrado suave como en la N64, proyección
+##   triplanar, relieve con <nombre>_normal.png y variación de tono para que no se
+##   note el mosaico.
 ##   Lo mismo con planeta_<nombre>.png (el resource_name del material de la esfera,
 ##   o el destino de la misión) y fondo_espacio.png. La lista de archivos
 ##   y sus prompts está en arte/PROMPTS_GEMINI.md.
-## - A cada cámara le agrega contornos en aristas y siluetas (scripts/contornos.gdshader),
-##   y a las luces, sombras con penumbra.
-## - Pone un filtro retro de pantalla completa por debajo de la interfaz.
-##   F2 alterna entre retro, retro fuerte y moderno.
+## - A cada cámara le agrega contornos en aristas y siluetas (scripts/contornos.gdshader)
+##   y profundidad de campo: lo lejano se desenfoca suavemente (ver PROFUNDIDAD).
+##   A las luces, sombras con penumbra. Los pisos y metales reflejan (SSR).
+## - Los carteles 3D que flotan sobre todo se dibujan en 2D, siempre nítidos
+##   (scripts/carteles_nitidos.gd).
+## - Pone un filtro retro de pantalla completa por debajo de la interfaz: color con
+##   tramado tipo N64, sin bloques. F2 alterna entre retro, retro fuerte (con
+##   píxeles grandes) y moderno.
 
 const CARPETA_TEXTURAS := "res://assets/texturas/"
 ## Cómo se ve cada material con textura: metros por repetición, rugosidad, metal,
@@ -28,8 +33,8 @@ const MATERIALES := {
 	"oscuro": {"metros": 1.5, "rugosidad": 0.6, "metal": 0.35, "relieve": 1.0, "manchas": 2.5},
 	"celda": {"metros": 1.2, "rugosidad": 0.25, "metal": 0.4, "relieve": 0.8, "manchas": 3.0},
 	"dorado": {"metros": 1.5, "rugosidad": 0.35, "metal": 0.8, "relieve": 1.2, "manchas": 2.0},
-	"pared": {"metros": 2.5, "rugosidad": 0.8, "metal": 0.0, "relieve": 1.0, "manchas": 3.0},
-	"piso": {"metros": 2.5, "rugosidad": 0.85, "metal": 0.0, "relieve": 1.0, "manchas": 2.5},
+	"pared": {"metros": 2.5, "rugosidad": 0.65, "metal": 0.0, "relieve": 1.0, "manchas": 3.0},
+	"piso": {"metros": 2.5, "rugosidad": 0.4, "metal": 0.1, "relieve": 1.0, "manchas": 2.5},
 	"concreto": {"metros": 8.0, "rugosidad": 0.9, "metal": 0.0, "relieve": 1.0, "manchas": 12.0, "variacion": 0.2, "otra_escala": 0.6},
 	"suelo": {"metros": 30.0, "rugosidad": 1.0, "metal": 0.0, "relieve": 0.6, "manchas": 35.0, "variacion": 0.3, "otra_escala": 0.8},
 }
@@ -39,11 +44,21 @@ const NIEBLA := {
 	"Esclusa": [0.008, 24.0],
 	"SalaDos": [0.006, 24.0],
 }
+## Profundidad de campo según la escena: desde qué distancia se desenfoca (m) y
+## en cuántos metros pasa de nítido a borroso. Por las ventanas, lo de afuera
+## queda suave; en la cinemática, el fondo.
+const PROFUNDIDAD := {
+	"Cabina": [9.0, 8.0],
+	"SalaDos": [8.0, 6.0],
+	"Esclusa": [8.0, 6.0],
+	"Eva": [70.0, 60.0],
+	"Lanzamiento": [260.0, 200.0],
+}
 ## Una esfera más grande que esto es un planeta.
 const RADIO_PLANETA := 100.0
 const MODOS := [
-	{"nombre": "Retro", "pixel": 2.0, "niveles": 64.0, "tramado": 0.35, "grano": 0.015},
-	{"nombre": "Retro fuerte", "pixel": 3.0, "niveles": 24.0, "tramado": 0.7, "grano": 0.03},
+	{"nombre": "Retro", "pixel": 1.0, "niveles": 48.0, "tramado": 0.3, "grano": 0.012, "aberracion": 0.0015},
+	{"nombre": "Retro fuerte", "pixel": 2.0, "niveles": 24.0, "tramado": 0.6, "grano": 0.025, "aberracion": 0.0025},
 	{"nombre": "Moderno", "pixel": 0.0},
 ]
 
@@ -52,6 +67,7 @@ var _materiales: Dictionary = {}  # nombre de material -> material texturizado, 
 var _texturas: Dictionary = {}  # nombre de archivo -> Texture2D, o null
 var _filtro: ColorRect
 var _aviso: Label
+var _carteles: CartelesNitidos
 
 
 func _ready() -> void:
@@ -61,6 +77,8 @@ func _ready() -> void:
 		modo = MODOS.size() - 1
 	_crear_filtro()
 	_aplicar_modo()
+	_carteles = CartelesNitidos.new()
+	add_child(_carteles)
 
 
 func _unhandled_key_input(evento: InputEvent) -> void:
@@ -107,6 +125,8 @@ func _on_nodo_agregado(nodo: Node) -> void:
 		_agregar_contornos(nodo)
 	elif nodo is Light3D:
 		_mejorar_luz(nodo)
+	elif nodo is Label3D:
+		_registrar_cartel.call_deferred(nodo)
 
 
 func _mejorar_entorno(nodo: WorldEnvironment) -> void:
@@ -127,6 +147,11 @@ func _mejorar_entorno(nodo: WorldEnvironment) -> void:
 	entorno.ssao_light_affect = 0.25
 	entorno.ssil_enabled = true
 	entorno.ssil_intensity = 0.8
+	# Reflejos en pisos y metales lustrados.
+	entorno.ssr_enabled = true
+	entorno.ssr_max_steps = 48
+	entorno.ssr_fade_in = 0.15
+	entorno.ssr_fade_out = 2.0
 	entorno.adjustment_enabled = true
 	entorno.adjustment_contrast = 1.1
 	entorno.adjustment_saturation = 1.25
@@ -136,7 +161,7 @@ func _mejorar_entorno(nodo: WorldEnvironment) -> void:
 	if es_espacio and textura("fondo_espacio"):
 		var cielo := PanoramaSkyMaterial.new()
 		cielo.panorama = textura("fondo_espacio")
-		cielo.filter = false
+		cielo.filter = true
 		# Un poco más tenue, para que el espacio siga oscuro y la nebulosa no domine.
 		cielo.energy_multiplier = 0.6
 		entorno.sky = Sky.new()
@@ -169,7 +194,7 @@ func _texturizar(malla: MeshInstance3D) -> void:
 		if material and mapa and material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
 			material.albedo_texture = mapa
 			material.albedo_color = Color.WHITE
-			material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+			material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		return
 	for i in malla.mesh.get_surface_count():
 		var original := malla.mesh.surface_get_material(i)
@@ -224,6 +249,31 @@ func _agregar_contornos(camara: Camera3D) -> void:
 	material.render_priority = Material.RENDER_PRIORITY_MIN
 	cuadro.material_override = material
 	camara.add_child.call_deferred(cuadro)
+	_agregar_profundidad.call_deferred(camara)
+
+
+## Desenfoque de lo lejano, solo en la vista principal (no en la nave del diseño).
+func _agregar_profundidad(camara: Camera3D) -> void:
+	if not is_instance_valid(camara) or camara.attributes or camara.get_viewport() != get_tree().root:
+		return
+	var escena := _escena_de(camara)
+	if not PROFUNDIDAD.has(escena):
+		return
+	var atributos := CameraAttributesPractical.new()
+	atributos.dof_blur_far_enabled = true
+	atributos.dof_blur_far_distance = PROFUNDIDAD[escena][0]
+	atributos.dof_blur_far_transition = PROFUNDIDAD[escena][1]
+	atributos.dof_blur_amount = 0.06
+	camara.attributes = atributos
+
+
+## Los carteles que flotan sobre todo se dibujan en 2D (ver CartelesNitidos): si no,
+## la profundidad de campo los desenfoca con la distancia del fondo que tienen detrás.
+## Se mira después de que la escena los configure (billboard, sin prueba de profundidad).
+func _registrar_cartel(cartel: Label3D) -> void:
+	if is_instance_valid(cartel) and cartel.no_depth_test and cartel.billboard != BaseMaterial3D.BILLBOARD_DISABLED \
+			and cartel.get_viewport() == get_tree().root:
+		_carteles.registrar(cartel)
 
 
 ## Sombras en todas las luces, y penumbra suave en el sol.
@@ -276,5 +326,5 @@ func _aplicar_modo() -> void:
 	_filtro.visible = datos["pixel"] > 0.0
 	if _filtro.visible:
 		var material := _filtro.material as ShaderMaterial
-		for parametro in ["pixel", "niveles", "tramado", "grano"]:
+		for parametro in ["pixel", "niveles", "tramado", "grano", "aberracion"]:
 			material.set_shader_parameter("tamano_pixel" if parametro == "pixel" else parametro, datos[parametro])

@@ -33,10 +33,13 @@ func _recorrer() -> void:
 	await _capturar("esclusa_01_inicio")
 	_comprobar(esclusa.estado == "sin_traje", "se empieza sin traje")
 
-	# El armario con el traje.
+	# El armario con el traje: un par de pasos hacia él (E alcanza 3 m).
+	var inicio: Vector3 = jugador.position
+	jugador.position = Vector3(0.6, 0.05, 0.6)
 	jugador.mirar_hacia(Vector3(2.1, 1.3, -1.0))
 	await _esperar(0.3)
 	_comprobar(jugador.consola_mirada() == "consola_armario", "mirar el armario lo detecta")
+	jugador.position = inicio
 	await _capturar("esclusa_02_armario")
 
 	# Sin traje la escotilla no se abre.
